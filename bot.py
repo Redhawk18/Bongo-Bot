@@ -2,6 +2,7 @@ import os
 import random
 
 import discord
+from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,29 +10,21 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 TROLLED = os.getenv('TROLLED_USER')
 
-client = discord.Client()
+#client = discord.Client()
+client = commands.Bot(command_prefix='!')
 
 @client.event
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
+@client.command()
+async def ping(ctx):
+    await ctx.send(f'Pong! :ping_pong: {round(client.latency * 1000)}ms')
 
-    if str(message.author) == TROLLED:
-        if '?' in message.content:
-            await message.channel.send(":penguin:")
-    
-    epic_quotes = [
-        'Mimosa is literally orihime',
-        'Hi Ben jojolion isnt coming out till the 19th, feelsbadman\n Wait part 6 ended this month?\n part 6 ended in 2005',
-        'hi guys\n Why\n https://tenor.com/view/xqc-arabfunny-arabic-saudi-arabia-projared-gif-18306091',
-    ]    
-        
-    if message.content == 'quote':
-        response = random.choice(epic_quotes)
-        await message.channel.send(response)
+
+for filename in os.listdir('./commands'):
+    if filename.endswith('.py'):
+        client.load_extension(f'commands.{filename[:-3]}')
+
 
 client.run(TOKEN)
