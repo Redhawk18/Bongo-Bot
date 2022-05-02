@@ -2,7 +2,7 @@ import os
 
 import discord
 from discord.ext import commands
-import youtube_dl
+from yt_dlp import YoutubeDL
 
 class Music_Commands(commands.Cog):
 
@@ -17,13 +17,13 @@ class Music_Commands(commands.Cog):
     #commands
     @commands.command()
     async def play(self, ctx, url : str):
-        song_valid = os.path.isfile("song.m4a")
+        song_valid = os.path.isfile("song.opus")
 
         try:
             if song_valid:
-                os.remove("song.m4a")
+                os.remove("song.opus")
         except PermissionError:
-            await ctx.send("song is playing")
+            await ctx.send("song is playing, i havent put a queue system in yet")
             return
 
         voiceChannel = discord.utils.get(ctx.guild.voice_channels, name="General") #TODO fix this
@@ -41,12 +41,12 @@ class Music_Commands(commands.Cog):
                 'preferredquality': '192',
             }],
         }
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        with YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
         for file in os.listdir("./"):
-            if file.endswith(".m4a"):
-                os.rename(file, "song.m4a")
-        voice.play(discord.FFmpegPCMAudio("song.m4a"))
+            if file.endswith(".opus"):
+                os.rename(file, "song.opus")
+        voice.play(discord.FFmpegPCMAudio("song.opus"))
 
     @commands.command()
     async def disconnect(self, ctx):

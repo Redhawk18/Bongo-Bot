@@ -1,4 +1,4 @@
 discord.py[voice]
 python-dotenv
 ffmpeg-python
-youtube_dl
+yt-dlp
