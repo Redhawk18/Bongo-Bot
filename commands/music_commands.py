@@ -2,6 +2,7 @@ import os
 
 import discord
 from discord.ext import commands
+from discord.ext.commands.errors import ClientException
 from yt_dlp import YoutubeDL
 
 class Music_Commands(commands.Cog):
@@ -16,37 +17,41 @@ class Music_Commands(commands.Cog):
 
     #commands
     @commands.command()
-    async def play(self, ctx, url : str):
-        song_valid = os.path.isfile("song.opus")
+    async def play(self, ctx, url : str): 
+        #TODO make bot switch vc's
+        song_valid = os.path.isfile("song.mp3")
 
         try:
-            if song_valid:
-                os.remove("song.opus")
-        except PermissionError:
-            await ctx.send("song is playing, i havent put a queue system in yet")
+            if song_valid: #no song is playing, removing old song file
+                os.remove("song.mp3")
+
+        except PermissionError: #if a current song is playing
+            await ctx.send("song is playing, i havent put a queue system in yet") #TODO add queue
             return
 
-        voiceChannel = discord.utils.get(ctx.guild.voice_channels, name="General") #TODO fix this
+        voiceChannel = discord.utils.get(ctx.guild.voice_channels, name="General") #TODO fix General only
 
         #connect to channel
-        await voiceChannel.connect()
-        voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
-        #if not voice.is_connected():
-        
+        try:
+            await voiceChannel.connect()
+            voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+        except ClientException: 
+            voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
-        ydl_opts = {
-            'format': 'bestaudio/best',
+        ydl_opts = { #TODO look into why the video some times has noise
+            'format': 'bestaudio',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferredquality': '192',
+                'preferredcodec': 'mp3',
+                'preferredquality': '320',
             }],
         }
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
         for file in os.listdir("./"):
-            if file.endswith(".opus"):
-                os.rename(file, "song.opus")
-        voice.play(discord.FFmpegPCMAudio("song.opus"))
+            if file.endswith(".mp3"):
+                os.rename(file, "song.mp3")
+        voice.play(discord.FFmpegPCMAudio("song.mp3"))
 
     @commands.command()
     async def disconnect(self, ctx):
