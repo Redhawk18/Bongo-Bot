@@ -1,3 +1,9 @@
+#token file
 .env
+
+#python junk
 __pycache__
+
+#audio junk
 *.m4a
+*.opus
