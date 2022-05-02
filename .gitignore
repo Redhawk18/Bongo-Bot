@@ -6,4 +6,5 @@ __pycache__
 
 #audio junk
 *.m4a
+*.m4a.part
 *.opus
