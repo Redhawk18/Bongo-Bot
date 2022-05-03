@@ -22,6 +22,7 @@ class Music_Commands(commands.Cog):
         if voice.is_connected():
             await voice.disconnect()
             await ctx.send("**Disconnected** :guitar:")
+            
         else:
             await ctx.send("Already disconnected")
 
@@ -60,12 +61,15 @@ class Music_Commands(commands.Cog):
                 'preferredquality': '256',
             }],
         }
+
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
             info_dict = ydl.extract_info(url, False)
+
         for file in os.listdir("./"):
             if file.endswith(".opus"):
                 os.rename(file, "song.opus")
+
         voice.play(discord.FFmpegPCMAudio("song.opus"))
         output = "**Playing** :notes: `" + info_dict.get('title', None) + "` - Now!"
         await ctx.send(output)
