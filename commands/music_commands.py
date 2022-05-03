@@ -29,13 +29,16 @@ class Music_Commands(commands.Cog):
     @commands.command()
     async def play(self, ctx, url : str): 
         #TODO make bot switch vc's
-        song_valid = os.path.isfile("song.mp3")
+        #TODO handle error when user isnt in vc
+        #TODO look into why the video some times has noise
+        #TODO add queue
+        song_valid = os.path.isfile("song.opus")
         try:
             if song_valid: #no song is playing, removing old song file
-                os.remove("song.mp3")
+                os.remove("song.opus")
 
         except PermissionError: #if a current song is playing
-            await ctx.send("song is playing, i havent put a queue system in yet") #TODO add queue
+            await ctx.send("song is playing, i havent put a queue system in yet") 
             return
 
         #find current vc
@@ -49,21 +52,21 @@ class Music_Commands(commands.Cog):
             voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
         
 
-        ydl_opts = { #TODO look into why the video some times has noise
+        ydl_opts = { 
             'format': 'bestaudio',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '320',
+                'preferredcodec': 'opus',
+                'preferredquality': '256',
             }],
         }
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
             info_dict = ydl.extract_info(url, False)
         for file in os.listdir("./"):
-            if file.endswith(".mp3"):
-                os.rename(file, "song.mp3")
-        voice.play(discord.FFmpegPCMAudio("song.mp3"))
+            if file.endswith(".opus"):
+                os.rename(file, "song.opus")
+        voice.play(discord.FFmpegPCMAudio("song.opus"))
         output = "**Playing** :notes: `" + info_dict.get('title', None) + "` - Now!"
         await ctx.send(output)
 
