@@ -20,7 +20,6 @@ class Music_Commands(commands.Cog):
     async def play(self, ctx, url : str): 
         #TODO make bot switch vc's
         song_valid = os.path.isfile("song.mp3")
-
         try:
             if song_valid: #no song is playing, removing old song file
                 os.remove("song.mp3")
@@ -30,7 +29,6 @@ class Music_Commands(commands.Cog):
             return
 
         voiceChannel = discord.utils.get(ctx.guild.voice_channels, name="General") #TODO fix General only
-
         #connect to channel
         try:
             await voiceChannel.connect()
@@ -48,10 +46,13 @@ class Music_Commands(commands.Cog):
         }
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
+            info_dict = ydl.extract_info(url, False)
         for file in os.listdir("./"):
             if file.endswith(".mp3"):
                 os.rename(file, "song.mp3")
         voice.play(discord.FFmpegPCMAudio("song.mp3"))
+        output = "**Playing** :notes: `" + info_dict.get('title', None) + "` - Now!"
+        await ctx.send(output)
 
     @commands.command()
     async def disconnect(self, ctx):
