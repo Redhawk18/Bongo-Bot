@@ -38,13 +38,14 @@ class Music_Commands(commands.Cog):
             await ctx.send("song is playing, i havent put a queue system in yet") #TODO add queue
             return
 
-        voiceChannel = discord.utils.get(ctx.guild.voice_channels, name="General") #TODO fix General only
-        #connect to channel
-        try:
+        #find current vc
+        voiceChannel = ctx.author.voice.channel
+        try: #connect to channel
             await voiceChannel.connect()
             voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
-            await ctx.send("**Connected** :drum:")
-        except ClientException: 
+            await ctx.send("**Connected** :drum: to `" + str(voiceChannel) +"`")
+
+        except ClientException: #already connected
             voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
         
 
