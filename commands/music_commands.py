@@ -16,19 +16,6 @@ class Music_Commands(commands.Cog):
         print("music commands lister online")
 
     @commands.command()
-    async def connect(self, ctx):
-        voiceChannel = discord.utils.get(ctx.guild.voice_channels, name="General") #TODO fix General only
-        #connect to channel
-        try:
-            await voiceChannel.connect()
-            voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
-        except ClientException: 
-            voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
-        await ctx.send("**Connected** :drum:")
-        return voice
-        
-
-    @commands.command()
     async def disconnect(self, ctx):
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
@@ -51,7 +38,15 @@ class Music_Commands(commands.Cog):
             await ctx.send("song is playing, i havent put a queue system in yet") #TODO add queue
             return
 
-        voice = ctx.invoke.connect(self, ctx)
+        voiceChannel = discord.utils.get(ctx.guild.voice_channels, name="General") #TODO fix General only
+        #connect to channel
+        try:
+            await voiceChannel.connect()
+            voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+            await ctx.send("**Connected** :drum:")
+        except ClientException: 
+            voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+        
 
         ydl_opts = { #TODO look into why the video some times has noise
             'format': 'bestaudio',
