@@ -81,7 +81,7 @@ class Music_Commands(commands.Cog):
         #voice.play(discord.FFmpegPCMAudio('song.opus'), after=lambda e: await self._play_next_song(e))
         
         try:
-            voice.play(discord.FFmpegPCMAudio('song.opus'), after=lambda e: asyncio.run(self._play_next_song(e)))
+            voice.play(discord.FFmpegPCMAudio('song.opus'), after=lambda error: asyncio.run(self._play_next_song(error)))
         except RuntimeError:
             print("runtime error")
         await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` - Now!")
