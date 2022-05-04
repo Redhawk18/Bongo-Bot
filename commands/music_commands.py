@@ -1,3 +1,4 @@
+import asyncio
 import os
 from queue import Queue
 
@@ -7,10 +8,19 @@ from discord.ext.commands.errors import ClientException
 from yt_dlp import YoutubeDL
 
 class Music_Commands(commands.Cog):
-    q = Queue(0)
 
     def __init__(self, client):
         self.client = client
+        self.q = Queue(0)
+        self._is_playing_song = False
+        self._ydl_opts = { 
+                'format': 'bestaudio',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'opus',
+                    'preferredquality': '256',
+                }],
+            }
         
 
     #events
@@ -30,61 +40,62 @@ class Music_Commands(commands.Cog):
             await ctx.send("Already disconnected")
 
     #commands
-    @commands.command()
-    async def play(self, ctx, url : str): 
         #TODO make bot switch vc's
         #TODO handle error when user isnt in vc
         #TODO look into why the video some times has noise
         #TODO add queue
-        print(Music_Commands.q.qsize())
-        song_valid = os.path.isfile("song.opus")
-        try:
-            if song_valid: #no song is playing, removing old song file
-                os.remove("song.opus")
+        #TODO refactor to not use permissionerror because its not platform independent
+    async def _play_next_song(self, error=None):
+        if os.path.isfile('song.opus'):
+            os.remove('song.opus')
 
-            Music_Commands.q.put(url)
-
-        except PermissionError: #if a current song is playing
-            await ctx.send("song is playing, i havent put a queue system in yet") 
-            Music_Commands.q.put(url)
-            print(Music_Commands.q.qsize())
+        if self.q.empty():
+            self._is_playing_song = False
+            print('No more songs in queue')
             return
 
-
         
-        while Music_Commands.q is not Music_Commands.q.empty():
-            #find current vc
-            voiceChannel = ctx.author.voice.channel
-            try: #connect to channel
-                await voiceChannel.connect()
-                voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
-                await ctx.send("**Connected** :drum: to `" + str(voiceChannel) +"`")
+        next_url, ctx = self.q.get()
+        print(f'Playing next song: {next_url}')
 
-            except ClientException: #already connected
-                voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
-            
+        self._is_playing_song = True
 
-            ydl_opts = { 
-                'format': 'bestaudio',
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'opus',
-                    'preferredquality': '256',
-                }],
-            }
+        voice_channel = ctx.author.voice.channel
 
-            current_url = Music_Commands.q.get()
-            with YoutubeDL(ydl_opts) as ydl:
-                ydl.download([current_url])
-                info_dict = ydl.extract_info(current_url, False)
+        try: #connect to channel
+            await voice_channel.connect()
+            voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+            await ctx.send(f'**Connected** :drum: to `{str(voice_channel)}`')
 
-            for file in os.listdir("./"):
-                if file.endswith(".opus"):
-                    os.rename(file, "song.opus")
+        except ClientException: #already connected
+            voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
-            voice.play(discord.FFmpegPCMAudio("song.opus"))
-            output = "**Playing** :notes: `" + info_dict.get('title', None) + "` - Now!"
-            await ctx.send(output)
+        with YoutubeDL(self._ydl_opts) as ydl:
+            ydl.download([next_url])
+            info_dict = ydl.extract_info(next_url, False)
+
+        for file in os.listdir(os.getcwd()):
+            if file.endswith('.opus'):
+                os.rename(file, 'song.opus')
+
+        #voice.play(discord.FFmpegPCMAudio('song.opus'), after=lambda e: await self._play_next_song(e))
+        
+        try:
+            voice.play(discord.FFmpegPCMAudio('song.opus'), after=lambda e: asyncio.run(self._play_next_song(e)))
+        except RuntimeError:
+            print("runtime error")
+        await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` - Now!")
+        
+        
+
+    @commands.command()
+    async def play(self, ctx, url : str): 
+        self.q.put((url, ctx))
+        if not self._is_playing_song:
+            await self._play_next_song(None)
+        else:
+            await ctx.send(f"**Added** :notes: `{url}` to queue")
+
 
     @commands.command()
     async def pause(self, ctx):
