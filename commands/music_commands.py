@@ -43,7 +43,7 @@ class Music_Commands(commands.Cog):
         #TODO make bot switch vc's
         #TODO handle error when user isnt in vc
         #TODO look into why the video some times has noise
-        #TODO add queue
+        #TODO fix queue runtime stacktrace
         #TODO refactor to not use permissionerror because its not platform independent
     async def _play_next_song(self, error=None):
         if os.path.isfile('song.opus'):
