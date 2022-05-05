@@ -14,12 +14,16 @@ class Music_Commands(commands.Cog):
         self.q = Queue(0)
         self._is_playing_song = False
         self._ydl_opts = { 
-                'format': 'bestaudio',
+                'format': 'bestaudio/best',
+                'noplaylist': True,
+
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'opus',
-                    'preferredquality': '256',
-                }],
+                    'preferredquality': '256', },
+                    {'key': 'SponsorBlock'},
+                    {'key': 'ModifyChapters', 'remove_sponsor_segments': ['sponsor', 'interaction', 'music_offtopic']}
+                ],
             }
         
 
