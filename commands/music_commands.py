@@ -87,8 +87,6 @@ class Music_Commands(commands.Cog):
         await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` - Now!")
         
 
-
-
     @commands.command()
     async def play(self, ctx, url : str): 
         self.q.put((url, ctx))
