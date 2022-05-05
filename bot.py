@@ -5,9 +5,9 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-#print(os.getenv('DISCORD_TOKEN'))
+
 TOKEN = os.getenv('DISCORD_TOKEN')
-TROLLED = os.getenv('TROLLED_USER')
+
 
 #client = discord.Client()
 client = commands.Bot(command_prefix='!')
