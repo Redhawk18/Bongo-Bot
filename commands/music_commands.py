@@ -83,15 +83,11 @@ class Music_Commands(commands.Cog):
             if file.endswith('.opus'):
                 os.rename(file, 'song.opus')
 
-        #voice.play(discord.FFmpegPCMAudio('song.opus'), after=lambda e: await self._play_next_song(e))
-        
-        try:
-            voice.play(discord.FFmpegPCMAudio('song.opus'), after=lambda e: asyncio.run(self._play_next_song(e)))
-        except RuntimeError:
-            print("runtime error")
+        voice.play(discord.FFmpegPCMAudio('song.opus'), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e), self.client.loop))
         await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` - Now!")
         
-        
+
+
 
     @commands.command()
     async def play(self, ctx, url : str): 
@@ -112,7 +108,7 @@ class Music_Commands(commands.Cog):
 
         else:
             await ctx.send("Nothing is playing")
-            
+
 
     @commands.command()
     async def resume(self, ctx):
@@ -124,6 +120,7 @@ class Music_Commands(commands.Cog):
 
         else:
             await ctx.send("Nothing is paused")
+
 
     @commands.command()
     async def stop(self, ctx):
