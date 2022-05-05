@@ -1,3 +1,8 @@
+#TODO make bot switch vc's
+#TODO handle error when user isnt in vc
+#TODO look into why the video some times has noise
+#TODO fix "now playing" runtime stacktrace
+
 import asyncio
 import os
 from queue import Queue
@@ -32,6 +37,7 @@ class Music_Commands(commands.Cog):
     async def on_ready(self):
         print("music commands lister online")
 
+
     @commands.command()
     async def disconnect(self, ctx):
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
@@ -43,12 +49,7 @@ class Music_Commands(commands.Cog):
         else:
             await ctx.send("Already disconnected")
 
-    #commands
-        #TODO make bot switch vc's
-        #TODO handle error when user isnt in vc
-        #TODO look into why the video some times has noise
-        #TODO fix queue runtime stacktrace
-        #TODO refactor to not use permissionerror because its not platform independent
+
     async def _play_next_song(self, error=None):
         if os.path.isfile('song.opus'):
             os.remove('song.opus')
@@ -112,6 +113,7 @@ class Music_Commands(commands.Cog):
         else:
             await ctx.send("Nothing is playing")
             
+
     @commands.command()
     async def resume(self, ctx):
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
