@@ -1,5 +1,4 @@
 #TODO make bot switch vc's
-#TODO handle error when user isnt in vc
 #TODO look into why the video some times has noise
 
 import asyncio
@@ -8,7 +7,7 @@ from queue import Queue
 
 import discord
 from discord.ext import commands
-from discord.ext.commands.errors import ClientException
+from discord.ext.commands.errors import ClientException, CommandInvokeError
 from yt_dlp import YoutubeDL
 
 class Music_Commands(commands.Cog):
@@ -48,23 +47,31 @@ class Music_Commands(commands.Cog):
         else:
             await ctx.send("Already disconnected")
 
+    async def _in_voice_channel(self, ctx):
+        """Users have to be in a voice channel"""
+        try: #checks if the author is in a voice channel
+            ctx.author.voice.channel
+
+        except AttributeError: # user isnt in any voice channel
+            await ctx.send("You are not in a voice channel")
+            return False
+
+        return True
+
 
     async def _play_next_song(self, error=None):
         if os.path.isfile('song.opus'):
             os.remove('song.opus')
 
-        if self.q.empty():
+        if self.q.empty(): #base case
             self._is_playing_song = False
             print('No more songs in queue')
             return
 
-        
         next_url, ctx = self.q.get()
-        print(f'Playing next song: {next_url}')
-
+        voice_channel = ctx.author.voice.channel # error is handled eariler
         self._is_playing_song = True
-
-        voice_channel = ctx.author.voice.channel
+        print(f'Playing next song: {next_url}')
 
         try: #connect to channel
             await voice_channel.connect()
@@ -88,6 +95,9 @@ class Music_Commands(commands.Cog):
 
     @commands.command()
     async def play(self, ctx, url : str): 
+        if not await self._in_voice_channel(ctx):
+            return
+
         self.q.put((url, ctx))
         if not self._is_playing_song:
             await self._play_next_song(None)
@@ -97,6 +107,8 @@ class Music_Commands(commands.Cog):
 
     @commands.command()
     async def pause(self, ctx):
+        if not await self._in_voice_channel(ctx):
+            return
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
         if voice.is_playing():
@@ -109,6 +121,8 @@ class Music_Commands(commands.Cog):
 
     @commands.command()
     async def resume(self, ctx):
+        if not await self._in_voice_channel(ctx):
+            return
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
         if not voice.is_playing():
@@ -121,6 +135,8 @@ class Music_Commands(commands.Cog):
 
     @commands.command()
     async def forceskip(self, ctx):
+        if not await self._in_voice_channel(ctx):
+            return
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
         
         if voice.is_playing():
