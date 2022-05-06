@@ -1,7 +1,6 @@
 #TODO make bot switch vc's
 #TODO handle error when user isnt in vc
 #TODO look into why the video some times has noise
-#TODO fix "now playing" runtime stacktrace
 
 import asyncio
 import os
@@ -24,8 +23,7 @@ class Music_Commands(commands.Cog):
 
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'opus',
-                    'preferredquality': '256', },
+                    'preferredcodec': 'opus', },
                     {'key': 'SponsorBlock'},
                     {'key': 'ModifyChapters', 'remove_sponsor_segments': ['sponsor', 'interaction', 'music_offtopic']}
                 ],
@@ -43,6 +41,7 @@ class Music_Commands(commands.Cog):
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
         if voice.is_connected():
+            await voice.stop()
             await voice.disconnect()
             await ctx.send("**Disconnected** :guitar:")
 
@@ -75,7 +74,7 @@ class Music_Commands(commands.Cog):
         except ClientException: #already connected
             voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
-        with YoutubeDL(self._ydl_opts) as ydl:
+        with YoutubeDL(self._ydl_opts) as ydl: #download audio
             ydl.download([next_url])
             info_dict = ydl.extract_info(next_url, False)
 
@@ -93,7 +92,7 @@ class Music_Commands(commands.Cog):
         if not self._is_playing_song:
             await self._play_next_song(None)
         else:
-            await ctx.send(f"**Added** :notes: `{url}` to queue")
+            await ctx.send(f"**Added** :musical_note: `{url}` to queue")
 
 
     @commands.command()
@@ -121,9 +120,15 @@ class Music_Commands(commands.Cog):
 
 
     @commands.command()
-    async def stop(self, ctx):
+    async def forceskip(self, ctx):
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
-        voice.stop()
+        
+        if voice.is_playing():
+            voice.stop()
+            await ctx.send("**Skipped** :fast_forward:")
+
+        else:
+            await ctx.send("Nothing is playing")
 
 
 def setup(client):
