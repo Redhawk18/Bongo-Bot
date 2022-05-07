@@ -61,7 +61,7 @@ class Music_Commands(commands.Cog):
         return True
 
 
-    async def _play_next_song(self, ctx, error=None):
+    async def _play_next_song(self, error=None):
         if os.path.isfile('song.opus'):
             os.remove('song.opus')
 
@@ -70,18 +70,21 @@ class Music_Commands(commands.Cog):
             print('No more songs in queue')
             return
 
-        next_url = self.q.pop()
-        voice_channel = ctx.author.voice.channel # error is handled eariler
-        self._is_playing_song = True
-        print(f'Playing next song: {next_url}')
 
+        next_url, ctx = self.q.pop()
+    
         try: #connect to channel
+            voice_channel = ctx.author.voice.channel # error is handled eariler
             await voice_channel.connect()
             voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
             await ctx.send(f'**Connected** :drum: to `{str(voice_channel)}`')
 
         except ClientException: #already connected
             voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+
+        self._is_playing_song = True
+        print(f'Playing next song: {next_url}')
+
 
         with YoutubeDL(self._ydl_opts) as ydl: #download audio
             ydl.download([next_url])
@@ -100,9 +103,9 @@ class Music_Commands(commands.Cog):
         if not await self._in_voice_channel(ctx):
             return
 
-        self.q.appendleft(url)
+        self.q.appendleft((url, ctx))
         if not self._is_playing_song:
-            await self._play_next_song(ctx, None)
+            await self._play_next_song(None)
         else:
             await ctx.send(f"**Added** :musical_note: `{url}` to queue")
 
@@ -152,6 +155,7 @@ class Music_Commands(commands.Cog):
     @commands.command()
     async def queue(self, ctx):
         tempq = copy.deepcopy(self.q)
+        #tempq = await asyncio.to_thread(copy.deepcopy, self.q)
 
         #incase the queue was empty from the start
         if len(tempq) == 0:
@@ -162,7 +166,7 @@ class Music_Commands(commands.Cog):
         index = 0
         while tempq:
             #get the title of the video
-            current_url = tempq.pop()
+            current_url, unused_ctx = tempq.pop()
             with YoutubeDL(self._ydl_opts) as ydl: #download metadata
                 #ydl.extract_info(current_url, False)
                 info_dict = await asyncio.to_thread(ydl.extract_info, current_url, False)
