@@ -2,8 +2,9 @@
 #TODO look into why the video some times has noise
 
 import asyncio
+import copy
+from collections import deque
 import os
-from queue import Queue
 
 import discord
 from discord.ext import commands
@@ -14,7 +15,7 @@ class Music_Commands(commands.Cog):
 
     def __init__(self, client):
         self.client = client
-        self.q = Queue(0)
+        self.q = deque()
         self._is_playing_song = False
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
@@ -40,12 +41,13 @@ class Music_Commands(commands.Cog):
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
         if voice.is_connected():
-            await voice.stop()
+            #await voice.stop()
             await voice.disconnect()
             await ctx.send("**Disconnected** :guitar:")
 
         else:
             await ctx.send("Already disconnected")
+
 
     async def _in_voice_channel(self, ctx):
         """Users have to be in a voice channel"""
@@ -59,16 +61,16 @@ class Music_Commands(commands.Cog):
         return True
 
 
-    async def _play_next_song(self, error=None):
+    async def _play_next_song(self, ctx, error=None):
         if os.path.isfile('song.opus'):
             os.remove('song.opus')
 
-        if self.q.empty(): #base case
+        if len(self.q) == 0: #base case
             self._is_playing_song = False
             print('No more songs in queue')
             return
 
-        next_url, ctx = self.q.get()
+        next_url = self.q.pop()
         voice_channel = ctx.author.voice.channel # error is handled eariler
         self._is_playing_song = True
         print(f'Playing next song: {next_url}')
@@ -98,9 +100,9 @@ class Music_Commands(commands.Cog):
         if not await self._in_voice_channel(ctx):
             return
 
-        self.q.put((url, ctx))
+        self.q.append(url)
         if not self._is_playing_song:
-            await self._play_next_song(None)
+            await self._play_next_song(ctx, None)
         else:
             await ctx.send(f"**Added** :musical_note: `{url}` to queue")
 
@@ -145,6 +147,30 @@ class Music_Commands(commands.Cog):
 
         else:
             await ctx.send("Nothing is playing")
+
+
+    @commands.command()
+    async def queue(self, ctx):
+        tempq = copy.deepcopy(self.q)
+
+        #incase the queue was empty from the start
+        if len(tempq) == 0:
+            await ctx.send("The queue is empty")
+            return
+
+        #print every element in the queue
+        index = 0
+        while tempq:
+            #get the title of the video
+            current_url = tempq.pop()
+            with YoutubeDL(self._ydl_opts) as ydl: #download metadata
+                info_dict = ydl.extract_info(current_url, False)
+
+            await ctx.send(f"{index +1}. `{info_dict.get('title', None)}`")
+            index += 1
+
+
+
 
 
 def setup(client):
