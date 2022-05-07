@@ -100,7 +100,7 @@ class Music_Commands(commands.Cog):
         if not await self._in_voice_channel(ctx):
             return
 
-        self.q.append(url)
+        self.q.appendleft(url)
         if not self._is_playing_song:
             await self._play_next_song(ctx, None)
         else:
@@ -164,9 +164,12 @@ class Music_Commands(commands.Cog):
             #get the title of the video
             current_url = tempq.pop()
             with YoutubeDL(self._ydl_opts) as ydl: #download metadata
-                info_dict = ydl.extract_info(current_url, False)
-
+                #ydl.extract_info(current_url, False)
+                info_dict = await asyncio.to_thread(ydl.extract_info, current_url, False)
+                
+            print(f"`{info_dict.get('title', None)}`")
             await ctx.send(f"{index +1}. `{info_dict.get('title', None)}`")
+            print(index)
             index += 1
 
 
