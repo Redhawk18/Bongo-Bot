@@ -1,4 +1,6 @@
 from math import ceil
+import random
+
 import discord
 from discord.ext import commands
 
@@ -17,6 +19,14 @@ class Util_Commands(commands.Cog):
     async def ping(self, ctx):
         await ctx.send(f'**Pong!** :ping_pong: {ceil(self.client.latency*1000)}ms')
 
+
+    @commands.command()
+    async def roll(self, ctx, dienumber : int):
+        if dienumber < 1:
+            await ctx.send("Input invalid")
+            return
+
+        await ctx.send(f'**Rolled** :game_die: {random.randint(1, dienumber)} of a {dienumber}-sided die')
 
 
 def setup(client):
