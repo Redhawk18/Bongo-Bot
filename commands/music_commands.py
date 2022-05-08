@@ -2,7 +2,6 @@
 #TODO look into why the video some times has noise
 
 import asyncio
-import copy
 from collections import deque
 import os
 
@@ -30,7 +29,6 @@ class Music_Commands(commands.Cog):
             }
         
 
-    #events
     @commands.Cog.listener()
     async def on_ready(self):
         print("music commands lister online")
@@ -85,7 +83,6 @@ class Music_Commands(commands.Cog):
 
         self._is_playing_song = True
         print(f'Playing next song: {next_url}')
-
 
         with YoutubeDL(self._ydl_opts) as ydl: #download audio
             ydl.download([next_url])
