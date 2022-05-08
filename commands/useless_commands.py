@@ -3,7 +3,7 @@ import random
 import discord
 from discord.ext import commands
 
-class General_Commands(commands.Cog):
+class Useless_Commands(commands.Cog):
 
     def __init__(self, client):
         self.client = client
@@ -11,12 +11,8 @@ class General_Commands(commands.Cog):
     #events
     @commands.Cog.listener()
     async def on_ready(self):
-        print("general commands lister online")
+        print("useless commands lister online")
 
-    #commands
-    @commands.command()
-    async def ping(self, ctx):
-        await ctx.send(f'Pong! :ping_pong:')
 
     @commands.command()
     async def quote(self, ctx):
@@ -30,6 +26,7 @@ class General_Commands(commands.Cog):
         response = random.choice(epic_quotes)
         await ctx.send(response)
 
+
     @commands.command()
     async def frank(self, ctx):
         await ctx.send('https://tenor.com/view/gezer123123123-gif-18858197')
@@ -37,4 +34,4 @@ class General_Commands(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(General_Commands(client))
+    client.add_cog(Useless_Commands(client))
