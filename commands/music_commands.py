@@ -96,7 +96,7 @@ class Music_Commands(commands.Cog):
                 os.rename(file, 'song.opus')
 
         voice.play(discord.FFmpegPCMAudio('song.opus'), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e), self.client.loop))
-        await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` - Now!")
+        await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` by `{info_dict.get('channel', None)}` - Now!")
         
 
     @commands.command()
@@ -155,29 +155,32 @@ class Music_Commands(commands.Cog):
 
     @commands.command()
     async def queue(self, ctx):
-        tempq = copy.deepcopy(self.q)
-        #tempq = await asyncio.to_thread(copy.deepcopy, self.q)
+        tempq = self.q.copy()
 
         #incase the queue was empty from the start
         if len(tempq) == 0:
             await ctx.send("The queue is empty")
             return
 
-        #print every element in the queue
+        #store every element in a string
         index = 0
+        output = ""
         while tempq:
-            #get the title of the video
+            #get the url of the video
             current_url, unused_ctx = tempq.pop()
             with YoutubeDL(self._ydl_opts) as ydl: #download metadata
-                #ydl.extract_info(current_url, False)
                 info_dict = await asyncio.to_thread(ydl.extract_info, current_url, False)
                 
-            print(f"`{info_dict.get('title', None)}`")
-            await ctx.send(f"{index +1}. `{info_dict.get('title', None)}`")
-            print(index)
+            minutes, seconds = divmod(info_dict.get('duration', None), 60)
+            output += (f"{index +1}. `{info_dict.get('title', None)}` - `{minutes}:{seconds}`\n")
             index += 1
 
-
+        embed = discord.Embed(
+            title = "**Queue** :books:",
+            description = output,
+            color = discord.Color.red(),
+        )
+        await ctx.send(embed=embed)
 
 
 
