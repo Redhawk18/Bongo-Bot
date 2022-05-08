@@ -21,10 +21,17 @@ class Util_Commands(commands.Cog):
 
 
     @commands.command()
-    async def roll(self, ctx, dienumber : int):
+    async def roll(self, ctx, dienumber):
+        try:
+            int(dienumber)
+        except ValueError:
+            await ctx.send("Input invalid")
+            return
+
         if dienumber < 1:
             await ctx.send("Input invalid")
             return
+
 
         await ctx.send(f'**Rolled** :game_die: {random.randint(1, dienumber)} of a {dienumber}-sided die')
 
