@@ -39,8 +39,8 @@ class Music_Commands(commands.Cog):
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
         if voice.is_connected():
-            await voice.stop()
             self.q.clear() #wipe all future songs
+            voice.stop()
             await voice.disconnect()
             await ctx.send("**Disconnected** :guitar:")
 
