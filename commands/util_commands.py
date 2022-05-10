@@ -35,6 +35,10 @@ class Util_Commands(commands.Cog):
             await ctx.send("Input invalid")
             return
 
+        if number_of_rolls > 192:
+            await ctx.send("Input invalid")
+            return
+
         sum = 0
         output = f'A {max}-sided die was rolled {number_of_rolls} times\n'
         for i in range(number_of_rolls):
