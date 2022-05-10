@@ -21,19 +21,38 @@ class Util_Commands(commands.Cog):
 
 
     @commands.command()
-    async def roll(self, ctx, dienumber):
-        try:
-            int(dienumber)
-        except ValueError:
-            await ctx.send("Input invalid")
-            return
-
-        if dienumber < 1:
+    async def roll(self, ctx, max : int):
+        if max < 1:
             await ctx.send("Input invalid")
             return
 
 
-        await ctx.send(f'**Rolled** :game_die: {random.randint(1, dienumber)} of a {dienumber}-sided die')
+        await ctx.send(f'**Rolled** :game_die: {random.randint(1, max)} of a {max}-sided die')
+
+    @commands.command()
+    async def multipleroll(self, ctx, max : int, number_of_rolls : int):
+        if number_of_rolls < 1 or max < 1:
+            await ctx.send("Input invalid")
+            return
+
+        sum = 0
+        output = f'A {max}-sided die was rolled {number_of_rolls} times\n'
+        for i in range(number_of_rolls):
+            current_roll = random.randint(1, max)
+            sum += current_roll
+            output += f'Rolled {current_roll} :game_die:\n'
+
+        #sum print
+        output += "\n"
+        output += f'The sum is **{sum} of {number_of_rolls * max}**'
+
+        embed = discord.Embed(
+            title = "**Multiple Rolled** :game_die:",
+            description = output,
+            color = discord.Color.blue(),
+        )
+        await ctx.send(embed=embed)
+
 
 
 def setup(client):
