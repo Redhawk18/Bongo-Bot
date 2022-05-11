@@ -20,7 +20,7 @@ class Util_Commands(commands.Cog):
         await ctx.send(f'**Pong!** :ping_pong: {ceil(self.client.latency*1000)}ms')
 
 
-    @commands.command()
+    @commands.command(aliases=['r'])
     async def roll(self, ctx, max : int):
         if max < 1:
             await ctx.send("Input invalid")
@@ -29,7 +29,7 @@ class Util_Commands(commands.Cog):
 
         await ctx.send(f'**Rolled** :game_die: {random.randint(1, max)} of a {max}-sided die')
 
-    @commands.command()
+    @commands.command(aliases=['multiroll', 'mroll', 'mr'])
     async def multipleroll(self, ctx, max : int, number_of_rolls : int):
         if number_of_rolls < 1 or max < 1:
             await ctx.send("Input invalid")

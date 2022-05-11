@@ -35,7 +35,7 @@ class Music_Commands(commands.Cog):
         print("music commands lister online")
 
 
-    @commands.command()
+    @commands.command(aliases=['fuckoff', 'd'])
     async def disconnect(self, ctx):
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
@@ -97,7 +97,7 @@ class Music_Commands(commands.Cog):
         await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` by `{info_dict.get('channel', None)}` - Now!")
         
 
-    @commands.command()
+    @commands.command(aliases=['p'])
     async def play(self, ctx, *, search : str): 
         if not await self._in_voice_channel(ctx):
             return
@@ -148,7 +148,7 @@ class Music_Commands(commands.Cog):
             await ctx.send("Nothing is paused")
 
 
-    @commands.command()
+    @commands.command(aliases=['fs', 'fskip'])
     async def forceskip(self, ctx):
         if not await self._in_voice_channel(ctx):
             return
@@ -162,7 +162,7 @@ class Music_Commands(commands.Cog):
             await ctx.send("Nothing is playing")
 
 
-    @commands.command()
+    @commands.command(aliases=['q'])
     async def queue(self, ctx):
         tempq = self.q.copy()
 
