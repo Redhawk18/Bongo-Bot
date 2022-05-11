@@ -4,6 +4,7 @@
 import asyncio
 from collections import deque
 import os
+import urllib.parse, urllib.request, re
 
 import discord
 from discord.ext import commands
@@ -97,10 +98,21 @@ class Music_Commands(commands.Cog):
         
 
     @commands.command()
-    async def play(self, ctx, url : str): 
+    async def play(self, ctx, *, search : str): 
         if not await self._in_voice_channel(ctx):
             return
 
+        #search youtube for url
+        query_string = urllib.parse.urlencode({
+            'search_query': search
+        })
+        htm_content = urllib.request.urlopen(
+            'https://www.youtube.com/results?' + query_string
+        )
+        search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
+        url = 'https://www.youtube.com/watch?v=' + search_results[0]
+
+        #start play proccess with url
         self.q.appendleft((url, ctx))
         if not self._is_playing_song:
             await self._play_next_song(None)
@@ -178,7 +190,6 @@ class Music_Commands(commands.Cog):
             color = discord.Color.red(),
         )
         await ctx.send(embed=embed)
-
 
 
 def setup(client):
