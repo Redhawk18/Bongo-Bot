@@ -92,7 +92,7 @@ class Music_Commands(commands.Cog):
             if file.endswith('.opus'):
                 os.rename(file, 'song.opus')
 
-        voice.play(discord.FFmpegPCMAudio('song.opus'), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e), self.client.loop))
+        voice.play(discord.FFmpegOpusAudio('song.opus'), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e), self.client.loop))
         await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` by `{info_dict.get('channel', None)}` - Now!")
         
 
