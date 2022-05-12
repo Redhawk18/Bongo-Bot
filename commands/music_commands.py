@@ -17,6 +17,7 @@ class Music_Commands(commands.Cog):
         self.client = client
         self.q = deque()
         self._is_playing_song = False
+        self.loop_enabled = False
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
                 'noplaylist': True,
@@ -72,6 +73,8 @@ class Music_Commands(commands.Cog):
 
 
         next_url, ctx = self.q.pop()
+        if self.loop_enabled:
+            self.q.append((next_url, ctx))
     
         try: #connect to channel
             voice_channel = ctx.author.voice.channel # error is handled eariler
@@ -190,6 +193,17 @@ class Music_Commands(commands.Cog):
             color = discord.Color.red(),
         )
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def loop(self, ctx):
+        if self.loop_enabled: #disable loop
+            self.loop_enabled = False
+            await ctx.send("**Loop Disabled** :repeat:")
+
+        else: #enable loop
+            self.loop_enabled = True
+            await ctx.send("**Loop Enabled** :repeat:")
+
 
 
 def setup(client):
