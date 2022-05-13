@@ -40,7 +40,7 @@ class Music_Commands(commands.Cog):
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
         if voice.is_connected():
-            self.q.clear() #wipe all future songs
+            await self.queueclear() #wipe all future songs
             voice.stop()
             await voice.disconnect()
             await ctx.send("**Disconnected** :guitar:")
@@ -217,6 +217,10 @@ class Music_Commands(commands.Cog):
             color = discord.Color.red(),
         )
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def queueclear(self):
+        self.q.clear()
 
     @commands.command()
     async def loop(self, ctx):
