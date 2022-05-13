@@ -5,12 +5,9 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-
-#client = discord.Client()
-client = commands.Bot(command_prefix='!', intents=discord.Intents.all())
+client = commands.Bot(command_prefix='!', case_insensitive=True, intents=discord.Intents.all())
 
 @client.event
 async def on_ready():
