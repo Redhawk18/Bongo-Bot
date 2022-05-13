@@ -1,8 +1,6 @@
-#TODO make bot switch vc's
-#TODO look into why the video some times has noise
-
 import asyncio
 from collections import deque
+from math import floor
 import os
 import urllib.parse, urllib.request, re
 
@@ -18,6 +16,7 @@ class Music_Commands(commands.Cog):
         self.q = deque()
         self._is_playing_song = False
         self.loop_enabled = False
+        self.how_many_want_to_skip = 0
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
                 'noplaylist': True,
@@ -158,11 +157,36 @@ class Music_Commands(commands.Cog):
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
         
         if voice.is_playing():
+            self.how_many_want_to_skip = 0 #reset counter
             voice.stop()
             await ctx.send("**Skipped** :fast_forward:")
 
         else:
             await ctx.send("Nothing is playing")
+
+    @commands.command()
+    async def skip(self, ctx):
+        if not await self._in_voice_channel(ctx):
+            return
+        voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+
+        if voice.is_playing():
+            #increase the how_many_want_to_skip
+            self.how_many_want_to_skip += 1
+
+            #check if its passed threshold
+            voice_channel = ctx.author.voice.channel
+            threshold = floor((len(voice_channel.members)-1)/2) #-1 for the bot
+
+            if self.how_many_want_to_skip >= threshold: #enough people
+                await self.forceskip(ctx)
+            
+            else: #not enough people
+                await ctx.send(f'**Skipping? ({self.how_many_want_to_skip}/{threshold} people) or use `forceskip`**')
+
+        else:
+            await ctx.send("Nothing is playing")
+            return
 
 
     @commands.command(aliases=['q'])
