@@ -164,7 +164,7 @@ class Music_Commands(commands.Cog):
         else:
             await ctx.send("Nothing is playing")
 
-    @commands.command()
+    @commands.command(aliases=['s'])
     async def skip(self, ctx):
         if not await self._in_voice_channel(ctx):
             return
