@@ -61,18 +61,6 @@ class Music_Commands(commands.Cog):
         return True
 
 
-    async def _query_to_url(self, query):
-        """Takes a query string and returns the top video's url from Youtube"""
-        query_string = urllib.parse.urlencode({
-            'search_query': query
-        })
-        htm_content = urllib.request.urlopen(
-            'https://www.youtube.com/results?' + query_string
-        )
-        search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
-        return 'https://www.youtube.com/watch?v=' + search_results[0]
-
-
     async def _play_next_song(self, error=None):
         """figures out what voice channel the user is in, and joins. Then it downloads and encodes and plays from the queue"""
         if os.path.isfile('song.opus'):
@@ -113,18 +101,38 @@ class Music_Commands(commands.Cog):
         
 
     @commands.command(aliases=['p'])
-    async def play(self, ctx, *, query : str): 
+    async def play(self, ctx, *, query : str, is_playnext=None): 
         if not await self._in_voice_channel(ctx):
             return
         
-        url = await self._query_to_url(query=query)
+        query_string = urllib.parse.urlencode({
+            'search_query': query
+        })
+        htm_content = urllib.request.urlopen(
+            'https://www.youtube.com/results?' + query_string
+        )
+        search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
+        url = 'https://www.youtube.com/watch?v=' + search_results[0]
 
         #start play proccess with url
-        self.q.appendleft((url, ctx))
+        if not is_playnext:
+            self.q.appendleft((url, ctx))
+        elif is_playnext:
+            self.q.append((url, ctx))
+
         if not self._is_playing_song:
             await self._play_next_song(None)
         else:
-            await ctx.send(f"**Added** :musical_note: `{url}` to queue")
+            if not is_playnext:
+                await ctx.send(f"**Added** :musical_note: `{url}` to queue")
+            elif is_playnext:
+                await ctx.send(f"**Added** :musical_note: `{url}` to the top of the queue")
+            
+
+
+    @commands.command()
+    async def playnext(self, ctx, *, query : str): 
+        await self.play(ctx, query=query, is_playnext=True)
 
 
     @commands.command()
