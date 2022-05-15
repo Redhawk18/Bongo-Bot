@@ -61,6 +61,17 @@ class Music_Commands(commands.Cog):
         return True
 
 
+    async def _query_to_url(self, query):
+        query_string = urllib.parse.urlencode({
+            'search_query': query
+        })
+        htm_content = urllib.request.urlopen(
+            'https://www.youtube.com/results?' + query_string
+        )
+        search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
+        return 'https://www.youtube.com/watch?v=' + search_results[0]
+
+
     async def _play_next_song(self, error=None):
         if os.path.isfile('song.opus'):
             os.remove('song.opus')
@@ -103,16 +114,8 @@ class Music_Commands(commands.Cog):
     async def play(self, ctx, *, search : str): 
         if not await self._in_voice_channel(ctx):
             return
-
-        #search youtube for url
-        query_string = urllib.parse.urlencode({
-            'search_query': search
-        })
-        htm_content = urllib.request.urlopen(
-            'https://www.youtube.com/results?' + query_string
-        )
-        search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
-        url = 'https://www.youtube.com/watch?v=' + search_results[0]
+        
+        url = await self._query_to_url(query = search)
 
         #start play proccess with url
         self.q.appendleft((url, ctx))
