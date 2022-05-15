@@ -62,6 +62,7 @@ class Music_Commands(commands.Cog):
 
 
     async def _query_to_url(self, query):
+        """Takes a query string and returns the top video's url from Youtube"""
         query_string = urllib.parse.urlencode({
             'search_query': query
         })
@@ -73,6 +74,7 @@ class Music_Commands(commands.Cog):
 
 
     async def _play_next_song(self, error=None):
+        """figures out what voice channel the user is in, and joins. Then it downloads and encodes and plays from the queue"""
         if os.path.isfile('song.opus'):
             os.remove('song.opus')
 
