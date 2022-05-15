@@ -8,6 +8,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands.errors import ClientException, CommandInvokeError
 from yt_dlp import YoutubeDL
+from yt_dlp import DownloadError
 
 class Music_Commands(commands.Cog):
 
@@ -129,10 +130,30 @@ class Music_Commands(commands.Cog):
                 await ctx.send(f"**Added** :musical_note: `{url}` to the top of the queue")
             
 
-
     @commands.command()
     async def playnext(self, ctx, *, query : str): 
         await self.play(ctx, query=query, is_playnext=True)
+
+    @commands.command()
+    async def playurl(self, ctx, url : str):
+        #this function HAS TO have a valid url
+        if 'https://www.youtube.com/watch?v=' in url or 'https://youtu.be/' in url:
+            #link might be valid
+            try:
+                with YoutubeDL(self._ydl_opts) as ydl: #download audio
+                    ydl.extract_info(url, False)
+            except DownloadError: #if video doesnt exist
+                await ctx.send("Invalid url")
+                return
+
+            self.q.appendleft((url, ctx))
+
+            if not self._is_playing_song:
+                await self._play_next_song(None)
+            else:
+                await ctx.send(f"**Added** :musical_note: `{url}` to queue")
+        else:
+            await ctx.send("Invalid url")
 
 
     @commands.command()
