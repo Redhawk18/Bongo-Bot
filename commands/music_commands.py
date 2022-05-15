@@ -111,11 +111,11 @@ class Music_Commands(commands.Cog):
         
 
     @commands.command(aliases=['p'])
-    async def play(self, ctx, *, search : str): 
+    async def play(self, ctx, *, query : str): 
         if not await self._in_voice_channel(ctx):
             return
         
-        url = await self._query_to_url(query = search)
+        url = await self._query_to_url(query=query)
 
         #start play proccess with url
         self.q.appendleft((url, ctx))
