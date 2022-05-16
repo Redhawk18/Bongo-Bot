@@ -17,6 +17,7 @@ class Music_Commands(commands.Cog):
         self._is_playing_song = False
         self.loop_enabled = False
         self.how_many_want_to_skip = 0
+        self.music_channel = None
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
                 'noplaylist': True,
@@ -47,6 +48,24 @@ class Music_Commands(commands.Cog):
 
         else:
             await ctx.send("Already disconnected")
+
+
+    @commands.command()
+    async def musicchannel(self, ctx):
+        #set authors text channel
+        self.music_channel = ctx.channel.name
+        await ctx.send(f'{str(self.music_channel)} will be the only text channel the bot will take and output music commands from')
+
+
+    async def _is_music_channel(self, ctx):
+        """compares authors text channel to the set music channel"""
+        print(f'music channel = {self.music_channel}')
+
+        if ctx.channel.name == self.music_channel:
+            return True
+
+        await ctx.send("Wrong channel for music commands")
+        return False
 
 
     async def _in_voice_channel(self, ctx):
@@ -102,7 +121,7 @@ class Music_Commands(commands.Cog):
 
     @commands.command(aliases=['p'])
     async def play(self, ctx, *, query : str, is_playnext=None): 
-        if not await self._in_voice_channel(ctx):
+        if not await self._in_voice_channel(ctx) or not await self._is_music_channel(ctx):
             return
         
         query_string = urllib.parse.urlencode({
