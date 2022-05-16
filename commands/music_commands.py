@@ -35,7 +35,7 @@ class Music_Commands(commands.Cog):
         print("music commands lister online")
 
 
-    @commands.command(aliases=['fuckoff', 'd'])
+    @commands.command(aliases=['fuckoff', 'd', 'dc'])
     async def disconnect(self, ctx):
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
