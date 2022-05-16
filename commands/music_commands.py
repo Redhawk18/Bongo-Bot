@@ -7,8 +7,7 @@ import urllib.parse, urllib.request, re
 import discord
 from discord.ext import commands
 from discord.ext.commands.errors import ClientException, CommandInvokeError
-from yt_dlp import YoutubeDL
-from yt_dlp import DownloadError
+from yt_dlp import YoutubeDL, DownloadError
 
 class Music_Commands(commands.Cog):
 
