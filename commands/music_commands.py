@@ -60,8 +60,6 @@ class Music_Commands(commands.Cog):
 
     async def _is_music_channel(self, ctx):
         """compares authors text channel to the set music channel"""
-        print(f'music channel = {self.music_channel}')
-
         if ctx.channel.name == self.music_channel:
             return True
 
