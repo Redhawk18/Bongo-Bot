@@ -129,11 +129,8 @@ class Music_Commands(commands.Cog):
         
 
     async def _add_videos_from_playlist(self, ctx, playlist_url):
-        _ydl_playlist_opts = { #extract_flat false so we can take videos out one by one
-            'extract_flat': False,
-        }
-
-        with YoutubeDL(_ydl_playlist_opts) as ydl:
+        #extract_flat false so we can take videos out one by one
+        with YoutubeDL({'extract_flat': False}) as ydl:
             #get the info_dict with all playlist videos
             playlist_info_dict = ydl.extract_info(playlist_url, False)
             video_url = ""
