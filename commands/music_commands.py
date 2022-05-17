@@ -282,6 +282,9 @@ class Music_Commands(commands.Cog):
                 info_dict = await asyncio.to_thread(ydl.extract_info, current_url, False)
                 
             minutes, seconds = divmod(info_dict.get('duration', None), 60)
+            if seconds < 10: #time like 2:0 -> 2:00
+                seconds = "0" + str(seconds)
+
             output += (f"{index +1}. `{info_dict.get('title', None)}` - `{minutes}:{seconds}`\n")
             index += 1
 
