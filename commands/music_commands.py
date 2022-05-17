@@ -17,10 +17,11 @@ class Music_Commands(commands.Cog):
         self._is_playing_song = False
         self.loop_enabled = False
         self.how_many_want_to_skip = 0
-        self.music_channel = None
+        #self.music_channel = None
+        self.music_channel = 'music-spam' #makes testing easier 
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
-                'noplaylist': True,
+                'extract_flat': True, 
 
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
@@ -108,8 +109,16 @@ class Music_Commands(commands.Cog):
         print(f'Playing next song: {next_url}')
 
         with YoutubeDL(self._ydl_opts) as ydl: #download audio
-            ydl.download([next_url])
             info_dict = ydl.extract_info(next_url, False)
+
+            #check if the link is a playlist
+            if info_dict.get('_type', None) != None:
+                #call _add_videos_from_playlist function to deal with it
+                await self._add_videos_from_playlist(ctx, next_url)
+                next_url, ctx = self.q.pop() #since we added a butch of new urls and the current next_url is a playlist
+                info_dict = ydl.extract_info(next_url, False) #new video new metadata
+
+            ydl.download([next_url])
 
         for file in os.listdir(os.getcwd()):
             if file.endswith('.opus'):
@@ -118,6 +127,22 @@ class Music_Commands(commands.Cog):
         voice.play(discord.FFmpegOpusAudio('song.opus'), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e), self.client.loop))
         await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` by `{info_dict.get('channel', None)}` - Now!")
         
+
+    async def _add_videos_from_playlist(self, ctx, playlist_url):
+        _ydl_playlist_opts = { #extract_flat false so we can take videos out one by one
+            'extract_flat': False,
+        }
+
+        with YoutubeDL(_ydl_playlist_opts) as ydl:
+            #get the info_dict with all playlist videos
+            playlist_info_dict = ydl.extract_info(playlist_url, False)
+            video_url = ""
+
+            for index in range(len(playlist_info_dict.get('entries', None))):
+                 video_url = playlist_info_dict.get('entries')[index].get('webpage_url')
+                 #add that to queue  
+                 self.q.appendleft((video_url, ctx))
+
 
     @commands.command(aliases=['p'])
     async def play(self, ctx, *, query : str, is_playnext=None): 
@@ -159,7 +184,7 @@ class Music_Commands(commands.Cog):
             #link might be valid
             try:
                 with YoutubeDL(self._ydl_opts) as ydl: #download audio
-                    ydl.extract_info(url, False)
+                    ydl.extract_info(url, False) #TODO sending to api is really slow replace with better trycatch
             except DownloadError: #if video doesnt exist
                 await ctx.send("Invalid url")
                 return
