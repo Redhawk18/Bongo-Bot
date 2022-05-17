@@ -293,7 +293,7 @@ class Music_Commands(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def queueclear(self):
+    async def queueclear(self, ctx):
         self.q.clear()
 
     @commands.command()
