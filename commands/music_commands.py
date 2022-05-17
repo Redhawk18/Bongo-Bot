@@ -174,6 +174,9 @@ class Music_Commands(commands.Cog):
 
     @commands.command()
     async def playurl(self, ctx, url : str):
+        if not await self._in_voice_channel(ctx) or not await self._is_music_channel(ctx):
+            return
+            
         #this function HAS TO have a valid url
         if 'https://www.youtube.com/watch?v=' in url or 'https://youtu.be/' in url:
             #link might be valid
