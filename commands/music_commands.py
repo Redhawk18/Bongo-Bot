@@ -168,7 +168,7 @@ class Music_Commands(commands.Cog):
                 await ctx.send(f"**Added** :musical_note: `{url}` to the top of the queue")
             
 
-    @commands.command()
+    @commands.command(aliases=['playtop'])
     async def playnext(self, ctx, *, query : str): 
         await self.play(ctx, query=query, is_playnext=True)
 
