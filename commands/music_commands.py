@@ -113,6 +113,7 @@ class Music_Commands(commands.Cog):
             if info_dict.get('_type', None) != None:
                 #call _add_videos_from_playlist function to deal with it
                 await self._add_videos_from_playlist(ctx, next_url)
+                await ctx.send(f'**Added Playlist** :musical_note: `{next_url}` to queue')
                 next_url, ctx = self.q.pop() #since we added a butch of new urls and the current next_url is a playlist
                 info_dict = ydl.extract_info(next_url, False) #new video new metadata
 
