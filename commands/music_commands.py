@@ -300,6 +300,7 @@ class Music_Commands(commands.Cog):
     @commands.command()
     async def queueclear(self, ctx):
         self.q.clear()
+        await ctx.send("**Cleared queue** :books:")
 
 
     @commands.command()
