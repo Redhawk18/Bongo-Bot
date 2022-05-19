@@ -42,7 +42,7 @@ class Music_Commands(commands.Cog):
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
         if voice.is_connected():
-            await self.queueclear() #wipe all future songs
+            self.q.clear() #wipe all future songs
             voice.stop()
             await voice.disconnect()
             await ctx.send("**Disconnected** :guitar:")
@@ -79,7 +79,7 @@ class Music_Commands(commands.Cog):
         return True
 
 
-    async def _play_next_song(self, error=None):
+    async def _play_next_song(self, error=None, ctx=None):
         """figures out what voice channel the user is in, and joins. Then it downloads and encodes and plays from the queue"""
         if os.path.isfile('song.opus'):
             os.remove('song.opus')
@@ -87,6 +87,7 @@ class Music_Commands(commands.Cog):
         if len(self.q) == 0: #base case
             self._is_playing_song = False
             print('No more songs in queue')
+            await self.disconnect(ctx)
             return
 
 
@@ -123,7 +124,7 @@ class Music_Commands(commands.Cog):
             if file.endswith('.opus'):
                 os.rename(file, 'song.opus')
 
-        voice.play(discord.FFmpegOpusAudio('song.opus'), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e), self.client.loop))
+        voice.play(discord.FFmpegOpusAudio('song.opus'), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e, ctx), self.client.loop))
         await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` by `{info_dict.get('channel', None)}` - Now!")
         
 
