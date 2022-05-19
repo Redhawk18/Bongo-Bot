@@ -177,7 +177,7 @@ class Music_Commands(commands.Cog):
     async def playurl(self, ctx, url : str):
         if not await self._in_voice_channel(ctx) or not await self._is_music_channel(ctx):
             return
-            
+
         #this function HAS TO have a valid url
         if 'https://www.youtube.com/watch?v=' in url or 'https://youtu.be/' in url:
             #link might be valid
@@ -300,6 +300,24 @@ class Music_Commands(commands.Cog):
     @commands.command()
     async def queueclear(self, ctx):
         self.q.clear()
+
+
+    @commands.command()
+    async def queueremove(self, ctx, queue_position : int):
+        if queue_position > len(self.q) or queue_position < 0:
+            await ctx.send("Input invalid")
+            return
+
+        #because of how the remove function works we have to make a copy
+        tempq = self.q.copy()
+
+        for index in range(queue_position -1): #so we dont have to save what's popped
+            tempq.pop()
+
+        #we should have the url of the track we want to remove
+        self.q.remove(tempq.pop())
+        await ctx.send("**Removed from queue** :books:")
+
 
     @commands.command()
     async def loop(self, ctx):
