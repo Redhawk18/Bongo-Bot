@@ -219,7 +219,7 @@ class Music_Commands(commands.Cog):
             return
         voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
 
-        if not voice.is_playing():
+        if voice.is_paused():
             voice.resume()
             await ctx.send("**Resumed** :arrow_forward:")
 
