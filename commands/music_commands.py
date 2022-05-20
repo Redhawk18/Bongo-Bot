@@ -17,8 +17,8 @@ class Music_Commands(commands.Cog):
         self._is_playing_song = False
         self.loop_enabled = False
         self.how_many_want_to_skip = 0
-        #self.music_channel = None
-        self.music_channel = 'music-spam' #makes testing easier 
+        self.music_channel = None
+        #self.music_channel = 'music-spam' #makes testing easier 
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
                 'extract_flat': True, 
