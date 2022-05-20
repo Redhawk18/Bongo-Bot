@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-client = commands.Bot(command_prefix='!', case_insensitive=True, intents=discord.Intents.all())
+client = commands.Bot(command_prefix='!', case_insensitive=True, intents=discord.Intents.all(), help_command=None)
 
 @client.event
 async def on_ready():
