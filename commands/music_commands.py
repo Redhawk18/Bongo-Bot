@@ -7,6 +7,7 @@ import urllib.parse, urllib.request, re
 import discord
 from discord.ext import commands
 from discord.ext.commands.errors import ClientException, CommandInvokeError
+import yt_dlp
 from yt_dlp import YoutubeDL, DownloadError
 
 class Music_Commands(commands.Cog):
@@ -17,8 +18,8 @@ class Music_Commands(commands.Cog):
         self._is_playing_song = False
         self.loop_enabled = False
         self.how_many_want_to_skip = 0
-        self.music_channel = None
-        #self.music_channel = 'music-spam' #makes testing easier 
+        #self.music_channel = None
+        self.music_channel = 'music-spam' #makes testing easier 
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
                 'extract_flat': True, 
@@ -108,6 +109,7 @@ class Music_Commands(commands.Cog):
         print(f'Playing next song: {next_url}')
 
         with YoutubeDL(self._ydl_opts) as ydl: #download audio
+
             info_dict = ydl.extract_info(next_url, False)
 
             #check if the link is a playlist
@@ -120,6 +122,7 @@ class Music_Commands(commands.Cog):
 
             ydl.download([next_url])
 
+
         for file in os.listdir(os.getcwd()):
             if file.endswith('.opus'):
                 os.rename(file, 'song.opus')
@@ -130,15 +133,19 @@ class Music_Commands(commands.Cog):
 
     async def _add_videos_from_playlist(self, ctx, playlist_url):
         #extract_flat false so we can take videos out one by one
-        with YoutubeDL({'extract_flat': False}) as ydl:
+        with YoutubeDL({'extract_flat': False, 'match_filter': yt_dlp.utils.match_filter_func('availability != private'), 'ignore_no_formats_error': True}) as ydl:
             #get the info_dict with all playlist videos
             playlist_info_dict = ydl.extract_info(playlist_url, False)
             video_url = ""
 
             for index in range(len(playlist_info_dict.get('entries', None))):
-                 video_url = playlist_info_dict.get('entries')[index].get('webpage_url')
-                 #add that to queue  
-                 self.q.appendleft((video_url, ctx))
+                if playlist_info_dict.get('entries')[index].get('uploader') == None:
+                    await ctx.send(f'track {index +1} is not public and was not added to the queue')
+                    continue
+
+                #add that to queue  
+                video_url = playlist_info_dict.get('entries')[index].get('webpage_url')
+                self.q.appendleft((video_url, ctx))
 
 
     @commands.command(aliases=['p'])
