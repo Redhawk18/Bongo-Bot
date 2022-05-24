@@ -85,7 +85,7 @@ class Music_Commands(commands.Cog):
         query_string = urllib.parse.urlencode({
             'search_query': query
         })
-        
+
         htm_content = urllib.request.urlopen(
             'https://www.youtube.com/results?' + query_string
         )
@@ -144,7 +144,29 @@ class Music_Commands(commands.Cog):
 
         voice.play(discord.FFmpegOpusAudio('song.opus', bitrate=192), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e, ctx), self.client.loop))
         await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` by `{info_dict.get('channel', None)}` - Now!")
+
+
+    async def _add_video(self, ctx, video_url, add_to_bottom_of_q=True):
+        #figure out if the video is a playlist
+        with YoutubeDL(self._ydl_opts) as ydl: #download audio
+            info_dict = ydl.extract_info(video_url, False)
+
+            #check if the link is a playlist
+            if info_dict.get('_type', None) != None: #is playlist
+                await self._add_videos_from_playlist(ctx, video_url)
+                return
         
+        #else just add the video into the queue
+        if add_to_bottom_of_q: #play or playurl
+            self.q.appendleft((video_url, ctx))
+            await ctx.send(f"**Added** :musical_note: `{video_url}` to queue")
+
+        else: #playnext
+            self.q.append((video_url, ctx))
+            await ctx.send(f"**Added** :musical_note: `{video_url}` to the top of the queue")
+
+            
+
 
     async def _add_videos_from_playlist(self, ctx, playlist_url):
         #extract_flat false so we can take videos out one by one
@@ -162,32 +184,33 @@ class Music_Commands(commands.Cog):
                 video_url = playlist_info_dict.get('entries')[index].get('webpage_url')
                 self.q.appendleft((video_url, ctx))
 
+    async def _play_or_add_url(self, ctx, url, add_to_bottom_of_q=True):
+        """basic if statement to stop dry code"""
+        #add video
+        if not add_to_bottom_of_q: #play
+            await self._add_video(ctx, url)
+        else: #playnext
+            await self._add_video(ctx, url, add_to_bottom_of_q=False)
+
+        #play video
+        if not self._is_playing_song:
+            await self._play_next_song(None)
+
+
 
     @commands.command(aliases=['p'])
-    async def play(self, ctx, *, query : str, is_playnext=None): 
+    async def play(self, ctx, *, query : str, add_to_bottom_of_q = False): 
         if not await self._in_voice_channel(ctx) or not await self._is_music_channel(ctx):
             return
         
         url = await self._search_youtube(query=query)
 
-        #start play proccess with url
-        if not is_playnext:
-            self.q.appendleft((url, ctx))
-        elif is_playnext:
-            self.q.append((url, ctx))
-
-        if not self._is_playing_song:
-            await self._play_next_song(None)
-        else:
-            if not is_playnext:
-                await ctx.send(f"**Added** :musical_note: `{url}` to queue")
-            elif is_playnext:
-                await ctx.send(f"**Added** :musical_note: `{url}` to the top of the queue")
+        await self._play_or_add_url(ctx, url, add_to_bottom_of_q)
             
 
     @commands.command(aliases=['playtop'])
     async def playnext(self, ctx, *, query : str): 
-        await self.play(ctx, query=query, is_playnext=True)
+        await self.play(ctx, query=query, add_to_bottom_of_q = True)
 
     @commands.command()
     async def playurl(self, ctx, url : str):
@@ -198,20 +221,14 @@ class Music_Commands(commands.Cog):
         if 'https://www.youtube.com/watch?v=' in url or 'https://youtu.be/' in url:
             #link might be valid
             try:
-                with YoutubeDL({'extract_flat': True}) as ydl: #download audio
-                    ydl.extract_info(url, False) #TODO sending to api is really slow replace with better trycatch
+                with YoutubeDL({'extract_flat': True}) as ydl: #download metadata
+                    ydl.extract_info(url, False)
             except DownloadError: #if video doesnt exist
                 await ctx.send("Invalid url")
                 return
 
-            self.q.appendleft((url, ctx))
-
-            if not self._is_playing_song:
-                await self._play_next_song(None)
-            else:
-                await ctx.send(f"**Added** :musical_note: `{url}` to queue")
-        else:
-            await ctx.send("Invalid url")
+            #video is valid, add to q
+            await self._play_or_add_url(ctx, url)
 
 
     @commands.command()
