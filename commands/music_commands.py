@@ -80,6 +80,20 @@ class Music_Commands(commands.Cog):
         return True
 
 
+    async def _search_youtube(self, *, query):
+        """searchs youtube with the query, and returns the url of the top video"""
+        query_string = urllib.parse.urlencode({
+            'search_query': query
+        })
+        
+        htm_content = urllib.request.urlopen(
+            'https://www.youtube.com/results?' + query_string
+        )
+
+        search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
+        return 'https://www.youtube.com/watch?v=' + search_results[0] #TODO rewrite to accpect playlists
+
+
     async def _play_next_song(self, error=None, ctx=None):
         """figures out what voice channel the user is in, and joins. Then it downloads and encodes and plays from the queue"""
         if os.path.isfile('song.opus'):
@@ -154,14 +168,7 @@ class Music_Commands(commands.Cog):
         if not await self._in_voice_channel(ctx) or not await self._is_music_channel(ctx):
             return
         
-        query_string = urllib.parse.urlencode({
-            'search_query': query
-        })
-        htm_content = urllib.request.urlopen(
-            'https://www.youtube.com/results?' + query_string
-        )
-        search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
-        url = 'https://www.youtube.com/watch?v=' + search_results[0]
+        url = await self._search_youtube(query=query)
 
         #start play proccess with url
         if not is_playnext:
