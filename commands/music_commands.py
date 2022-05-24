@@ -115,8 +115,9 @@ class Music_Commands(commands.Cog):
             #check if the link is a playlist
             if info_dict.get('_type', None) != None:
                 #call _add_videos_from_playlist function to deal with it
-                await self._add_videos_from_playlist(ctx, next_url)
                 await ctx.send(f'**Added Playlist** :musical_note: `{next_url}` to queue')
+                await self._add_videos_from_playlist(ctx, next_url)
+
                 next_url, ctx = self.q.pop() #since we added a butch of new urls and the current next_url is a playlist
                 info_dict = ydl.extract_info(next_url, False) #new video new metadata
 
@@ -140,7 +141,7 @@ class Music_Commands(commands.Cog):
 
             for index in range(len(playlist_info_dict.get('entries', None))):
                 if playlist_info_dict.get('entries')[index].get('uploader') == None:
-                    await ctx.send(f'track {index +1} is not public and was not added to the queue')
+                    await ctx.send(f'**track {index +1}** :cd: is not public and was not added to the queue')
                     continue
 
                 #add that to queue  
