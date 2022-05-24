@@ -190,7 +190,7 @@ class Music_Commands(commands.Cog):
         if 'https://www.youtube.com/watch?v=' in url or 'https://youtu.be/' in url:
             #link might be valid
             try:
-                with YoutubeDL(self._ydl_opts) as ydl: #download audio
+                with YoutubeDL({'extract_flat': True}) as ydl: #download audio
                     ydl.extract_info(url, False) #TODO sending to api is really slow replace with better trycatch
             except DownloadError: #if video doesnt exist
                 await ctx.send("Invalid url")
