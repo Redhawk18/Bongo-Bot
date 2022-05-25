@@ -129,7 +129,6 @@ class Music_Commands(commands.Cog):
             #check if the link is a playlist
             if info_dict.get('_type', None) != None:
                 #call _add_videos_from_playlist function to deal with it
-                await ctx.send(f'**Added Playlist** :musical_note: `{next_url}` to queue')
                 await self._add_videos_from_playlist(ctx, next_url)
 
                 next_url, ctx = self.q.pop() #since we added a butch of new urls and the current next_url is a playlist
@@ -163,13 +162,13 @@ class Music_Commands(commands.Cog):
 
         else: #playnext
             self.q.append((video_url, ctx))
-            await ctx.send(f"**Added** :musical_note: `{video_url}` to the top of the queue")
-
-            
+            await ctx.send(f"**Added** :musical_note: `{video_url}` to the top of the queue") 
 
 
     async def _add_videos_from_playlist(self, ctx, playlist_url):
         #extract_flat false so we can take videos out one by one
+        await ctx.send(f'**Added Playlist** :musical_note: `{playlist_url}` to queue')
+        
         with YoutubeDL({'extract_flat': False, 'match_filter': yt_dlp.utils.match_filter_func('availability != private'), 'ignore_no_formats_error': True}) as ydl:
             #get the info_dict with all playlist videos
             playlist_info_dict = ydl.extract_info(playlist_url, False)
@@ -184,6 +183,7 @@ class Music_Commands(commands.Cog):
                 video_url = playlist_info_dict.get('entries')[index].get('webpage_url')
                 self.q.appendleft((video_url, ctx))
 
+
     async def _play_or_add_url(self, ctx, url, add_to_bottom_of_q=True):
         """basic if statement to stop dry code"""
         #add video
@@ -195,7 +195,6 @@ class Music_Commands(commands.Cog):
         #play video
         if not self._is_playing_song:
             await self._play_next_song(None)
-
 
 
     @commands.command(aliases=['p'])
