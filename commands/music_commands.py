@@ -99,6 +99,9 @@ class Music_Commands(commands.Cog):
         if os.path.isfile('song.opus'):
             os.remove('song.opus')
 
+        #encase song fails to skip and then finishes
+        self.how_many_want_to_skip = 0
+
         if len(self.q) == 0: #base case
             self._is_playing_song = False
             print('No more songs in queue')
