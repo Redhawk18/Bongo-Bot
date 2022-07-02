@@ -370,5 +370,5 @@ class Music_Commands(commands.Cog):
 
 
 
-def setup(client):
-    client.add_cog(Music_Commands(client))
+async def setup(client):
+    await client.add_cog(Music_Commands(client))

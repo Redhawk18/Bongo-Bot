@@ -1,4 +1,4 @@
-discord.py[voice]==1.7.3
+#discord.py removed for the time since its in development
 python-dotenv
 ffmpeg-python
 yt-dlp
