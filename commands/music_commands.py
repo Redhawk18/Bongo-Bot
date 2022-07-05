@@ -216,8 +216,7 @@ class Music_Commands(commands.Cog):
     async def playnext(self, ctx, *, query : str): 
         await self.play(ctx, query=query, add_to_bottom_of_q = True)
 
-
-    @commands.command(aliases=['pu', 'purl'])
+    @commands.command()
     async def playurl(self, ctx, url : str):
         if not await self._in_voice_channel(ctx) or not await self._is_music_channel(ctx):
             return
