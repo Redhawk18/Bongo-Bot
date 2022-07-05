@@ -19,8 +19,8 @@ class Music_Commands(commands.Cog):
         self._is_playing_song = False
         self.loop_enabled = False
         self.how_many_want_to_skip = 0
-        #self.music_channel = None
-        self.music_channel = 'music-spam' #makes testing easier 
+        self.music_channel = None
+        #self.music_channel = 'music-spam' #makes testing easier 
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
                 'extract_flat': True, 
@@ -98,11 +98,9 @@ class Music_Commands(commands.Cog):
 
     async def _play_next_song(self, error=None, ctx=None):
         """figures out what voice channel the user is in, and joins. Then it downloads and encodes and plays from the queue"""
-        print('line 100')
         if os.path.isfile('song.opus'):
             os.remove('song.opus')
-        
-        print('line 104')
+
 
         #encase song fails to skip and then finishes
         self.how_many_want_to_skip = 0
@@ -113,7 +111,6 @@ class Music_Commands(commands.Cog):
             await self.disconnect(ctx)
             return
 
-        print('line 113')
         next_url, ctx = self.q.pop()
         if self.loop_enabled:
             self.q.append((next_url, ctx))
@@ -127,7 +124,6 @@ class Music_Commands(commands.Cog):
         except ClientException: #already connected
             voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
         
-        print('line 127')
 
         self._is_playing_song = True
         print(f'Playing next song: {next_url}')
@@ -135,14 +131,13 @@ class Music_Commands(commands.Cog):
         with YoutubeDL(self._ydl_opts) as ydl: #download audio
 
             info_dict = await asyncio.to_thread(ydl.extract_info, next_url, False)
-            print("137")
             #check if the link is a playlist
-            # if info_dict.get('_type', None) != None:
-            #     #call _add_videos_from_playlist function to deal with it
-            #     await self._add_videos_from_playlist(ctx, next_url)
+            if info_dict.get('_type', None) != None:
+                #call _add_videos_from_playlist function to deal with it
+                await self._add_videos_from_playlist(ctx, next_url)
 
-            #     next_url, ctx = self.q.pop() #since we added a butch of new urls and the current next_url is a playlist
-            #     info_dict = await asyncio.to_thread(None, ydl.extract_info, next_url, False) #new video new metadata
+                next_url, ctx = self.q.pop() #since we added a butch of new urls and the current next_url is a playlist
+                info_dict = await asyncio.to_thread(None, ydl.extract_info, next_url, False) #new video new metadata
 
             ydl.download([next_url])
 
