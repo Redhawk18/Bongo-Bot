@@ -1,5 +1,4 @@
 import asyncio
-import concurrent.futures
 from collections import deque
 from math import floor
 import os
