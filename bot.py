@@ -26,6 +26,9 @@ async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
 
+    #sync new commands
+    await bot.tree.sync()
+
 async def main():
     #load cogs
     for filename in os.listdir('./commands'):
@@ -34,6 +37,7 @@ async def main():
     
     #start bot
     await bot.start(TOKEN)
+    
     
 
 asyncio.run(main())
