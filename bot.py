@@ -4,6 +4,11 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
+#.env
+if not os.path.isfile('.env'):
+    print("you forgot the .env file")
+    exit()
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
