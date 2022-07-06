@@ -1,3 +1,4 @@
+import asyncio
 import os
 
 import discord
@@ -12,14 +13,31 @@ if not os.path.isfile('.env'):
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-client = commands.Bot(command_prefix='!', case_insensitive=True, intents=discord.Intents.all(), help_command=None)
+#intents
+bot_intents = discord.Intents.default()
+bot_intents.message_content = True
+bot_intents.voice_states = True
 
-@client.event
+bot = commands.Bot(command_prefix='!', intents=bot_intents)
+
+
+@bot.event
 async def on_ready():
-    print(f'{client.user} has connected to Discord!')
+    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
+    print('------')
 
+async def main():
+    #load cogs
     for filename in os.listdir('./commands'):
         if filename.endswith('.py'):
-            await client.load_extension(f'commands.{filename[:-3]}')
+            await bot.load_extension(f'commands.{filename[:-3]}')
+    
+    #start bot
+    await bot.start(TOKEN)
+    
 
-client.run(TOKEN)
+asyncio.run(main())
+
+
+
+
