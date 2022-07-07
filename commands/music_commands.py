@@ -45,6 +45,7 @@ class Music_Commands(commands.Cog):
         if voice.is_connected():
             self.q.clear() #wipe all future songs
             voice.stop()
+            self._is_playing_song = False
             await voice.disconnect()
             await ctx.send("**Disconnected** :guitar:")
 
