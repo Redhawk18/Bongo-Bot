@@ -18,8 +18,8 @@ class Music_Commands(commands.Cog):
         self._is_playing_song = False
         self.loop_enabled = False
         self.how_many_want_to_skip = 0
-        self.music_channel = None
-        #self.music_channel = 'music-spam' #makes testing easier 
+        #self.music_channel = None
+        self.music_channel = 'music-spam' #makes testing easier 
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
                 'extract_flat': True, 
@@ -44,7 +44,6 @@ class Music_Commands(commands.Cog):
 
         if voice.is_connected():
             self.q.clear() #wipe all future songs
-            self._is_playing_song = False
             voice.stop()
             await voice.disconnect()
             await ctx.send("**Disconnected** :guitar:")
@@ -100,7 +99,6 @@ class Music_Commands(commands.Cog):
         if os.path.isfile('song.opus'):
             os.remove('song.opus')
 
-
         #encase song fails to skip and then finishes
         self.how_many_want_to_skip = 0
 
@@ -110,6 +108,7 @@ class Music_Commands(commands.Cog):
             await self.disconnect(ctx)
             return
 
+
         next_url, ctx = self.q.pop()
         if self.loop_enabled:
             self.q.append((next_url, ctx))
@@ -117,36 +116,35 @@ class Music_Commands(commands.Cog):
         try: #connect to channel
             voice_channel = ctx.author.voice.channel # error is handled eariler
             await voice_channel.connect()
-            voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild) #ctx.guild.voice_client
+            voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
             await ctx.send(f'**Connected** :drum: to `{str(voice_channel)}`')
 
         except ClientException: #already connected
             voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
-        
 
         self._is_playing_song = True
         print(f'Playing next song: {next_url}')
 
         with YoutubeDL(self._ydl_opts) as ydl: #download audio
 
-            info_dict = await asyncio.to_thread(ydl.extract_info, next_url, False)
+            info_dict = ydl.extract_info(next_url, False)
+
             #check if the link is a playlist
             if info_dict.get('_type', None) != None:
                 #call _add_videos_from_playlist function to deal with it
                 await self._add_videos_from_playlist(ctx, next_url)
 
                 next_url, ctx = self.q.pop() #since we added a butch of new urls and the current next_url is a playlist
-                info_dict = await asyncio.to_thread(None, ydl.extract_info, next_url, False) #new video new metadata
+                info_dict = ydl.extract_info(next_url, False) #new video new metadata
 
             ydl.download([next_url])
+
 
         for file in os.listdir(os.getcwd()):
             if file.endswith('.opus'):
                 os.rename(file, 'song.opus')
 
-        print('before')
-        voice.play(discord.FFmpegOpusAudio("song.opus", bitrate=192), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e, ctx), self.client.loop))
-
+        voice.play(discord.FFmpegOpusAudio('song.opus', bitrate=192), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e, ctx), self.client.loop))
         await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` by `{info_dict.get('channel', None)}` - Now!")
 
 
@@ -216,7 +214,8 @@ class Music_Commands(commands.Cog):
     async def playnext(self, ctx, *, query : str): 
         await self.play(ctx, query=query, add_to_bottom_of_q = True)
 
-    @commands.command()
+
+    @commands.command(aliases=['pu', 'purl'])
     async def playurl(self, ctx, url : str):
         if not await self._in_voice_channel(ctx) or not await self._is_music_channel(ctx):
             return
@@ -273,7 +272,6 @@ class Music_Commands(commands.Cog):
             self.how_many_want_to_skip = 0 #reset counter
             voice.stop()
             await ctx.send("**Skipped** :fast_forward:")
-            asyncio.run_coroutine_threadsafe(self._play_next_song(ctx), self.client.loop) #file io is blocking :(
 
         else:
             await ctx.send("Nothing is playing")
@@ -372,5 +370,5 @@ class Music_Commands(commands.Cog):
 
 
 
-async def setup(client):
-    await client.add_cog(Music_Commands(client))
+def setup(client):
+    client.add_cog(Music_Commands(client))

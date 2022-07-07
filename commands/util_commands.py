@@ -56,6 +56,7 @@ class Util_Commands(commands.Cog):
 
             `playurl` - play a url directly to a video or playlist
                 useage - `playurl https://www.youtube.com/watch?v=zW1v0QBqTOs&list=PLD7NSS9oUY0T30WaolXWoFxIHB9Z4b3Ix&index=1`
+                aliases - `purl, pu`
 
             `pause` - pauses the current playing audio
 
@@ -145,5 +146,5 @@ class Util_Commands(commands.Cog):
 
 
 
-async def setup(client):
-    await client.add_cog(Util_Commands(client))
+def setup(client):
+    client.add_cog(Util_Commands(client))

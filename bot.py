@@ -1,3 +1,4 @@
+
 import os
 
 import discord
@@ -13,8 +14,8 @@ client = commands.Bot(command_prefix='!', case_insensitive=True, intents=discord
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
 
-    for filename in os.listdir('./commands'):
-        if filename.endswith('.py'):
-            await client.load_extension(f'commands.{filename[:-3]}')
+for filename in os.listdir('./commands'):
+    if filename.endswith('.py'):
+        client.load_extension(f'commands.{filename[:-3]}')
 
 client.run(TOKEN)
