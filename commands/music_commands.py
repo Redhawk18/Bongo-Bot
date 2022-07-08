@@ -153,7 +153,7 @@ class Music_Commands(commands.Cog):
     async def _add_video(self, ctx, video_url, add_to_bottom_of_q=True):
         #figure out if the video is a playlist
         with YoutubeDL(self._ydl_opts) as ydl: #download audio
-            info_dict = ydl.extract_info(video_url, False)
+            info_dict = await asyncio.to_thread(ydl.extract_info, video_url, False)
 
             #check if the link is a playlist
             if info_dict.get('_type', None) != None: #is playlist
@@ -176,7 +176,7 @@ class Music_Commands(commands.Cog):
         
         with YoutubeDL({'extract_flat': False, 'match_filter': yt_dlp.utils.match_filter_func('availability != private'), 'ignore_no_formats_error': True}) as ydl:
             #get the info_dict with all playlist videos
-            playlist_info_dict = ydl.extract_info(playlist_url, False)
+            playlist_info_dict = await asyncio.to_thread(ydl.extract_info, playlist_url, False)
             video_url = ""
 
             for index in range(len(playlist_info_dict.get('entries', None))):
