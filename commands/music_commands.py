@@ -150,6 +150,16 @@ class Music_Commands(commands.Cog):
         await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` by `{info_dict.get('channel', None)}` - Now!")
 
 
+    async def _is_video_too_long(self, info_dict):
+        #info_dict stores duration in seconds
+        print(info_dict.get('duration', None))
+        if info_dict.get('duration', None) > 32400:
+            return True
+
+        return False
+
+
+
     async def _add_video(self, ctx, video_url, add_to_bottom_of_q=True):
         #figure out if the video is a playlist
         with YoutubeDL(self._ydl_opts) as ydl: #download audio
@@ -159,6 +169,11 @@ class Music_Commands(commands.Cog):
             if info_dict.get('_type', None) != None: #is playlist
                 await self._add_videos_from_playlist(ctx, video_url)
                 return
+        
+            if await self._is_video_too_long(info_dict):
+                await ctx.send('video too long! >:(')
+                return
+                
         
         #else just add the video into the queue
         if add_to_bottom_of_q: #play or playurl
@@ -184,6 +199,7 @@ class Music_Commands(commands.Cog):
                     await ctx.send(f'**track {index +1}** :cd: is not public and was not added to the queue')
                     continue
 
+                #TODO we dont check playlist video length, which IS A PROBLEM
                 #add that to queue  
                 video_url = playlist_info_dict.get('entries')[index].get('webpage_url')
                 self.q.appendleft((video_url, ctx))
