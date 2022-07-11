@@ -18,8 +18,8 @@ class Music_Commands(commands.Cog):
         self._is_playing_song = False
         self.loop_enabled = False
         self.how_many_want_to_skip = 0
-        self.music_channel = None
-        #self.music_channel = 'music-spam' #makes testing easier 
+        #self.music_channel = None
+        self.music_channel = 'music-spam' #makes testing easier 
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
                 'extract_flat': True, 
@@ -338,12 +338,8 @@ class Music_Commands(commands.Cog):
             current_url, unused_ctx = tempq.pop()
             with YoutubeDL(self._ydl_opts) as ydl: #download metadata
                 info_dict = await asyncio.to_thread(ydl.extract_info, current_url, False)
-                
-            minutes, seconds = divmod(info_dict.get('duration', None), 60)
-            if seconds < 10: #time like 2:0 -> 2:00
-                seconds = "0" + str(seconds)
 
-            output += (f"{index +1}. `{info_dict.get('title', None)}` - `{minutes}:{seconds}`\n")
+            output += (f"{index +1}. `{info_dict.get('title', None)}` - `{info_dict.get('duration_string', None)}`\n")
             index += 1
 
         embed = discord.Embed(
