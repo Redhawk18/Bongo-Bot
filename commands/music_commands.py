@@ -351,10 +351,10 @@ class Music_Commands(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    @commands.command()
-    async def queueclear(self, ctx):
+    @commands.command(name='queue clear', description='Clears everything in the queue')
+    async def queueclear(self, interaction: discord.Interaction):
         self.q.clear()
-        await ctx.send("**Cleared queue** :books:")
+        await interaction.response.send_message("**Cleared queue** :books:")
 
 
     @commands.command()
