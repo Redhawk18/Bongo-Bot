@@ -40,7 +40,7 @@ class Music_Commands(commands.Cog):
 
     @commands.command(aliases=['fuckoff', 'd', 'dc'])
     async def disconnect(self, ctx):
-        voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+        voice = ctx.guild.voice_client
 
         if voice.is_connected():
             self.q.clear() #wipe all future songs
@@ -117,11 +117,11 @@ class Music_Commands(commands.Cog):
         try: #connect to channel
             voice_channel = ctx.author.voice.channel # error is handled eariler
             await voice_channel.connect()
-            voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild) #ctx.guild.voice_client
+            voice = ctx.guild.voice_client #ctx.guild.voice_client
             await ctx.send(f'**Connected** :drum: to `{str(voice_channel)}`')
 
         except ClientException: #already connected
-            voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+            voice = ctx.guild.voice_client
         
 
         self._is_playing_song = True
@@ -256,7 +256,7 @@ class Music_Commands(commands.Cog):
     async def pause(self, ctx):
         if not await self._in_voice_channel(ctx):
             return
-        voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+        voice = ctx.guild.voice_client
 
         if voice.is_playing():
             voice.pause()
@@ -270,7 +270,7 @@ class Music_Commands(commands.Cog):
     async def resume(self, ctx):
         if not await self._in_voice_channel(ctx):
             return
-        voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+        voice = ctx.guild.voice_client
 
         if voice.is_paused():
             voice.resume()
@@ -284,7 +284,7 @@ class Music_Commands(commands.Cog):
     async def forceskip(self, ctx):
         if not await self._in_voice_channel(ctx):
             return
-        voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+        voice = ctx.guild.voice_client
         
         if voice.is_playing():
             self.how_many_want_to_skip = 0 #reset counter
@@ -300,7 +300,7 @@ class Music_Commands(commands.Cog):
     async def skip(self, ctx):
         if not await self._in_voice_channel(ctx):
             return
-        voice = discord.utils.get(self.client.voice_clients, guild=ctx.guild)
+        voice = ctx.guild.voice_client
 
         if voice.is_playing():
             #increase the how_many_want_to_skip
