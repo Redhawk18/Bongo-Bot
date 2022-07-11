@@ -357,10 +357,10 @@ class Music_Commands(commands.Cog):
         await interaction.response.send_message("**Cleared queue** :books:")
 
 
-    @commands.command()
-    async def queueremove(self, ctx, queue_position : int):
+    @app_commands.command(name='queue remove', description='removes a song from the queue based on its track number')
+    async def queueremove(self, interaction: discord.Integration, queue_position : int):
         if queue_position > len(self.q) or queue_position < 0:
-            await ctx.send("Input invalid")
+            await interaction.response.send_message("Input invalid")
             return
 
         #because of how the remove function works we have to make a copy
@@ -371,7 +371,7 @@ class Music_Commands(commands.Cog):
 
         #we should have the url of the track we want to remove
         self.q.remove(tempq.pop())
-        await ctx.send("**Removed from queue** :books:")
+        await interaction.response.send_message("**Removed from queue** :books:")
 
 
     @app_commands.command(name='loop', description='Loops the current song until disabled')
