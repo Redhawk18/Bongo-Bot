@@ -17,7 +17,7 @@ class Useless_Commands(commands.Cog):
         print("useless commands lister online")
 
 
-    @app_commands.command()
+    @app_commands.command(name='frank', description='To be Frank')
     async def frank(self, interaction: discord.Interaction):
         await interaction.response.send_message('https://tenor.com/view/gezer123123123-gif-18858197')
 

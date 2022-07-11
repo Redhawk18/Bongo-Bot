@@ -100,12 +100,12 @@ class Util_Commands(commands.Cog):
             return
 
 
-    @app_commands.command()
+    @app_commands.command(name='ping', description='Pong!')
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message(f'**Pong!** :ping_pong: {ceil(self.client.latency*1000)}ms')
 
 
-    @app_commands.command()
+    @app_commands.command(name='roll', description='Rolls a n-sided die')
     async def roll(self, interaction: discord.Interaction, max : int):
         if max < 1:
             await interaction.response.send_message("Input invalid")
@@ -115,7 +115,7 @@ class Util_Commands(commands.Cog):
         await interaction.response.send_message(f'**Rolled** :game_die: {random.randint(1, max)} of a {max}-sided die')
 
 
-    @app_commands.command()
+    @app_commands.command(name='multipleroll', description='Rolls a n-sided die x number of times')
     async def multipleroll(self, interaction: discord.Interaction, max : int, number_of_rolls : int):
         if number_of_rolls < 1 or max < 1 or number_of_rolls > 192:
             await interaction.response.send_message("Input invalid")
