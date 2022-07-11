@@ -5,6 +5,7 @@ import os
 import urllib.parse, urllib.request, re
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands.errors import ClientException, CommandInvokeError
 import yt_dlp
@@ -373,15 +374,17 @@ class Music_Commands(commands.Cog):
         await ctx.send("**Removed from queue** :books:")
 
 
-    @commands.command()
-    async def loop(self, ctx):
+    @app_commands.command(name='loop', description='Loops the current song until disabled')
+    async def loop(self, interaction: discord.Interaction): #TODO refactor this to put it to disable removing tracks and add it once
         if self.loop_enabled: #disable loop
             self.loop_enabled = False
-            await ctx.send("**Loop Disabled** :repeat:")
+            await interaction.response.send_message("**Loop Disabled** :repeat:")
+            #remove song from queue
 
         else: #enable loop
             self.loop_enabled = True
-            await ctx.send("**Loop Enabled** :repeat:")
+            #add current song back into q and disable removing songs from q
+            await interaction.response.send_message("**Loop Enabled** :repeat:")
 
 
 
