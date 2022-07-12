@@ -145,7 +145,6 @@ class Music_Commands(commands.Cog):
             if file.endswith('.opus'):
                 os.rename(file, 'song.opus')
 
-        print('before')
         voice.play(discord.FFmpegOpusAudio("song.opus", bitrate=192), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e, ctx), self.client.loop))
 
         await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` by `{info_dict.get('channel', None)}` - Now!")
@@ -351,13 +350,13 @@ class Music_Commands(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    @commands.command(name='queue clear', description='Clears everything in the queue')
+    @commands.command(name='queue-clear', description='Clears everything in the queue')
     async def queueclear(self, interaction: discord.Interaction):
         self.q.clear()
         await interaction.response.send_message("**Cleared queue** :books:")
 
 
-    @app_commands.command(name='queue remove', description='removes a song from the queue based on its track number')
+    @app_commands.command(name='queue-remove', description='removes a song from the queue based on its track number')
     async def queueremove(self, interaction: discord.Integration, queue_position : int):
         if queue_position > len(self.q) or queue_position < 0:
             await interaction.response.send_message("Input invalid")
