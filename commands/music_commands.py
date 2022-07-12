@@ -54,11 +54,11 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Already disconnected")
 
 
-    @commands.command()
-    async def musicchannel(self, ctx):
+    @app_commands.command()
+    async def musicchannel(self, interaction: discord.Interaction): #TODO make a json or something to store settings
         #set authors text channel
-        self.music_channel = ctx.channel.name
-        await ctx.send(f'{str(self.music_channel)} will be the only text channel the bot will take and output music commands from')
+        self.music_channel = interaction.channel.name
+        await interaction.response.send_message(f'{str(self.music_channel)} will be the only text channel the bot will take and output music commands from')
 
 
     async def _is_music_channel(self, ctx):
