@@ -39,19 +39,19 @@ class Music_Commands(commands.Cog):
         print("music commands lister online")
 
 
-    @commands.command(aliases=['fuckoff', 'd', 'dc'])
-    async def disconnect(self, ctx):
-        voice = ctx.guild.voice_client
+    @app_commands.command(name='disconnect', description='disconnect from voice chat')
+    async def disconnect(self, interaction: discord.Interaction):
+        voice = interaction.guild.voice_client
 
         if voice.is_connected():
             self.q.clear() #wipe all future songs
             self._is_playing_song = False
             voice.stop()
             await voice.disconnect()
-            await ctx.send("**Disconnected** :guitar:")
+            await interaction.response.send_message("**Disconnected** :guitar:")
 
         else:
-            await ctx.send("Already disconnected")
+            await interaction.response.send_message("Already disconnected")
 
 
     @commands.command()
@@ -252,51 +252,51 @@ class Music_Commands(commands.Cog):
             await self._play_or_add_url(ctx, url)
 
 
-    @commands.command()
-    async def pause(self, ctx):
-        if not await self._in_voice_channel(ctx):
+    @app_commands.command(name="pause", description="Pauses track")
+    async def pause(self, interaction: discord.Interaction):
+        if not await self._in_voice_channel(interaction):
             return
-        voice = ctx.guild.voice_client
+        voice = interaction.guild.voice_client
 
         if voice.is_playing():
             voice.pause()
-            await ctx.send("**Paused** :pause_button:")
+            await interaction.response.send_message("**Paused** :pause_button:")
 
         else:
-            await ctx.send("Nothing is playing")
+            await interaction.response.send_message("Nothing is playing")
 
 
-    @commands.command()
-    async def resume(self, ctx):
-        if not await self._in_voice_channel(ctx):
+    @app_commands.command(name="resume", description="Resumes track")
+    async def resume(self, interaction: discord.Interaction):
+        if not await self._in_voice_channel(interaction):
             return
-        voice = ctx.guild.voice_client
+        voice = interaction.guild.voice_client
 
         if voice.is_paused():
             voice.resume()
-            await ctx.send("**Resumed** :arrow_forward:")
+            await interaction.response.send_message("**Resumed** :arrow_forward:")
 
         else:
-            await ctx.send("Nothing is paused")
+            await interaction.response.send_message("Nothing is paused")
 
 
-    @commands.command(aliases=['fs', 'fskip'])
-    async def forceskip(self, ctx):
-        if not await self._in_voice_channel(ctx):
+    @app_commands.command(name="force-skip", description="Skips the track")
+    async def forceskip(self, interaction: discord.Interaction):
+        if not await self._in_voice_channel(interaction):
             return
-        voice = ctx.guild.voice_client
+        voice = interaction.guild.voice_client
         
         if voice.is_playing():
             self.how_many_want_to_skip = 0 #reset counter
             voice.stop()
-            await ctx.send("**Skipped** :fast_forward:")
+            await interaction.response.send_message("**Skipped** :fast_forward:")
             asyncio.run_coroutine_threadsafe(self._play_next_song(ctx), self.client.loop) #file io is blocking :(
 
         else:
-            await ctx.send("Nothing is playing")
+            await interaction.response.send_message("Nothing is playing")
 
 
-    @commands.command(aliases=['s'])
+    @app_commands.command(name='skip', description='Calls a vote to skip the track')
     async def skip(self, ctx):
         if not await self._in_voice_channel(ctx):
             return
