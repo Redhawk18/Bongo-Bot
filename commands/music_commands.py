@@ -344,13 +344,13 @@ class Music_Commands(commands.Cog):
             return
 
 
-    @commands.command(aliases=['q'])
-    async def queue(self, ctx):
+    @app_commands.command(name="queue", description="Lists the queue")
+    async def queue(self, interaction: discord.Interaction):
         tempq = self.q.copy()
 
         #incase the queue was empty from the start
         if len(tempq) == 0:
-            await ctx.send("The queue is empty")
+            await interaction.response.send_message("The queue is empty")
             return
 
         #store every element in a string
@@ -370,7 +370,7 @@ class Music_Commands(commands.Cog):
             description = output,
             color = discord.Color.red(),
         )
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
 
     @commands.command(name='queue-clear', description='Clears everything in the queue')
