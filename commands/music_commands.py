@@ -57,32 +57,36 @@ class Music_Commands(commands.Cog):
     @app_commands.command()
     async def musicchannel(self, interaction: discord.Interaction): #TODO make a json or something to store settings
         #set authors text channel
-        self.music_channel = interaction.channel.name
+        self.music_channel = interaction.channel
         await interaction.response.send_message(f'{str(self.music_channel)} will be the only text channel the bot will take and output music commands from')
 
 
-    async def _is_music_channel(self, ctx):
+    async def _is_music_channel(self, interaction: discord.Interaction):
         """compares authors text channel to the set music channel"""
-        if ctx.channel.name == self.music_channel:
+        if interaction.channel == self.music_channel:
             return True
 
-        await ctx.send("Wrong channel for music commands")
+        await interaction.response.send_message("Wrong channel for music commands")
         return False
 
 
-    async def _in_voice_channel(self, ctx):
-        """Users have to be in a voice channel"""
+    async def _in_voice_channel(self, interaction: discord.Interaction):
+        """Users have to be in a voice channel""" #TODO fix
+        
         try: #checks if the author is in a voice channel
-            ctx.author.voice.channel
+            #interaction.message.author.voice
+
+            interaction.user.voice
 
         except AttributeError: # user isnt in any voice channel
-            await ctx.send("You are not in a voice channel")
+            await interaction.response.send_message("You are not in a voice channel")
+            print("false")
             return False
 
         return True
 
 
-    async def _search_youtube(self, *, query):
+    async def _search_youtube(self, *, query): #TODO rewrite to give better results
         """searchs youtube with the query, and returns the url of the top video"""
         query_string = urllib.parse.urlencode({
             'search_query': query
@@ -96,7 +100,7 @@ class Music_Commands(commands.Cog):
         return 'https://www.youtube.com/watch?v=' + search_results[0] #TODO rewrite to accpect playlists
 
 
-    async def _play_next_song(self, error=None, ctx=None):
+    async def _play_next_song(self, error=None):
         """figures out what voice channel the user is in, and joins. Then it downloads and encodes and plays from the queue"""
         if os.path.isfile('song.opus'):
             os.remove('song.opus')
@@ -108,21 +112,29 @@ class Music_Commands(commands.Cog):
         if len(self.q) == 0: #base case
             self._is_playing_song = False
             print('No more songs in queue')
-            await self.disconnect(ctx)
+            await self.disconnect(interaction)
             return
 
-        next_url, ctx = self.q.pop()
+        next_url, interaction = self.q.pop()
         if self.loop_enabled:
-            self.q.append((next_url, ctx))
+            self.q.append((next_url, interaction))
+
+        print("before connect")
     
-        try: #connect to channel
-            voice_channel = ctx.author.voice.channel # error is handled eariler
+        try: #connect to channel #TODO i think all of this is unneeded
+            print("124")
+            voice_channel = interaction.user.voice.channel # error is handled eariler
+            print("126")
             await voice_channel.connect()
-            voice = ctx.guild.voice_client #ctx.guild.voice_client
-            await ctx.send(f'**Connected** :drum: to `{str(voice_channel)}`')
+            print("128")
+            voice = interaction.guild.voice_client
+            print("130")
+            await interaction.followup.send(f'**Connected** :drum: to `{str(voice_channel)}`')
 
         except ClientException: #already connected
-            voice = ctx.guild.voice_client
+            voice = interaction.guild.voice_client
+
+        print("after connect")
         
 
         self._is_playing_song = True
@@ -134,9 +146,9 @@ class Music_Commands(commands.Cog):
             #check if the link is a playlist
             if info_dict.get('_type', None) != None:
                 #call _add_videos_from_playlist function to deal with it
-                await self._add_videos_from_playlist(ctx, next_url)
+                await self._add_videos_from_playlist(interaction, next_url)
 
-                next_url, ctx = self.q.pop() #since we added a butch of new urls and the current next_url is a playlist
+                next_url, interaction = self.q.pop() #since we added a butch of new urls and the current next_url is a playlist
                 info_dict = await asyncio.to_thread(None, ydl.extract_info, next_url, False) #new video new metadata
 
             ydl.download([next_url])
@@ -145,9 +157,9 @@ class Music_Commands(commands.Cog):
             if file.endswith('.opus'):
                 os.rename(file, 'song.opus')
 
-        voice.play(discord.FFmpegOpusAudio("song.opus", bitrate=192), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e, ctx), self.client.loop))
+        voice.play(discord.FFmpegOpusAudio("song.opus", bitrate=192), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e), self.client.loop))
 
-        await ctx.send(f"**Playing** :notes: `{info_dict.get('title', None)}` by `{info_dict.get('channel', None)}` - Now!")
+        await interaction.followup.send(f"**Playing** :notes: `{info_dict.get('title', None)}` by `{info_dict.get('channel', None)}` - Now!")
 
 
     async def _is_video_too_long(self, info_dict):
@@ -159,83 +171,94 @@ class Music_Commands(commands.Cog):
         return False
 
 
-
-    async def _add_video(self, ctx, video_url, add_to_bottom_of_q=True):
+    async def _add_video(self, interaction, video_url, add_to_bottom_of_q=True):
         #figure out if the video is a playlist
         with YoutubeDL(self._ydl_opts) as ydl: #download audio
             info_dict = await asyncio.to_thread(ydl.extract_info, video_url, False)
 
             #check if the link is a playlist
             if info_dict.get('_type', None) != None: #is playlist
-                await self._add_videos_from_playlist(ctx, video_url)
+                await self._add_videos_from_playlist(interaction, video_url)
                 return
         
             if await self._is_video_too_long(info_dict):
-                await ctx.send('video too long! >:(')
+                await interaction.followup.send('video too long! >:(')
                 return
                 
         
         #else just add the video into the queue
         if add_to_bottom_of_q: #play or playurl
-            self.q.appendleft((video_url, ctx))
-            await ctx.send(f"**Added** :musical_note: `{video_url}` to queue")
+            self.q.appendleft((video_url, interaction))
+            await interaction.response.send_message(f"**Added** :musical_note: `{video_url}` to queue")
 
         else: #playnext
-            self.q.append((video_url, ctx))
-            await ctx.send(f"**Added** :musical_note: `{video_url}` to the top of the queue") 
+            self.q.append((video_url, interaction))
+            await interaction.response.send_message(f"**Added** :musical_note: `{video_url}` to the top of the queue") 
 
 
-    async def _add_videos_from_playlist(self, ctx, playlist_url):
-        #extract_flat false so we can take videos out one by one
-        await ctx.send(f'**Added Playlist** :musical_note: `{playlist_url}` to queue')
+    # async def _add_videos_from_playlist(self, ctx, playlist_url):
+    #     #extract_flat false so we can take videos out one by one
+    #     await ctx.send(f'**Added Playlist** :musical_note: `{playlist_url}` to queue')
         
-        with YoutubeDL({'extract_flat': False, 'match_filter': yt_dlp.utils.match_filter_func('availability != private'), 'ignore_no_formats_error': True}) as ydl:
-            #get the info_dict with all playlist videos
-            playlist_info_dict = await asyncio.to_thread(ydl.extract_info, playlist_url, False)
-            video_url = ""
+    #     with YoutubeDL({'extract_flat': False, 'match_filter': yt_dlp.utils.match_filter_func('availability != private'), 'ignore_no_formats_error': True}) as ydl:
+    #         #get the info_dict with all playlist videos
+    #         playlist_info_dict = await asyncio.to_thread(ydl.extract_info, playlist_url, False)
+    #         video_url = ""
 
-            for index in range(len(playlist_info_dict.get('entries', None))):
-                if playlist_info_dict.get('entries')[index].get('uploader') == None:
-                    await ctx.send(f'**track {index +1}** :cd: is not public and was not added to the queue')
-                    continue
+    #         for index in range(len(playlist_info_dict.get('entries', None))):
+    #             if playlist_info_dict.get('entries')[index].get('uploader') == None:
+    #                 await ctx.send(f'**track {index +1}** :cd: is not public and was not added to the queue')
+    #                 continue
 
-                #TODO we dont check playlist video length, which IS A PROBLEM
-                #add that to queue  
-                video_url = playlist_info_dict.get('entries')[index].get('webpage_url')
-                self.q.appendleft((video_url, ctx))
+    #             #TODO we dont check playlist video length, which IS A PROBLEM
+    #             #add that to queue  
+    #             video_url = playlist_info_dict.get('entries')[index].get('webpage_url')
+    #             self.q.appendleft((video_url, ctx))
 
 
-    async def _play_or_add_url(self, ctx, url, add_to_bottom_of_q=True):
+    async def _play_or_add_url(self, interaction, url, add_to_bottom_of_q=True):
         """basic if statement to stop dry code"""
+        print("line 217")
         #add video
         if not add_to_bottom_of_q: #play
-            await self._add_video(ctx, url)
+            await self._add_video(interaction, url)
+
         else: #playnext
-            await self._add_video(ctx, url, add_to_bottom_of_q=False)
+            await self._add_video(interaction, url, add_to_bottom_of_q=False)
 
         #play video
         if not self._is_playing_song:
             await self._play_next_song(None)
 
 
-    @commands.command(aliases=['p'])
-    async def play(self, ctx, *, query : str, add_to_bottom_of_q = False): 
-        if not await self._in_voice_channel(ctx) or not await self._is_music_channel(ctx):
+    @app_commands.command(name="play", description="plays a query from Youtube")
+    async def play(self, interaction: discord.Interaction, *, query : str, add_to_bottom_of_q: bool = False): 
+        print("line 231")
+        if not await self._in_voice_channel(interaction):
             return
         
-        url = await self._search_youtube(query=query)
+        print("235")
 
-        await self._play_or_add_url(ctx, url, add_to_bottom_of_q)
+        print(self.music_channel)
+        if not await self._is_music_channel(interaction):
+            return
+        
+        print("240")
+
+        url = await self._search_youtube(query=query)
+        print("line 243")
+
+        await self._play_or_add_url(interaction, url, add_to_bottom_of_q)
             
 
-    @commands.command(aliases=['playtop'])
-    async def playnext(self, ctx, *, query : str): 
-        await self.play(ctx, query=query, add_to_bottom_of_q = True)
+    @app_commands.command(name="play-top", description="plays a query from Youtube next")
+    async def playtop(self, interaction: discord.Interaction, *, query : str): #TODO unfuse this from play
+        await self.play(interaction, query=query, add_to_bottom_of_q = True)
 
 
-    @commands.command(aliases=['pu', 'purl'])
-    async def playurl(self, ctx, url : str):
-        if not await self._in_voice_channel(ctx) or not await self._is_music_channel(ctx):
+    @app_commands.command(name="play-url", description="plays a Youtube url")
+    async def playurl(self, interaction: discord.Interaction, url : str):
+        if not await self._in_voice_channel(interaction) or not await self._is_music_channel(interaction):
             return
 
         #this function HAS TO have a valid url
@@ -245,11 +268,11 @@ class Music_Commands(commands.Cog):
                 with YoutubeDL({'extract_flat': True}) as ydl: #download metadata
                     ydl.extract_info(url, False)
             except DownloadError: #if video doesnt exist
-                await ctx.send("Invalid url")
+                await interaction.response.send_message("Invalid url")
                 return
 
             #video is valid, add to q
-            await self._play_or_add_url(ctx, url)
+            await self._play_or_add_url(interaction, url)
 
 
     @app_commands.command(name="pause", description="Pauses track")
@@ -290,34 +313,34 @@ class Music_Commands(commands.Cog):
             self.how_many_want_to_skip = 0 #reset counter
             voice.stop()
             await interaction.response.send_message("**Skipped** :fast_forward:")
-            asyncio.run_coroutine_threadsafe(self._play_next_song(ctx), self.client.loop) #file io is blocking :(
+            asyncio.run_coroutine_threadsafe(self._play_next_song(interaction), self.client.loop) #file io is blocking :(
 
         else:
             await interaction.response.send_message("Nothing is playing")
 
 
     @app_commands.command(name='skip', description='Calls a vote to skip the track')
-    async def skip(self, ctx):
-        if not await self._in_voice_channel(ctx):
+    async def skip(self, interaction: discord.Interaction):
+        if not await self._in_voice_channel(interaction):
             return
-        voice = ctx.guild.voice_client
+        voice = interaction.guild.voice_client
 
         if voice.is_playing():
             #increase the how_many_want_to_skip
             self.how_many_want_to_skip += 1
 
             #check if its passed threshold
-            voice_channel = ctx.author.voice.channel
+            voice_channel = interaction.message.author.voice.channel
             threshold = floor((len(voice_channel.members)-1)/2) #-1 for the bot
 
             if self.how_many_want_to_skip >= threshold: #enough people
-                await self.forceskip(ctx)
+                await self.forceskip(interaction)
             
             else: #not enough people
-                await ctx.send(f'**Skipping? ({self.how_many_want_to_skip}/{threshold} people) or use `forceskip`**')
+                await interaction.response.send_message(f'**Skipping? ({self.how_many_want_to_skip}/{threshold} people) or use `forceskip`**')
 
         else:
-            await ctx.send("Nothing is playing")
+            await interaction.response.send_message("Nothing is playing")
             return
 
 
