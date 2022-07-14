@@ -115,7 +115,7 @@ class Util_Commands(commands.Cog):
         await interaction.response.send_message(f'**Rolled** :game_die: {random.randint(1, max)} of a {max}-sided die')
 
 
-    @app_commands.command(name='multipleroll', description='Rolls a n-sided die x number of times')
+    @app_commands.command(name='multiple-roll', description='Rolls a n-sided die x number of times')
     async def multipleroll(self, interaction: discord.Interaction, max : int, number_of_rolls : int):
         if number_of_rolls < 1 or max < 1 or number_of_rolls > 192:
             await interaction.response.send_message("Input invalid")

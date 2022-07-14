@@ -129,7 +129,7 @@ class Music_Commands(commands.Cog):
             print("128")
             voice = interaction.guild.voice_client
             print("130")
-            await interaction.followup.send(f'**Connected** :drum: to `{str(voice_channel)}`')
+            #await interaction.followup.send(f'**Connected** :drum: to `{str(voice_channel)}`')
 
         except ClientException: #already connected
             voice = interaction.guild.voice_client
@@ -381,13 +381,13 @@ class Music_Commands(commands.Cog):
         await interaction.followup.send(embed=embed)
 
 
-    @commands.command(name='queue-clear', description='Clears everything in the queue')
+    @app_commands.command(name='queue-clear', description='Clears everything in the queue')
     async def queueclear(self, interaction: discord.Interaction):
         self.q.clear()
         await interaction.response.send_message("**Cleared queue** :books:")
 
 
-    @app_commands.command(name='queue-remove', description='removes a song from the queue based on its track number')
+    @app_commands.command(name='queue-remove', description='Removes a song from the queue based on its track number')
     async def queueremove(self, interaction: discord.Integration, queue_position : int):
         if queue_position > len(self.q) or queue_position < 0:
             await interaction.response.send_message("Input invalid")
