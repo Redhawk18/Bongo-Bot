@@ -57,13 +57,13 @@ class Music_Commands(commands.Cog):
     @app_commands.command()
     async def musicchannel(self, interaction: discord.Interaction): #TODO make a json or something to store settings
         #set authors text channel
-        self.music_channel = interaction.channel
+        self.music_channel = interaction.channel.name
         await interaction.response.send_message(f'{str(self.music_channel)} will be the only text channel the bot will take and output music commands from')
 
 
     async def _is_music_channel(self, interaction: discord.Interaction):
         """compares authors text channel to the set music channel"""
-        if interaction.channel == self.music_channel:
+        if interaction.channel.name == self.music_channel:
             return True
 
         await interaction.response.send_message("Wrong channel for music commands")
