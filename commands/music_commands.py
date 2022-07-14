@@ -357,6 +357,9 @@ class Music_Commands(commands.Cog):
         if len(tempq) == 0:
             await interaction.response.send_message("The queue is empty")
             return
+        
+        else:
+            await interaction.response.send_message("Queue is loading...")
 
         #store every element in a string
         index = 0
@@ -375,7 +378,7 @@ class Music_Commands(commands.Cog):
             description = output,
             color = discord.Color.red(),
         )
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
 
     @commands.command(name='queue-clear', description='Clears everything in the queue')
