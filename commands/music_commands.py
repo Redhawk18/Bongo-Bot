@@ -171,54 +171,59 @@ class Music_Commands(commands.Cog):
         return False
 
 
-    async def _add_video(self, interaction, video_url, add_to_bottom_of_q=True):
-        #figure out if the video is a playlist
-        with YoutubeDL(self._ydl_opts) as ydl: #download audio
+    async def _add_video(self, interaction, video_url, is_playlist=False, add_to_bottom_of_q=True):
+        #sees if the video is public
+        #with YoutubeDL({'match_filter': yt_dlp.utils.match_filter_func('availability != private'), 'ignore_no_formats_error': True}) as ydl:
+        with YoutubeDL(self._ydl_opts) as ydl:
+            #make sure video is valid
             info_dict = await asyncio.to_thread(ydl.extract_info, video_url, False)
+            print("info_dict got")
 
-            #check if the link is a playlist
+            #if video is a playlist
             if info_dict.get('_type', None) != None: #is playlist
                 await self._add_videos_from_playlist(interaction, video_url)
                 return
         
+            #if video is too long
             if await self._is_video_too_long(info_dict):
                 await interaction.followup.send('video too long! >:(')
                 return
                 
         
-        #else just add the video into the queue
+        
+        #if is_playlist:
+
         if add_to_bottom_of_q: #play or playurl
             self.q.appendleft((video_url, interaction))
-            await interaction.response.send_message(f"**Added** :musical_note: `{video_url}` to queue")
+                #await interaction.response.send_message(f"**Added** :musical_note: `{video_url}` to queue")
 
         else: #playnext
             self.q.append((video_url, interaction))
-            await interaction.response.send_message(f"**Added** :musical_note: `{video_url}` to the top of the queue") 
+                #await interaction.response.send_message(f"**Added** :musical_note: `{video_url}` to the top of the queue") 
 
 
-    # async def _add_videos_from_playlist(self, ctx, playlist_url):
-    #     #extract_flat false so we can take videos out one by one
-    #     await ctx.send(f'**Added Playlist** :musical_note: `{playlist_url}` to queue')
+    async def _add_videos_from_playlist(self, interaction: discord.Interaction, playlist_url):
+        #extract_flat false so we can take videos out one by one
+        await interaction.response.send_message(f'**Added Playlist** :musical_note: `{playlist_url}` to queue')
         
-    #     with YoutubeDL({'extract_flat': False, 'match_filter': yt_dlp.utils.match_filter_func('availability != private'), 'ignore_no_formats_error': True}) as ydl:
-    #         #get the info_dict with all playlist videos
-    #         playlist_info_dict = await asyncio.to_thread(ydl.extract_info, playlist_url, False)
-    #         video_url = ""
+        with YoutubeDL({'extract_flat': False, 'match_filter': yt_dlp.utils.match_filter_func('availability != private'), 'ignore_no_formats_error': True}) as ydl:
+            #get the info_dict with all playlist videos
+            playlist_info_dict = await asyncio.to_thread(ydl.extract_info, playlist_url, False)
 
-    #         for index in range(len(playlist_info_dict.get('entries', None))):
-    #             if playlist_info_dict.get('entries')[index].get('uploader') == None:
-    #                 await ctx.send(f'**track {index +1}** :cd: is not public and was not added to the queue')
-    #                 continue
+            for index in range(len(playlist_info_dict.get('entries', None))):
+                if playlist_info_dict.get('entries')[index].get('uploader') == None:
+                    await interaction.followup.send(f'**track {index +1}** :cd: is not public and was not added to the queue')
+                    print("private track")
+                    continue
 
-    #             #TODO we dont check playlist video length, which IS A PROBLEM
-    #             #add that to queue  
-    #             video_url = playlist_info_dict.get('entries')[index].get('webpage_url')
-    #             self.q.appendleft((video_url, ctx))
+                #add video
+                await self._add_video(interaction, playlist_info_dict.get('entries')[index].get('webpage_url'), is_playlist=True)
+                print("true")
 
 
     async def _play_or_add_url(self, interaction, url, add_to_bottom_of_q=True):
         """basic if statement to stop dry code"""
-        print("line 217")
+        print("line 222")
         #add video
         if not add_to_bottom_of_q: #play
             await self._add_video(interaction, url)
