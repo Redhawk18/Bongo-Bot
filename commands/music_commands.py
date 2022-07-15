@@ -405,8 +405,8 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name='loop', description='Loops the current song until disabled')
-    @app_commands.choices(choice=[app_commands.Choice(name="Enabled", value="1"), app_commands.Choice(name="Disabled", value="0")])
-    async def loop(self, interaction: discord.Interaction, choice: app_commands.Choice[str]): #TODO refactor this to put it to disable removing tracks and add it once
+    @app_commands.choices(choice=[app_commands.Choice(name="Enabled", value=1), app_commands.Choice(name="Disabled", value=0)])
+    async def loop(self, interaction: discord.Interaction, choice: app_commands.Choice[int]): #TODO refactor this to put it to disable removing tracks and add it once
         print(choice.value)
         await interaction.response.send_message(choice.value)
 
