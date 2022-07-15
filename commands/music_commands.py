@@ -23,6 +23,7 @@ class Music_Commands(commands.Cog):
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
                 'extract_flat': True, 
+                'ignoreerrors': True, #if sponserblock api is unreachable
 
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
