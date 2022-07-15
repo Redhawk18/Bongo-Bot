@@ -20,6 +20,7 @@ class Music_Commands(commands.Cog):
         self.loop_enabled = False
         self.how_many_want_to_skip = 0
         #self.music_channel = None
+        self.now_playing = None
         self.music_channel = 'music-spam' #makes testing easier 
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
@@ -152,6 +153,7 @@ class Music_Commands(commands.Cog):
                 next_url, interaction = self.q.pop() #since we added a butch of new urls and the current next_url is a playlist
                 info_dict = await asyncio.to_thread(None, ydl.extract_info, next_url, False) #new video new metadata
 
+            self.now_playing = info_dict
             ydl.download([next_url])
 
         for file in os.listdir(os.getcwd()):
@@ -348,6 +350,24 @@ class Music_Commands(commands.Cog):
         else:
             await interaction.response.send_message("Nothing is playing")
             return
+
+    @app_commands.command(name="now-playing", description="Show the playing song")
+    async def nowplaying(self, interaction: discord.Interaction):
+        if not self._is_playing_song:
+            await interaction.response.send_message("Nothing is playing")
+            return
+
+        embed = discord.Embed(
+            title = "**Now Playing** :notes:",
+            url = self.now_playing.get('webpage_url', None),
+            color = discord.Color.red(),
+        )
+        embed.set_thumbnail(url=self.now_playing.get('thumbnail', None))
+        embed.add_field(name="Title", value=self.now_playing.get('title', None), inline=False)
+        embed.add_field(name="Uploader", value=self.now_playing.get('uploader', None))
+        embed.add_field(name="Duration", value=self.now_playing.get('duration_string', None))
+
+        await interaction.response.send_message(embed=embed)
 
 
     @app_commands.command(name="queue", description="Lists the queue")
