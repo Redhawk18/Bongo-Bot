@@ -235,7 +235,7 @@ class Music_Commands(commands.Cog):
         if not self._is_playing_song:
             await self._play_next_song(None)
 
-
+    #TODO fix not having any feedback when playing normal videos
     @app_commands.command(name="play", description="plays a query from Youtube")
     async def play(self, interaction: discord.Interaction, *, query : str, add_to_bottom_of_q: bool = False): 
         print("line 231")
@@ -405,8 +405,12 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name='loop', description='Loops the current song until disabled')
-    async def loop(self, interaction: discord.Interaction): #TODO refactor this to put it to disable removing tracks and add it once
-        if self.loop_enabled: #disable loop
+    @app_commands.choices(choice=[app_commands.Choice(name="Enabled", value="1"), app_commands.Choice(name="Disabled", value="0")])
+    async def loop(self, interaction: discord.Interaction, choice: app_commands.Choice[str]): #TODO refactor this to put it to disable removing tracks and add it once
+        print(choice.value)
+        await interaction.response.send_message(choice.value)
+
+        if choice.value == 0: #disable loop
             self.loop_enabled = False
             await interaction.response.send_message("**Loop Disabled** :repeat:")
             #remove song from queue
