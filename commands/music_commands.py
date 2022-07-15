@@ -23,7 +23,8 @@ class Music_Commands(commands.Cog):
         self.music_channel = 'music-spam' #makes testing easier 
         self._ydl_opts = { 
                 'format': 'bestaudio/best',
-                'extract_flat': True, 
+                'extract_flat': True, #uses the playlist link, not each videos link
+                'ignoreerrors': True, #if sponserblock api is unreachable
 
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
