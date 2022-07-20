@@ -1,4 +1,3 @@
-#discord.py removed for the time since its in development
+#discord.py removed since no stable pip release
 python-dotenv
-ffmpeg-python
-yt-dlp
+wavelink

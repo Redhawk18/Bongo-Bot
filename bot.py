@@ -1,6 +1,7 @@
 import asyncio
 import os
 
+import wavelink
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -27,16 +28,18 @@ async def on_ready():
     print('------')
 
     #sync new commands
-    await bot.tree.sync()
+    #await bot.tree.sync()
+
 
 async def main():
-    #load cogs
-    for filename in os.listdir('./commands'):
-        if filename.endswith('.py'):
-            await bot.load_extension(f'commands.{filename[:-3]}')
-    
-    #start bot
-    await bot.start(TOKEN)
+    async with bot:
+        #load cogs
+        for filename in os.listdir('./commands'):
+            if filename.endswith('.py'):
+                await bot.load_extension(f'commands.{filename[:-3]}')
+        
+        #start bot
+        await bot.start(TOKEN)
     
     
 

@@ -7,8 +7,8 @@ from discord.ext import commands
 
 class Util_Commands(commands.Cog):
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
 
     
     @commands.Cog.listener()
