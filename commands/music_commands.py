@@ -1,4 +1,3 @@
-import asyncio
 from collections import deque
 from math import floor
 
@@ -54,7 +53,7 @@ class Music_Commands(commands.Cog):
         if len(self.song_queue) == 0:
             #queue is empty
             self.is_playing = False
-            #disconnect the bot or make a timer or smth
+             #disconnect the bot or make a timer or smth
             return
         
         #else we want to keep playing
@@ -217,15 +216,91 @@ class Music_Commands(commands.Cog):
         embed.set_thumbnail(url="https://i.ytimg.com/vi_webp/" + self.now_playing_dict.get('identifier') + "/maxresdefault.webp")
         embed.add_field(name="Title", value=self.now_playing_dict.get('title'), inline=False)
         embed.add_field(name="Uploader", value=self.now_playing_dict.get('author'))
+
         total_seconds = self.now_playing_dict.get('length')/1000
         minutes, seconds = divmod(total_seconds, 60)
         hours, minutes = divmod(minutes, 60)
         if hours > 0:
-            embed.add_field(name="Duration", value=f'{floor(hours)}:{floor(minutes)}:{floor(seconds)}')
+            embed.add_field(name="Duration", value=f'{floor(hours)}:{await self.add_zero(floor(minutes))}:{await self.add_zero(floor(seconds))}')
         else:
-            embed.add_field(name="Duration", value=f'{floor(minutes)}:{floor(seconds)}')
+            embed.add_field(name="Duration", value=f'{floor(minutes)}:{await self.add_zero(floor(seconds))}')
 
         await interaction.response.send_message(embed=embed)   
+
+
+    @app_commands.command(name="queue", description="Lists the queue")
+    async def queue(self, interaction: discord.Interaction):
+        tempq = self.song_queue.copy()
+
+        #incase the queue was empty from the start
+        if len(tempq) == 0:
+            await interaction.response.send_message("The queue is empty")
+            return
+
+        #store every element in a string
+        index = 0
+        output = ""
+        total_seconds = 0
+        while tempq:
+            #get the url of the video
+            track, interaction = tempq.pop()
+
+            minutes, seconds = divmod(track.length, 60)
+            if minutes >= 60:
+                hours, minutes = divmod(minutes, 60)
+                output += (f"{index +1}. `{track.title}` - `{floor(hours)}:{await self.add_zero(floor(minutes))}:{await self.add_zero(floor(seconds))}`\n")
+            else:
+                output += (f"{index +1}. `{track.title}` - `{floor(minutes)}:{await self.add_zero(floor(seconds))}`\n")
+
+            total_seconds += track.length
+            index += 1
+
+
+        embed = discord.Embed( #5000 character limit
+            title = "**Queue** :books:",
+            description = output,
+            color = discord.Color.red(),
+        )
+        #figure the length of the queue
+        queue_minutes, queue_seconds = divmod(total_seconds, 60)
+        if queue_minutes >= 60:
+            queue_hours, queue_minutes = divmod(minutes, 60)
+            embed.set_footer(text=f'Total length {floor(queue_hours)}:{await self.add_zero(floor(queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
+        else:
+            embed.set_footer(text=f'Total length {floor(queue_minutes)}:{queue_seconds}')
+        
+        await interaction.response.send_message(embed=embed)
+
+
+    async def add_zero(self, number):
+        """turns 2 seconds to 02"""
+        if number < 10:
+            return "0" + str(number)
+
+        return str(number)
+
+
+    @app_commands.command(name='queue-clear', description='Clears everything in the queue')
+    async def queueclear(self, interaction: discord.Interaction):
+        self.song_queue.clear()
+        await interaction.response.send_message("**Cleared queue** :books:")
+
+
+    @app_commands.command(name='queue-remove', description='Removes a song from the queue based on its track number')
+    async def queueremove(self, interaction: discord.Integration, queue_position : int):
+        if queue_position > len(self.q) or queue_position < 0:
+            await interaction.response.send_message("Input invalid")
+            return
+
+        #because of how the remove function works we have to make a copy
+        tempq = self.song_queue.copy()
+
+        for index in range(queue_position -1): #so we dont have to save what's popped
+            tempq.pop()
+
+        #we should have the url of the track we want to remove
+        self.song_queue.remove(tempq.pop())
+        await interaction.response.send_message("**Removed from queue** :books:")
 
 
 
