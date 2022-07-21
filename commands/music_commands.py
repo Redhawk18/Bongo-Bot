@@ -217,7 +217,13 @@ class Music_Commands(commands.Cog):
         embed.set_thumbnail(url="https://i.ytimg.com/vi_webp/" + self.now_playing_dict.get('identifier') + "/maxresdefault.webp")
         embed.add_field(name="Title", value=self.now_playing_dict.get('title'), inline=False)
         embed.add_field(name="Uploader", value=self.now_playing_dict.get('author'))
-        embed.add_field(name="Duration", value=self.now_playing_dict.get('length'))
+        total_seconds = self.now_playing_dict.get('length')/1000
+        minutes, seconds = divmod(total_seconds, 60)
+        hours, minutes = divmod(minutes, 60)
+        if hours > 0:
+            embed.add_field(name="Duration", value=f'{floor(hours)}:{floor(minutes)}:{floor(seconds)}')
+        else:
+            embed.add_field(name="Duration", value=f'{floor(minutes)}:{floor(seconds)}')
 
         await interaction.response.send_message(embed=embed)   
 
