@@ -200,7 +200,26 @@ class Music_Commands(commands.Cog):
             return
 
 
-    
+    @app_commands.command(name="now-playing", description="Show the playing song")
+    async def nowplaying(self, interaction: discord.Interaction):
+        if not self.is_playing:
+            await interaction.response.send_message("Nothing is playing")
+            return
+
+        print("before embed")
+        print(self.now_playing_dict)
+        embed = discord.Embed(
+            title = "**Now Playing** :notes:",
+            url = self.now_playing_dict.get('uri'),
+            color = discord.Color.red(),
+            description=""
+        ) 
+        embed.set_thumbnail(url="https://i.ytimg.com/vi_webp/" + self.now_playing_dict.get('identifier') + "/maxresdefault.webp")
+        embed.add_field(name="Title", value=self.now_playing_dict.get('title'), inline=False)
+        embed.add_field(name="Uploader", value=self.now_playing_dict.get('author'))
+        embed.add_field(name="Duration", value=self.now_playing_dict.get('length'))
+
+        await interaction.response.send_message(embed=embed)   
 
 
 
