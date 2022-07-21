@@ -236,6 +236,7 @@ class Music_Commands(commands.Cog):
         if len(tempq) == 0:
             await interaction.response.send_message("The queue is empty")
             return
+        await interaction.response.send_message("Queue is loading")
 
         #store every element in a string
         index = 0
@@ -267,9 +268,9 @@ class Music_Commands(commands.Cog):
             queue_hours, queue_minutes = divmod(minutes, 60)
             embed.set_footer(text=f'Total length {floor(queue_hours)}:{await self.add_zero(floor(queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
         else:
-            embed.set_footer(text=f'Total length {floor(queue_minutes)}:{queue_seconds}')
+            embed.set_footer(text=f'Total length {floor((queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
         
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
 
     async def add_zero(self, number):
