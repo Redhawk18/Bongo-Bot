@@ -129,7 +129,14 @@ class Music_Commands(commands.Cog):
 
         track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
         await self.play_or_add(track, interaction)
-        
+
+
+    @app_commands.command(name="play-next", description="plays a Youtube track after the current one") #TODO add cool downs for commands
+    async def play_next(self, interaction: discord.Interaction, *, query: str):
+        """Play a song with the given search query."""
+
+        track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
+        await self.play_or_add(track, interaction, add_to_bottom=False)
 
 
     @app_commands.command(name="pause", description="Pauses track")
