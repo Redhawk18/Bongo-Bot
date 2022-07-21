@@ -72,6 +72,21 @@ class Music_Commands(commands.Cog):
         return voice
 
 
+    @app_commands.command(name="disconnect", description="disconnect from voice chat")
+    async def disconnect(self, interaction: discord.Interaction):
+        voice: wavelink.Player = interaction.guild.voice_client
+
+        if voice.is_connected():
+            self.q.clear() #wipe all future songs
+            self._is_playing_song = False
+            await voice.stop()
+            await voice.disconnect()
+            await interaction.response.send_message("**Disconnected** :guitar:")
+
+        else:
+            await interaction.response.send_message("Already disconnected") 
+
+
     async def play_or_add(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True):
         """Takes a track and adds it to the queue, and if nothing is playing this sends it to play"""
         #add to queue
