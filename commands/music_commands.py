@@ -77,7 +77,7 @@ class Music_Commands(commands.Cog):
         voice: wavelink.Player = interaction.guild.voice_client
 
         if voice.is_connected():
-            self.q.clear() #wipe all future songs
+            self.song_queue.clear() #wipe all future songs
             self._is_playing_song = False
             await voice.stop()
             await voice.disconnect()
