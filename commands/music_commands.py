@@ -15,9 +15,10 @@ class Music_Commands(commands.Cog):
 
         self.song_queue = deque()
         self.is_playing = False 
-        self.now_playing:dict = None
-
-
+        self.how_many_want_to_skip = 0
+        self.now_playing_dict:dict = None
+        self.loop_enabled = False
+        
 
 
     @commands.Cog.listener()
@@ -32,7 +33,6 @@ class Music_Commands(commands.Cog):
     async def connect_nodes(self):
         """Connect to our Lavalink nodes."""
         await self.bot.wait_until_ready()
-
         await wavelink.NodePool.create_node(
             bot=self.bot,
             host="127.0.0.1",
@@ -47,34 +47,76 @@ class Music_Commands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_track_start(self, player: wavelink.Player, track: wavelink.Track):
-        print("start of track")
+        self.is_playing = True
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: wavelink.player, track: wavelink.Track, reason):
-        print("end of track")
+        if len(self.song_queue) == 0:
+            #queue is empty
+            self.is_playing = False
+            #disconnect the bot or make a timer or smth
+            return
+        
+        #else we want to keep playing
+        await self.play_song()
 
 
-    async def play2(self, vc: wavelink.Player, interaction, *, track: wavelink.YouTubeTrack):
-        print("in func")
+    async def connect(self, interaction): #TODO add error catching
+        if not interaction.guild.voice_client:
+            voice: wavelink.Player = await interaction.user.voice.channel.connect(cls=wavelink.Player)
+            await interaction.followup.send(f'**Connected** :drum: to `{interaction.user.voice.channel.name}`')
 
-             
+        else:
+            voice: wavelink.Player = interaction.guild.voice_client
+
+        return voice
 
 
-    @app_commands.command()
+    async def play_or_add(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True):
+        """Takes a track and adds it to the queue, and if nothing is playing this sends it to play"""
+        #add to queue
+        if add_to_bottom:
+            self.song_queue.appendleft((track, interaction))
+            await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to queue")
+        
+        else: #playnext
+            self.song_queue.append((track, interaction))
+            await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue") 
+
+        #if not playing we start playing
+        if not self.is_playing:
+            await self.play_song()
+
+
+    async def play_song(self):
+        """plays the first song in the queue"""
+        self.how_many_want_to_skip = 0 #reset counter
+
+        track, interaction = self.song_queue.pop()
+
+        if self.loop_enabled:
+            #add the track back into the front
+            self.song_queue.append((track, interaction))
+
+
+        #connect bot to voice chat
+        voice = await self.connect(interaction)
+
+        self.now_playing_dict = track.info
+        #play track
+        await voice.play(track)
+        await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!")   
+
+
+    @app_commands.command()#TODO add cool downs for commands
     async def play(self, interaction: discord.Interaction, *, query: str): #TODO add parsing for direct urls
         """Play a song with the given search query.
 
         If not connected, connect to our voice channel.
         """
-        if not interaction.guild.voice_client:
-            vc: wavelink.Player = await interaction.user.voice.channel.connect(cls=wavelink.Player)
-
-        else:
-            vc: wavelink.Player = interaction.guild.voice_client
-
         track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
-        await interaction.response.send_message(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!")   
-        await vc.play(track)
+        await self.play_or_add(track, interaction)
+        
 
 
     @app_commands.command(name="pause", description="Pauses track")
@@ -106,7 +148,6 @@ class Music_Commands(commands.Cog):
         voice: wavelink.Player = interaction.guild.voice_client
         
         if voice.is_playing():
-            self.how_many_want_to_skip = 0 #reset counter
             await voice.stop()
             await interaction.response.send_message("**Skipped** :fast_forward:")
 
