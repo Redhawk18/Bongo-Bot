@@ -123,12 +123,10 @@ class Music_Commands(commands.Cog):
         await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!")   
 
 
-    @app_commands.command()#TODO add cool downs for commands
-    async def play(self, interaction: discord.Interaction, *, query: str): #TODO add parsing for direct urls
-        """Play a song with the given search query.
+    @app_commands.command(name="play", description="plays a Youtube track")#TODO add cool downs for commands
+    async def play(self, interaction: discord.Interaction, *, query: str):
+        """Play a song with the given search query."""
 
-        If not connected, connect to our voice channel.
-        """
         track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
         await self.play_or_add(track, interaction)
         
@@ -170,7 +168,7 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Nothing is playing")
 
 
-    @app_commands.command(name='skip', description='Calls a vote to skip the track')
+    @app_commands.command(name="skip", description="Calls a vote to skip the track")
     async def skip(self, interaction: discord.Interaction):
         if not await self._in_voice_channel(interaction):
             return
