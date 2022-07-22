@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 
 import wavelink
@@ -18,6 +19,8 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 bot_intents = discord.Intents.default()
 bot_intents.message_content = True
 bot_intents.voice_states = True
+
+handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 
 bot = commands.Bot(command_prefix='!', intents=bot_intents)
 
@@ -39,12 +42,10 @@ async def main():
                 await bot.load_extension(f'commands.{filename[:-3]}')
         
         #start bot
+        logging.basicConfig(level=logging.INFO)
         await bot.start(TOKEN)
+        
     
     
 
 asyncio.run(main())
-
-
-
-
