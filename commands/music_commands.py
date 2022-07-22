@@ -304,7 +304,29 @@ class Music_Commands(commands.Cog):
         await interaction.response.send_message("**Removed from queue** :books:")
 
 
+    @app_commands.command(name='loop', description='Loops the current song until disabled')
+    async def loop(self, interaction: discord.Interaction):
+        if not self.is_playing:
+            await interaction.response.send_message("Nothing Playing")
+            return
 
+        print("interaction",interaction.id)
+
+        if self.loop_enabled: #disable loop
+            print("if")
+            track, interaction = self.song_queue.pop()
+            self.loop_enabled = False
+            await interaction.followup.send("**Loop Disabled** :repeat:")
+
+        else: #enable loop
+            print("else")
+            #add current song to the top of the queue once
+            track = await wavelink.YouTubeTrack.search(query=self.now_playing_dict.get('title'), return_first=True)
+            self.song_queue.append((track, interaction))
+            self.loop_enabled = True
+            await interaction.response.send_message("**Loop Enabled** :repeat:")
+
+        print("end of command")
 
 
 
