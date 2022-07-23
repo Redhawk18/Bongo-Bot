@@ -83,6 +83,7 @@ class Music_Commands(commands.Cog):
         self.is_playing = False
         await voice.stop()            
         await voice.disconnect()
+        self.disconnect_timer.stop()
         print("is playing",self.is_playing)
 
     @app_commands.command(name="disconnect", description="disconnect from voice chat")
@@ -111,7 +112,7 @@ class Music_Commands(commands.Cog):
                 await self.stop_voice_functions(voice)
                 #await vc.disconnect()
                 print("disconnect")
-                self.disconnect_timer.stop()
+                
         
 
 
