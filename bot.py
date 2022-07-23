@@ -35,6 +35,12 @@ async def on_ready():
     await bot.tree.sync()
 
 
+@bot.tree.error
+async def on_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
+    if isinstance(error, discord.app_commands.CommandOnCooldown):
+        await interaction.response.send_message(str(error), ephemeral=True)
+
+
 async def main():
     async with bot:
         #load cogs

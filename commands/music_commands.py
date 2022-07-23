@@ -153,6 +153,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="play", description="plays a Youtube track")#TODO add cool downs for commands
+    @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def play(self, interaction: discord.Interaction, *, query: str):
         """Play a song with the given search query."""
 
@@ -161,6 +162,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="play-next", description="plays a Youtube track after the current one") #TODO add cool downs for commands
+    @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def play_next(self, interaction: discord.Interaction, *, query: str):
         """Play a song with the given search query."""
 
@@ -193,6 +195,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="force-skip", description="Skips the track")
+    @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def forceskip(self, interaction: discord.Interaction):
         voice: wavelink.Player = interaction.guild.voice_client
         
@@ -259,6 +262,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="queue", description="Lists the queue")
+    @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
     async def queue(self, interaction: discord.Interaction):
         tempq = self.song_queue.copy()
 
