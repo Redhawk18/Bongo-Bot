@@ -17,6 +17,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 
 #intents
 bot_intents = discord.Intents.default()
+bot_intents.members = True
 bot_intents.message_content = True
 bot_intents.voice_states = True
 
