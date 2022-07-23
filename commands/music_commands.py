@@ -4,13 +4,15 @@ from math import floor
 import wavelink
 import discord
 from discord import app_commands
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 class Music_Commands(commands.Cog):
     """Music cog to hold Wavelink related commands and listeners."""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+
+        #self.disconnect_timer.start()
 
         self.song_queue = deque()
         self.is_playing = False 
@@ -68,22 +70,49 @@ class Music_Commands(commands.Cog):
         else:
             voice: wavelink.Player = interaction.guild.voice_client
 
+        #start disconnect timer
+        self.disconnect_timer.start()
+
         return voice
 
+    
+    async def stop_voice_functions(self, voice: discord.VoiceClient):
+        print("stop_voice_functions")
+        self.song_queue.clear() #wipe all future songs
+        print(self.song_queue)
+        self.is_playing = False
+        await voice.stop()            
+        await voice.disconnect()
+        print("is playing",self.is_playing)
 
     @app_commands.command(name="disconnect", description="disconnect from voice chat")
     async def disconnect(self, interaction: discord.Interaction):
         voice: wavelink.Player = interaction.guild.voice_client
 
         if voice.is_connected():
-            self.song_queue.clear() #wipe all future songs
-            self._is_playing_song = False
-            await voice.stop()
-            await voice.disconnect()
-            await interaction.response.send_message("**Disconnected** :guitar:")
+            await self.stop_voice_functions(voice)
+            if not interaction.response.is_done():
+                await interaction.response.send_message("**Disconnected** :guitar:")
 
         else:
             await interaction.response.send_message("Already disconnected") 
+
+    
+    @tasks.loop(seconds=10)
+    async def disconnect_timer(self):
+        print("currentloop", self.disconnect_timer.current_loop)
+        #When a task is started is runs for the first time, which is too fast
+        if self.disconnect_timer.current_loop == 0:
+            return
+
+        for voice in self.bot.voice_clients:
+            print("peps in vc",len(voice.channel.members), "list ->", voice.channel.members)
+            if len(voice.channel.members) < 2: #no-one or bot in vc
+                await self.stop_voice_functions(voice)
+                #await vc.disconnect()
+                print("disconnect")
+                self.disconnect_timer.stop()
+        
 
 
     async def play_or_add(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True):
@@ -98,6 +127,7 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue") 
 
         #if not playing we start playing
+        print("is playing",self.is_playing)
         if not self.is_playing:
             await self.play_song()
 
@@ -175,7 +205,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="skip", description="Calls a vote to skip the track")
-    async def skip(self, interaction: discord.Interaction):
+    async def skip(self, interaction: discord.Interaction): #TODO make a list of people who have voted and wipe on new song
         if not await self._in_voice_channel(interaction):
             return
         voice = interaction.guild.voice_client
