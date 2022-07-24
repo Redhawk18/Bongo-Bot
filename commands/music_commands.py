@@ -71,7 +71,8 @@ class Music_Commands(commands.Cog):
             voice: wavelink.Player = interaction.guild.voice_client
 
         #start disconnect timer
-        self.disconnect_timer.start()
+        if not self.disconnect_timer.is_running():
+            self.disconnect_timer.start()
 
         return voice
 
