@@ -365,7 +365,23 @@ class Music_Commands(commands.Cog):
         print("end of command")
 
 
+    @app_commands.command(name="volume", description="Sets the volume of the player, max is 150")
+    async def volume(self, interaction: discord.Interaction, percent: float):
+        if percent <= 0 or percent > 150:
+            await interaction.response.send_message("Invalid input")
+            return
 
+        #turn percent into a float between 0-1.5
+        volume = percent/100
+
+        voice: wavelink.Player = interaction.guild.voice_client
+
+        if voice.is_connected():
+            await voice.set_volume(volume, seek=True)
+            await interaction.response.send_message(f'**Volume** :loud_sound: changed to {percent}%')
+        
+        else:
+            await interaction.response.send_message("Not connected to voice chat")
 
 
 
