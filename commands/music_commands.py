@@ -115,6 +115,10 @@ class Music_Commands(commands.Cog):
                 print("disconnect")
                 
         
+    async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True):
+        """Searchs for the track, and checks if it's a playlist"""
+        track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
+        await self.play_or_add(track, interaction, add_to_bottom)    
 
 
     async def play_or_add(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True):
@@ -154,22 +158,18 @@ class Music_Commands(commands.Cog):
         await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!")   
 
 
-    @app_commands.command(name="play", description="plays a Youtube track")#TODO add cool downs for commands
+    @app_commands.command(name="play", description="plays a Youtube track") #TODO add playlist support
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def play(self, interaction: discord.Interaction, *, query: str):
-        """Play a song with the given search query."""
+        await self.search_track(interaction, query)
 
         track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
         await self.play_or_add(track, interaction)
 
-
-    @app_commands.command(name="play-next", description="plays a Youtube track after the current one") #TODO add cool downs for commands
+    @app_commands.command(name="play-next", description="plays a Youtube track after the current one")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def play_next(self, interaction: discord.Interaction, *, query: str):
-        """Play a song with the given search query."""
-
-        track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
-        await self.play_or_add(track, interaction, add_to_bottom=False)
+        await self.search_track(interaction, query, add_to_bottom=False)
 
 
     @app_commands.command(name="pause", description="Pauses track")
