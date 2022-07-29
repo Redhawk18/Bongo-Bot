@@ -7,6 +7,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
+import custom_player
+
 class Music_Commands(commands.Cog):
     """Music cog to hold Wavelink related commands and listeners."""
 
@@ -65,7 +67,7 @@ class Music_Commands(commands.Cog):
 
     async def connect(self, interaction): #TODO add error catching
         if not interaction.guild.voice_client:
-            voice: wavelink.Player = await interaction.user.voice.channel.connect(cls=wavelink.Player)
+            voice: wavelink.Player = await interaction.user.voice.channel.connect(cls=custom_player.Custom_Player)
             await interaction.followup.send(f'**Connected** :drum: to `{interaction.user.voice.channel.name}`')
 
         else:
@@ -292,8 +294,8 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="queue", description="Lists the queue")
-    @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
-    async def queue(self, interaction: discord.Interaction):
+    @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id)) #TODO followup embed send causes webhook problems
+    async def queue(self, interaction: discord.Interaction): #TODO some problem with time footer
         tempq = self.song_queue.copy()
 
         #incase the queue was empty from the start
