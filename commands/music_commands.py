@@ -83,7 +83,6 @@ class Music_Commands(commands.Cog):
         self.song_queue.clear() #wipe all future songs
         print(self.song_queue)
         self.is_playing = False
-        self.now_playing_dict = None
         await voice.stop()            
         await voice.disconnect()
         self.disconnect_timer.stop()
