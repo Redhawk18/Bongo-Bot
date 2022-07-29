@@ -1,5 +1,6 @@
 from collections import deque
 from math import floor
+import re
 
 import wavelink
 import discord
@@ -117,11 +118,22 @@ class Music_Commands(commands.Cog):
         
     async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True):
         """Searchs for the track, and checks if it's a playlist"""
-        track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
-        await self.play_or_add(track, interaction, add_to_bottom)    
+        URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+        if URL_RE.match(query) and "list=" in query: #playlist
+            print("playlist")
+            playlist = await wavelink.YouTubePlaylist.search(query=query)
+            print("125")
+            await self.add_playlist(playlist, interaction)
+            #for track in playlist.tracks:
+                #print(track.info)
+                #await self.play_or_add(track, interaction, add_to_bottom)
+
+        else: #normal track
+            track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
+            await self.add_song(track, interaction, add_to_bottom)    
 
 
-    async def play_or_add(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True):
+    async def add_song(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True):
         """Takes a track and adds it to the queue, and if nothing is playing this sends it to play"""
         #add to queue
         if add_to_bottom:
@@ -134,6 +146,24 @@ class Music_Commands(commands.Cog):
 
         #if not playing we start playing
         print("is playing",self.is_playing)
+        await self.play_if_not()
+
+
+    async def add_playlist(self, playlist: wavelink.YouTubePlaylist, interaction):
+        "Adds each video individually to the queue"
+        index = 0
+        for track in playlist.tracks:
+            self.song_queue.appendleft((track, interaction))
+            print(track.info)
+
+            index += 1
+
+        await interaction.response.send_message(f'**Added** :musical_note: Playlist with {index} tracks to the queue')
+        #await interaction.response.send_message(f'**Added** Playlist `url` with {index} tracks to the queue') 
+        await self.play_if_not()
+
+
+    async def play_if_not(self):
         if not self.is_playing:
             await self.play_song()
 
@@ -163,8 +193,6 @@ class Music_Commands(commands.Cog):
     async def play(self, interaction: discord.Interaction, *, query: str):
         await self.search_track(interaction, query)
 
-        track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
-        await self.play_or_add(track, interaction)
 
     @app_commands.command(name="play-next", description="plays a Youtube track after the current one")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
@@ -174,7 +202,7 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="pause", description="Pauses track")
     async def pause(self, interaction: discord.Interaction):
-        voice: wavelink.Player = interaction.guild.voice_client
+        voice: wavelink.Player = interaction.guild.voice_client #TODO make this a function
 
         if voice.is_playing():
             await voice.pause()
@@ -234,7 +262,7 @@ class Music_Commands(commands.Cog):
             return
 
 
-    @app_commands.command(name="now-playing", description="Show the playing song")
+    @app_commands.command(name="now-playing", description="Show the playing song") #add markdown formate for field links
     async def nowplaying(self, interaction: discord.Interaction):
         if not self.is_playing:
             await interaction.response.send_message("Nothing is playing")
@@ -317,13 +345,13 @@ class Music_Commands(commands.Cog):
         return str(number)
 
 
-    @app_commands.command(name='queue-clear', description='Clears everything in the queue')
+    @app_commands.command(name="queue-clear", description="Clears everything in the queue")
     async def queueclear(self, interaction: discord.Interaction):
         self.song_queue.clear()
         await interaction.response.send_message("**Cleared queue** :books:")
 
 
-    @app_commands.command(name='queue-remove', description='Removes a song from the queue based on its track number')
+    @app_commands.command(name="queue-remove", description="Removes a song from the queue based on its track number")
     async def queueremove(self, interaction: discord.Integration, queue_position : int):
         if queue_position > len(self.q) or queue_position < 0:
             await interaction.response.send_message("Input invalid")
@@ -340,7 +368,7 @@ class Music_Commands(commands.Cog):
         await interaction.response.send_message("**Removed from queue** :books:")
 
 
-    @app_commands.command(name='loop', description='Loops the current song until disabled')
+    @app_commands.command(name="loop", description="Loops the current song until disabled")
     async def loop(self, interaction: discord.Interaction):
         if not self.is_playing:
             await interaction.response.send_message("Nothing Playing")
@@ -382,38 +410,6 @@ class Music_Commands(commands.Cog):
         
         else:
             await interaction.response.send_message("Not connected to voice chat")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
