@@ -7,3 +7,4 @@ __pycache__
 #wavelink dependencies
 lavalink/Lavalink.jar
 lavalink/logs/
+lavalink/plugins

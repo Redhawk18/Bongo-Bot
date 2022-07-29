@@ -25,7 +25,10 @@ lavalink:
       #strategy: "RotateOnBan" # RotateOnBan | LoadBalance | NanoSwitch | RotatingNanoSwitch
       #searchTriggersFail: true # Whether a search 429 should trigger marking the ip as failing
       #retryLimit: -1 # -1 = use default lavaplayer value | 0 = infinity | >0 = retry will happen this numbers times
-
+  plugins:
+    - dependency: "com.github.topisenpai:sponsorblock-plugin:v1.0.3" # replace v1.0.3 with the latest release tag!
+      repository: "https://jitpack.io"
+      
 metrics:
   prometheus:
     enabled: false
