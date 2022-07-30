@@ -1,19 +1,12 @@
 import wavelink
 
-import contextlib
-import datetime
-import logging
-from typing import Any, Dict, Union, Optional
+from typing import Optional
 
 import discord
 from discord.channel import VoiceChannel
 
 from wavelink import abc
-from wavelink import Node, NodePool
-from wavelink import WaitQueue
 from wavelink import PartialTrack
-#from wavelink import MISSING
-from wavelink import Filter
 
 class Custom_Player(wavelink.player.Player):
     """Exact wavelink player with lavalink plugin support for sponserblock"""
