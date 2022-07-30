@@ -70,7 +70,7 @@ class Custom_Player(wavelink.player.Player):
             "track": source.id,
             "noReplace": not replace,
             "skipSegments": [
-                "interaction", "music_offtopic", "preview", "sponsor"
+                "interaction", "music_offtopic", "preview", "selfpromo", "sponsor"
             ]
         }
         if start is not None and start > 0:
