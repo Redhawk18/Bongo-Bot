@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 
 class Useless_Commands(commands.Cog):
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
 
     #events
     @commands.Cog.listener()

@@ -1,296 +1,213 @@
-import asyncio
 from collections import deque
 from math import floor
-import os
-import urllib.parse, urllib.request, re
+import re
 
+import wavelink
 import discord
 from discord import app_commands
-from discord.ext import commands
-from discord.ext.commands.errors import ClientException, CommandInvokeError
-import yt_dlp
-from yt_dlp import YoutubeDL, DownloadError
+from discord.ext import commands, tasks
+
+import custom_player
 
 class Music_Commands(commands.Cog):
+    """Music cog to hold Wavelink related commands and listeners."""
 
-    def __init__(self, client):
-        self.client = client
-        self.q = deque()
-        self._is_playing_song = False
-        self.loop_enabled = False
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+        #self.disconnect_timer.start()
+
+        self.song_queue = deque()
+        self.is_playing = False 
         self.how_many_want_to_skip = 0
-        #self.music_channel = None
-        self.now_playing = None
-        self.music_channel = 'music-spam' #makes testing easier 
-        self._ydl_opts = { 
-                'format': 'bestaudio/best',
-                'extract_flat': True, #uses the playlist link, not each videos link
-                'ignoreerrors': True, #if sponserblock api is unreachable
-
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'opus', },
-                    {'key': 'SponsorBlock'},
-                    {'key': 'ModifyChapters', 'remove_sponsor_segments': ['sponsor', 'interaction', 'music_offtopic']}
-                ],
-            }
+        self.now_playing_dict:dict = None
+        self.loop_enabled = False
         
+
 
     @commands.Cog.listener()
     async def on_ready(self):
         print("music commands lister online")
 
 
-    @app_commands.command(name='disconnect', description='disconnect from voice chat')
-    async def disconnect(self, interaction: discord.Interaction):
-        voice = interaction.guild.voice_client
+    #Lavalink 
+    async def cog_load(self):
+        self.bot.loop.create_task(self.connect_nodes())
 
-        if voice.is_connected():
-            self.q.clear() #wipe all future songs
-            self._is_playing_song = False
-            voice.stop()
-            await voice.disconnect()
-            await interaction.response.send_message("**Disconnected** :guitar:")
-
-        else:
-            await interaction.response.send_message("Already disconnected")
-
-
-    @app_commands.command()
-    async def musicchannel(self, interaction: discord.Interaction): #TODO make a json or something to store settings
-        #set authors text channel
-        self.music_channel = interaction.channel.name
-        await interaction.response.send_message(f'{str(self.music_channel)} will be the only text channel the bot will take and output music commands from')
-
-
-    async def _is_music_channel(self, interaction: discord.Interaction):
-        """compares authors text channel to the set music channel"""
-        if interaction.channel.name == self.music_channel:
-            return True
-
-        await interaction.response.send_message("Wrong channel for music commands")
-        return False
-
-
-    async def _in_voice_channel(self, interaction: discord.Interaction):
-        """Users have to be in a voice channel""" #TODO fix
-        
-        try: #checks if the author is in a voice channel
-            #interaction.message.author.voice
-
-            interaction.user.voice
-
-        except AttributeError: # user isnt in any voice channel
-            await interaction.response.send_message("You are not in a voice channel")
-            print("false")
-            return False
-
-        return True
-
-
-    async def _search_youtube(self, *, query): #TODO rewrite to give better results
-        """searchs youtube with the query, and returns the url of the top video"""
-        query_string = urllib.parse.urlencode({
-            'search_query': query
-        })
-
-        htm_content = urllib.request.urlopen(
-            'https://www.youtube.com/results?' + query_string
+    async def connect_nodes(self):
+        """Connect to our Lavalink nodes."""
+        await self.bot.wait_until_ready()
+        await wavelink.NodePool.create_node(
+            bot=self.bot,
+            host="127.0.0.1",
+            port=2333,
+            password="password"
         )
 
-        search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
-        return 'https://www.youtube.com/watch?v=' + search_results[0] #TODO rewrite to accpect playlists
+    @commands.Cog.listener()
+    async def on_wavelink_node_ready(self, node: wavelink.Node):
+        """Event fired when a node has finished connecting."""
+        print(f'Node: <{node.identifier}> is ready!')
+
+    @commands.Cog.listener()
+    async def on_wavelink_track_start(self, player: wavelink.Player, track: wavelink.Track):
+        self.is_playing = True
+
+    @commands.Cog.listener()
+    async def on_wavelink_track_end(self, player: wavelink.player, track: wavelink.Track, reason):
+        if len(self.song_queue) == 0:
+            #queue is empty
+            self.is_playing = False
+             #disconnect the bot or make a timer or smth
+            return
+        
+        #else we want to keep playing
+        await self.play_song()
 
 
-    async def _play_next_song(self, error=None):
-        """figures out what voice channel the user is in, and joins. Then it downloads and encodes and plays from the queue"""
-        if os.path.isfile('song.opus'):
-            os.remove('song.opus')
+    async def connect(self, interaction): #TODO add error catching
+        if not interaction.guild.voice_client:
+            voice: wavelink.Player = await interaction.user.voice.channel.connect(cls=custom_player.Custom_Player)
+            await interaction.followup.send(f'**Connected** :drum: to `{interaction.user.voice.channel.name}`')
 
+        else:
+            voice: wavelink.Player = interaction.guild.voice_client
 
-        #encase song fails to skip and then finishes
-        self.how_many_want_to_skip = 0
+        #start disconnect timer
+        if not self.disconnect_timer.is_running():
+            self.disconnect_timer.start()
 
-        if len(self.q) == 0: #base case
-            self._is_playing_song = False
-            print('No more songs in queue')
-            await self.disconnect(interaction)
+        return voice
+
+    
+    async def stop_voice_functions(self, voice: discord.VoiceClient):
+        print("stop_voice_functions")
+        self.song_queue.clear() #wipe all future songs
+        print(self.song_queue)
+        self.is_playing = False
+        await voice.stop()            
+        await voice.disconnect()
+        self.disconnect_timer.stop()
+        print("is playing",self.is_playing)
+
+    @app_commands.command(name="disconnect", description="disconnect from voice chat")
+    async def disconnect(self, interaction: discord.Interaction):
+        voice: wavelink.Player = interaction.guild.voice_client
+
+        if voice.is_connected():
+            await self.stop_voice_functions(voice)
+            if not interaction.response.is_done():
+                await interaction.response.send_message("**Disconnected** :guitar:")
+
+        else:
+            await interaction.response.send_message("Already disconnected") 
+
+    
+    @tasks.loop(seconds=10)
+    async def disconnect_timer(self):
+        print("currentloop", self.disconnect_timer.current_loop)
+        #When a task is started is runs for the first time, which is too fast
+        if self.disconnect_timer.current_loop == 0:
             return
 
-        next_url, interaction = self.q.pop()
-        if self.loop_enabled:
-            self.q.append((next_url, interaction))
-
-        print("before connect")
-    
-        try: #connect to channel #TODO i think all of this is unneeded
-            print("124")
-            voice_channel = interaction.user.voice.channel # error is handled eariler
-            print("126")
-            await voice_channel.connect()
-            print("128")
-            voice = interaction.guild.voice_client
-            print("130")
-            #await interaction.followup.send(f'**Connected** :drum: to `{str(voice_channel)}`')
-
-        except ClientException: #already connected
-            voice = interaction.guild.voice_client
-
-        print("after connect")
-        
-
-        self._is_playing_song = True
-        print(f'Playing next song: {next_url}')
-
-        with YoutubeDL(self._ydl_opts) as ydl: #download audio
-
-            info_dict = await asyncio.to_thread(ydl.extract_info, next_url, False)
-            #check if the link is a playlist
-            if info_dict.get('_type', None) != None:
-                #call _add_videos_from_playlist function to deal with it
-                await self._add_videos_from_playlist(interaction, next_url)
-
-                next_url, interaction = self.q.pop() #since we added a butch of new urls and the current next_url is a playlist
-                info_dict = await asyncio.to_thread(None, ydl.extract_info, next_url, False) #new video new metadata
-
-            self.now_playing = info_dict
-            ydl.download([next_url])
-
-        for file in os.listdir(os.getcwd()):
-            if file.endswith('.opus'):
-                os.rename(file, 'song.opus')
-
-        voice.play(discord.FFmpegOpusAudio("song.opus", bitrate=192), after=lambda e: asyncio.run_coroutine_threadsafe(self._play_next_song(e), self.client.loop))
-
-        await interaction.followup.send(f"**Playing** :notes: `{info_dict.get('title', None)}` by `{info_dict.get('channel', None)}` - Now!")
-
-
-    async def _is_video_too_long(self, info_dict):
-        #info_dict stores duration in seconds
-        print(info_dict.get('duration', None))
-        if info_dict.get('duration', None) > 32400:
-            return True
-
-        return False
-
-
-    async def _add_video(self, interaction, video_url, is_playlist=False, add_to_bottom_of_q=True):
-        #sees if the video is public
-        #with YoutubeDL({'match_filter': yt_dlp.utils.match_filter_func('availability != private'), 'ignore_no_formats_error': True}) as ydl:
-        with YoutubeDL(self._ydl_opts) as ydl:
-            #make sure video is valid
-            info_dict = await asyncio.to_thread(ydl.extract_info, video_url, False)
-            print("info_dict got")
-
-            #if video is a playlist
-            if info_dict.get('_type', None) != None: #is playlist
-                await self._add_videos_from_playlist(interaction, video_url)
-                return
-        
-            #if video is too long
-            if await self._is_video_too_long(info_dict):
-                await interaction.followup.send('video too long! >:(')
-                return
+        for voice in self.bot.voice_clients:
+            print("peps in vc",len(voice.channel.members), "list ->", voice.channel.members)
+            if len(voice.channel.members) < 2: #no-one or bot in vc
+                await self.stop_voice_functions(voice)
+                #await vc.disconnect()
+                print("disconnect")
                 
         
+    async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True):
+        """Searchs for the track, and checks if it's a playlist"""
+        URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+        if URL_RE.match(query) and "list=" in query: #playlist
+            print("playlist")
+            playlist = await wavelink.YouTubePlaylist.search(query=query)
+            print("125")
+            await self.add_playlist(playlist, interaction)
+            #for track in playlist.tracks:
+                #print(track.info)
+                #await self.play_or_add(track, interaction, add_to_bottom)
+
+        else: #normal track
+            track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
+            await self.add_song(track, interaction, add_to_bottom)    
+
+
+    async def add_song(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True):
+        """Takes a track and adds it to the queue, and if nothing is playing this sends it to play"""
+        #add to queue
+        if add_to_bottom:
+            self.song_queue.appendleft((track, interaction))
+            await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to queue")
         
-        #if is_playlist:
-
-        if add_to_bottom_of_q: #play or playurl
-            self.q.appendleft((video_url, interaction))
-                #await interaction.response.send_message(f"**Added** :musical_note: `{video_url}` to queue")
-
         else: #playnext
-            self.q.append((video_url, interaction))
-                #await interaction.response.send_message(f"**Added** :musical_note: `{video_url}` to the top of the queue") 
+            self.song_queue.append((track, interaction))
+            await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue") 
+
+        #if not playing we start playing
+        print("is playing",self.is_playing)
+        await self.play_if_not()
 
 
-    async def _add_videos_from_playlist(self, interaction: discord.Interaction, playlist_url):
-        #extract_flat false so we can take videos out one by one
-        await interaction.response.send_message(f'**Added Playlist** :musical_note: `{playlist_url}` to queue')
-        
-        with YoutubeDL({'extract_flat': False, 'match_filter': yt_dlp.utils.match_filter_func('availability != private'), 'ignore_no_formats_error': True}) as ydl:
-            #get the info_dict with all playlist videos
-            playlist_info_dict = await asyncio.to_thread(ydl.extract_info, playlist_url, False)
+    async def add_playlist(self, playlist: wavelink.YouTubePlaylist, interaction):
+        "Adds each video individually to the queue"
+        index = 0
+        for track in playlist.tracks:
+            self.song_queue.appendleft((track, interaction))
+            print(track.info)
 
-            for index in range(len(playlist_info_dict.get('entries', None))):
-                if playlist_info_dict.get('entries')[index].get('uploader') == None:
-                    await interaction.followup.send(f'**track {index +1}** :cd: is not public and was not added to the queue')
-                    print("private track")
-                    continue
+            index += 1
 
-                #add video
-                await self._add_video(interaction, playlist_info_dict.get('entries')[index].get('webpage_url'), is_playlist=True)
-                print("true")
+        await interaction.response.send_message(f'**Added** :musical_note: Playlist with {index} tracks to the queue')
+        #await interaction.response.send_message(f'**Added** Playlist `url` with {index} tracks to the queue') 
+        await self.play_if_not()
 
 
-    async def _play_or_add_url(self, interaction, url, add_to_bottom_of_q=True):
-        """basic if statement to stop dry code"""
-        print("line 222")
-        #add video
-        if not add_to_bottom_of_q: #play
-            await self._add_video(interaction, url)
-
-        else: #playnext
-            await self._add_video(interaction, url, add_to_bottom_of_q=False)
-
-        #play video
-        if not self._is_playing_song:
-            await self._play_next_song(None)
-
-    #TODO fix not having any feedback when playing normal videos
-    @app_commands.command(name="play", description="plays a query from Youtube")
-    async def play(self, interaction: discord.Interaction, *, query : str, add_to_bottom_of_q: bool = False): 
-        print("line 231")
-        if not await self._in_voice_channel(interaction):
-            return
-        
-        print("235")
-
-        print(self.music_channel)
-        if not await self._is_music_channel(interaction):
-            return
-        
-        print("240")
-
-        url = await self._search_youtube(query=query)
-        print("line 243")
-
-        await self._play_or_add_url(interaction, url, add_to_bottom_of_q)
-            
-
-    @app_commands.command(name="play-top", description="plays a query from Youtube next")
-    async def playtop(self, interaction: discord.Interaction, *, query : str): #TODO unfuse this from play
-        await self.play(interaction, query=query, add_to_bottom_of_q = True)
+    async def play_if_not(self):
+        if not self.is_playing:
+            await self.play_song()
 
 
-    @app_commands.command(name="play-url", description="plays a Youtube url")
-    async def playurl(self, interaction: discord.Interaction, url : str):
-        if not await self._in_voice_channel(interaction) or not await self._is_music_channel(interaction):
-            return
+    async def play_song(self):
+        """plays the first song in the queue"""
+        self.how_many_want_to_skip = 0 #reset counter
 
-        #this function HAS TO have a valid url
-        if 'https://www.youtube.com/watch?v=' in url or 'https://youtu.be/' in url:
-            #link might be valid
-            try:
-                with YoutubeDL({'extract_flat': True}) as ydl: #download metadata
-                    ydl.extract_info(url, False)
-            except DownloadError: #if video doesnt exist
-                await interaction.response.send_message("Invalid url")
-                return
+        track, interaction = self.song_queue.pop()
 
-            #video is valid, add to q
-            await self._play_or_add_url(interaction, url)
+        if self.loop_enabled:
+            #add the track back into the front
+            self.song_queue.append((track, interaction))
+
+
+        #connect bot to voice chat
+        voice = await self.connect(interaction)
+
+        self.now_playing_dict = track.info
+        #play track
+        await voice.play(track)
+        await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!")   
+
+
+    @app_commands.command(name="play", description="plays a Youtube track") #TODO add playlist support
+    @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
+    async def play(self, interaction: discord.Interaction, *, query: str):
+        await self.search_track(interaction, query)
+
+
+    @app_commands.command(name="play-next", description="plays a Youtube track after the current one")
+    @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
+    async def play_next(self, interaction: discord.Interaction, *, query: str):
+        await self.search_track(interaction, query, add_to_bottom=False)
 
 
     @app_commands.command(name="pause", description="Pauses track")
     async def pause(self, interaction: discord.Interaction):
-        if not await self._in_voice_channel(interaction):
-            return
-        voice = interaction.guild.voice_client
+        voice: wavelink.Player = interaction.guild.voice_client #TODO make this a function
 
         if voice.is_playing():
-            voice.pause()
+            await voice.pause()
             await interaction.response.send_message("**Paused** :pause_button:")
 
         else:
@@ -299,12 +216,10 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="resume", description="Resumes track")
     async def resume(self, interaction: discord.Interaction):
-        if not await self._in_voice_channel(interaction):
-            return
-        voice = interaction.guild.voice_client
+        voice: wavelink.Player = interaction.guild.voice_client
 
         if voice.is_paused():
-            voice.resume()
+            await voice.resume()
             await interaction.response.send_message("**Resumed** :arrow_forward:")
 
         else:
@@ -312,23 +227,20 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="force-skip", description="Skips the track")
+    @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def forceskip(self, interaction: discord.Interaction):
-        if not await self._in_voice_channel(interaction):
-            return
-        voice = interaction.guild.voice_client
+        voice: wavelink.Player = interaction.guild.voice_client
         
         if voice.is_playing():
-            self.how_many_want_to_skip = 0 #reset counter
-            voice.stop()
+            await voice.stop()
             await interaction.response.send_message("**Skipped** :fast_forward:")
-            asyncio.run_coroutine_threadsafe(self._play_next_song(interaction), self.client.loop) #file io is blocking :(
 
         else:
             await interaction.response.send_message("Nothing is playing")
 
 
-    @app_commands.command(name='skip', description='Calls a vote to skip the track')
-    async def skip(self, interaction: discord.Interaction):
+    @app_commands.command(name="skip", description="Calls a vote to skip the track")
+    async def skip(self, interaction: discord.Interaction): #TODO make a list of people who have voted and wipe on new song
         if not await self._in_voice_channel(interaction):
             return
         voice = interaction.guild.voice_client
@@ -351,97 +263,157 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Nothing is playing")
             return
 
-    @app_commands.command(name="now-playing", description="Show the playing song")
+
+    @app_commands.command(name="now-playing", description="Show the playing song") #add markdown formate for field links
     async def nowplaying(self, interaction: discord.Interaction):
-        if not self._is_playing_song:
+        if not self.is_playing:
             await interaction.response.send_message("Nothing is playing")
             return
 
+        print("before embed")
+        print(self.now_playing_dict)
         embed = discord.Embed(
             title = "**Now Playing** :notes:",
-            url = self.now_playing.get('webpage_url', None),
+            url = self.now_playing_dict.get('uri'),
             color = discord.Color.red(),
-        )
-        embed.set_thumbnail(url=self.now_playing.get('thumbnail', None))
-        embed.add_field(name="Title", value=self.now_playing.get('title', None), inline=False)
-        embed.add_field(name="Uploader", value=self.now_playing.get('uploader', None))
-        embed.add_field(name="Duration", value=self.now_playing.get('duration_string', None))
+            description=""
+        ) 
+        embed.set_thumbnail(url="https://i.ytimg.com/vi_webp/" + self.now_playing_dict.get('identifier') + "/maxresdefault.webp")
+        embed.add_field(name="Title", value=self.now_playing_dict.get('title'), inline=False)
+        embed.add_field(name="Uploader", value=self.now_playing_dict.get('author'))
 
-        await interaction.response.send_message(embed=embed)
+        total_seconds = self.now_playing_dict.get('length')/1000
+        minutes, seconds = divmod(total_seconds, 60)
+        hours, minutes = divmod(minutes, 60)
+        if hours > 0:
+            embed.add_field(name="Duration", value=f'{floor(hours)}:{await self.add_zero(floor(minutes))}:{await self.add_zero(floor(seconds))}')
+        else:
+            embed.add_field(name="Duration", value=f'{floor(minutes)}:{await self.add_zero(floor(seconds))}')
+
+        await interaction.response.send_message(embed=embed)   
 
 
     @app_commands.command(name="queue", description="Lists the queue")
-    async def queue(self, interaction: discord.Interaction):
-        tempq = self.q.copy()
+    @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id)) #TODO followup embed send causes webhook problems
+    async def queue(self, interaction: discord.Interaction): #TODO some problem with time footer
+        tempq = self.song_queue.copy()
 
         #incase the queue was empty from the start
         if len(tempq) == 0:
             await interaction.response.send_message("The queue is empty")
             return
-        
-        else:
-            await interaction.response.send_message("Queue is loading...")
+        await interaction.response.send_message("Queue is loading")
 
         #store every element in a string
         index = 0
         output = ""
+        total_seconds = 0
         while tempq:
             #get the url of the video
-            current_url, unused_ctx = tempq.pop()
-            with YoutubeDL(self._ydl_opts) as ydl: #download metadata
-                info_dict = await asyncio.to_thread(ydl.extract_info, current_url, False)
+            track, interaction = tempq.pop()
 
-            output += (f"{index +1}. `{info_dict.get('title', None)}` - `{info_dict.get('duration_string', None)}`\n")
+            minutes, seconds = divmod(track.length, 60)
+            if minutes >= 60:
+                hours, minutes = divmod(minutes, 60)
+                output += (f"{index +1}. `{track.title}` - `{floor(hours)}:{await self.add_zero(floor(minutes))}:{await self.add_zero(floor(seconds))}`\n")
+            else:
+                output += (f"{index +1}. `{track.title}` - `{floor(minutes)}:{await self.add_zero(floor(seconds))}`\n")
+
+            total_seconds += track.length
             index += 1
 
-        embed = discord.Embed(
+
+        embed = discord.Embed( #5000 character limit
             title = "**Queue** :books:",
             description = output,
             color = discord.Color.red(),
         )
+        #figure the length of the queue
+        queue_minutes, queue_seconds = divmod(total_seconds, 60)
+        if queue_minutes >= 60:
+            queue_hours, queue_minutes = divmod(minutes, 60)
+            embed.set_footer(text=f'Total length {floor(queue_hours)}:{await self.add_zero(floor(queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
+        else:
+            embed.set_footer(text=f'Total length {floor((queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
+        
         await interaction.followup.send(embed=embed)
 
 
-    @app_commands.command(name='queue-clear', description='Clears everything in the queue')
+    async def add_zero(self, number):
+        """turns 2 seconds to 02"""
+        if number < 10:
+            return "0" + str(number)
+
+        return str(number)
+
+
+    @app_commands.command(name="queue-clear", description="Clears everything in the queue")
     async def queueclear(self, interaction: discord.Interaction):
-        self.q.clear()
+        self.song_queue.clear()
         await interaction.response.send_message("**Cleared queue** :books:")
 
 
-    @app_commands.command(name='queue-remove', description='Removes a song from the queue based on its track number')
+    @app_commands.command(name="queue-remove", description="Removes a song from the queue based on its track number")
     async def queueremove(self, interaction: discord.Integration, queue_position : int):
         if queue_position > len(self.q) or queue_position < 0:
             await interaction.response.send_message("Input invalid")
             return
 
         #because of how the remove function works we have to make a copy
-        tempq = self.q.copy()
+        tempq = self.song_queue.copy()
 
         for index in range(queue_position -1): #so we dont have to save what's popped
             tempq.pop()
 
         #we should have the url of the track we want to remove
-        self.q.remove(tempq.pop())
+        self.song_queue.remove(tempq.pop())
         await interaction.response.send_message("**Removed from queue** :books:")
 
 
-    @app_commands.command(name='loop', description='Loops the current song until disabled')
-    @app_commands.choices(choice=[app_commands.Choice(name="Enabled", value=1), app_commands.Choice(name="Disabled", value=0)])
-    async def loop(self, interaction: discord.Interaction, choice: app_commands.Choice[int]): #TODO refactor this to put it to disable removing tracks and add it once
-        print(choice.value)
-        await interaction.response.send_message(choice.value)
+    @app_commands.command(name="loop", description="Loops the current song until disabled")
+    async def loop(self, interaction: discord.Interaction):
+        if not self.is_playing:
+            await interaction.response.send_message("Nothing Playing")
+            return
 
-        if choice.value == 0: #disable loop
+        print("interaction",interaction.id)
+
+        if self.loop_enabled: #disable loop
+            print("if")
+            track, interaction = self.song_queue.pop()
             self.loop_enabled = False
-            await interaction.response.send_message("**Loop Disabled** :repeat:")
-            #remove song from queue
+            await interaction.followup.send("**Loop Disabled** :repeat:")
 
         else: #enable loop
+            print("else")
+            #add current song to the top of the queue once
+            track = await wavelink.YouTubeTrack.search(query=self.now_playing_dict.get('title'), return_first=True)
+            self.song_queue.append((track, interaction))
             self.loop_enabled = True
-            #add current song back into q and disable removing songs from q
             await interaction.response.send_message("**Loop Enabled** :repeat:")
 
+        print("end of command")
 
 
-async def setup(client):
-    await client.add_cog(Music_Commands(client))
+    @app_commands.command(name="volume", description="Sets the volume of the player, max is 150")
+    async def volume(self, interaction: discord.Interaction, percent: float):
+        if percent <= 0 or percent > 150:
+            await interaction.response.send_message("Invalid input")
+            return
+
+        #turn percent into a float between 0-1.5
+        volume = percent/100
+
+        voice: wavelink.Player = interaction.guild.voice_client
+
+        if voice.is_connected():
+            await voice.set_volume(volume, seek=True)
+            await interaction.response.send_message(f'**Volume** :loud_sound: changed to {percent}%')
+        
+        else:
+            await interaction.response.send_message("Not connected to voice chat")
+
+
+
+async def setup(bot):
+    await bot.add_cog(Music_Commands(bot))
