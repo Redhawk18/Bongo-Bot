@@ -26,17 +26,11 @@ class Useless_Commands(commands.Cog):
     async def on_message(self, message):
         #get trolled user from env
         load_dotenv()
-        TROLLED_USER = os.getenv('TROLLED_USER')
+        TROLLED_USER_ID = int(os.getenv('TROLLED_USER_ID'))
 
-        if message.author.name + "#" + message.author.discriminator != TROLLED_USER:
-            return
-
-        if message.content.startswith('!'):
-            return
-
-        #1 in 20 messages
-        if random.randint(1, 20) == 20:
-            await message.add_reaction("🐧")
+        if TROLLED_USER_ID == message.author.id:
+            if random.randint(1, 15) == 15: #1 in 15 messages
+                await message.add_reaction("🐧")
 
 
 
