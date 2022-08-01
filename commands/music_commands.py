@@ -134,7 +134,9 @@ class Music_Commands(commands.Cog):
                 
         
     async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True):
-        """Searchs for the track, and checks if it's a playlist"""
+        if await self.get_voice(interaction) is None: #user is not in voice chat
+            return        
+
         URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
         if URL_RE.match(query) and "list=" in query: #playlist
             print("playlist")
