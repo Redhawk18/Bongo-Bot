@@ -221,16 +221,16 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="pause", description="Pauses track")
     async def pause(self, interaction: discord.Interaction):
-        voice = await self.get_voice(interaction)
+        voice = await self.get_voice(interaction) #TODO add error checking so people in other vc's cant affect how the bot plays in a different vc
         if voice is None:
             return
 
-        if voice.is_playing():
+        if not voice.is_paused():
             await voice.pause()
             await interaction.response.send_message("**Paused** :pause_button:")
 
         else:
-            await interaction.response.send_message("Nothing is playing")
+            await interaction.response.send_message("Already paused")
 
 
     @app_commands.command(name="resume", description="Resumes track")
@@ -244,7 +244,7 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("**Resumed** :arrow_forward:")
 
         else:
-            await interaction.response.send_message("Nothing is paused")
+            await interaction.response.send_message("Already resumed")
 
 
     @app_commands.command(name="force-skip", description="Skips the track")
