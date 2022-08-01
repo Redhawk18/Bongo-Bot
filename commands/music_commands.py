@@ -19,7 +19,7 @@ class Music_Commands(commands.Cog):
 
         self.song_queue = deque()
         self.is_playing = False 
-        self.how_many_want_to_skip = 0
+        self.user_who_want_to_skip:list = []
         self.now_playing_dict:dict = None
         self.loop_enabled = False
         
@@ -70,7 +70,7 @@ class Music_Commands(commands.Cog):
             voice: wavelink.Player = await interaction.user.voice.channel.connect(cls=custom_player.Custom_Player)
             await interaction.followup.send(f'**Connected** :drum: to `{interaction.user.voice.channel.name}`')
 
-        else:
+        else: #already connected
             voice: wavelink.Player = interaction.guild.voice_client
 
         #start disconnect timer
@@ -134,8 +134,8 @@ class Music_Commands(commands.Cog):
                 
         
     async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True):
-        if await self.get_voice(interaction) is None: #user is not in voice chat
-            return        
+        #if await self.get_voice(interaction) is None: #user is not in voice chat #TODO make the user have to be in voice chat to use this command
+            #return        
 
         URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
         if URL_RE.match(query) and "list=" in query: #playlist
@@ -189,7 +189,7 @@ class Music_Commands(commands.Cog):
 
     async def play_song(self):
         """plays the first song in the queue"""
-        self.how_many_want_to_skip = 0 #reset counter
+        self.user_who_want_to_skip.clear() #reset list
 
         track, interaction = self.song_queue.pop()
 
@@ -264,26 +264,29 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="skip", description="Calls a vote to skip the track")
     async def skip(self, interaction: discord.Interaction): #TODO make a list of people who have voted and wipe on new song
-        if not await self._in_voice_channel(interaction): #TODO this function doesnt exist anymore
-            return
-
         voice = await self.get_voice(interaction)
         if voice is None:
             return
 
         if voice.is_playing():
-            #increase the how_many_want_to_skip
-            self.how_many_want_to_skip += 1
+            #check list if the user is the same
+            for id in self.user_who_want_to_skip:
+                if id == interaction.user.id: #already voted
+                    await interaction.response.send_message("You already voted")
+                    return
+
+            #add user id to list
+            self.user_who_want_to_skip.append(interaction.user.id)
 
             #check if its passed threshold
             voice_channel = interaction.message.author.voice.channel
             threshold = floor((len(voice_channel.members)-1)/2) #-1 for the bot
 
-            if self.how_many_want_to_skip >= threshold: #enough people
+            if len(self.user_who_want_to_skip) >= threshold: #enough people
                 await self.forceskip(interaction)
             
             else: #not enough people
-                await interaction.response.send_message(f'**Skipping? ({self.how_many_want_to_skip}/{threshold} people) or use `forceskip`**')
+                await interaction.response.send_message(f'**Skipping? ({len(self.user_who_want_to_skip)}/{threshold} people) or use `forceskip`**')
 
         else:
             await interaction.response.send_message("Nothing is playing")
