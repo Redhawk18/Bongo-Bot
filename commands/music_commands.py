@@ -79,6 +79,19 @@ class Music_Commands(commands.Cog):
 
         return voice
 
+
+    async def get_voice(self, interaction):
+        print("84")
+        voice: wavelink.Player = interaction.guild.voice_client
+        print("86")
+        print(type(voice))
+        if voice is None: #not connected to voice
+            print("88")
+            await interaction.response.send_message("Nothing is playing")
+            return None
+
+        return voice
+
     
     async def stop_voice_functions(self, voice: discord.VoiceClient):
         print("stop_voice_functions")
@@ -92,7 +105,9 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="disconnect", description="disconnect from voice chat")
     async def disconnect(self, interaction: discord.Interaction):
-        voice: wavelink.Player = interaction.guild.voice_client
+        voice = await self.get_voice(interaction)
+        if voice is None:
+            return
 
         if voice.is_connected():
             await self.stop_voice_functions(voice)
@@ -204,7 +219,9 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="pause", description="Pauses track")
     async def pause(self, interaction: discord.Interaction):
-        voice: wavelink.Player = interaction.guild.voice_client #TODO make this a function
+        voice = await self.get_voice(interaction)
+        if voice is None:
+            return
 
         if voice.is_playing():
             await voice.pause()
@@ -216,7 +233,9 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="resume", description="Resumes track")
     async def resume(self, interaction: discord.Interaction):
-        voice: wavelink.Player = interaction.guild.voice_client
+        voice = await self.get_voice(interaction)
+        if voice is None:
+            return
 
         if voice.is_paused():
             await voice.resume()
@@ -229,7 +248,9 @@ class Music_Commands(commands.Cog):
     @app_commands.command(name="force-skip", description="Skips the track")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def forceskip(self, interaction: discord.Interaction):
-        voice: wavelink.Player = interaction.guild.voice_client
+        voice = await self.get_voice(interaction)
+        if voice is None:
+            return
         
         if voice.is_playing():
             await voice.stop()
@@ -241,9 +262,12 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="skip", description="Calls a vote to skip the track")
     async def skip(self, interaction: discord.Interaction): #TODO make a list of people who have voted and wipe on new song
-        if not await self._in_voice_channel(interaction):
+        if not await self._in_voice_channel(interaction): #TODO this function doesnt exist anymore
             return
-        voice = interaction.guild.voice_client
+
+        voice = await self.get_voice(interaction)
+        if voice is None:
+            return
 
         if voice.is_playing():
             #increase the how_many_want_to_skip
@@ -404,7 +428,9 @@ class Music_Commands(commands.Cog):
         #turn percent into a float between 0-1.5
         volume = percent/100
 
-        voice: wavelink.Player = interaction.guild.voice_client
+        voice = await self.get_voice(interaction)
+        if voice is None:
+            return
 
         if voice.is_connected():
             await voice.set_volume(volume, seek=True)
