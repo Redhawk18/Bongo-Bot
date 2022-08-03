@@ -78,9 +78,9 @@ class Music_Commands(commands.Cog):
         return voice
 
 
-    async def is_in_voice(self, interaction):
+    async def is_in_voice(self, interaction: discord.Integration):
         """returns True if the user is in a voice chat"""
-        if interaction.guild.voice_client is None: #not in any voice chat
+        if interaction.user.voice is None: #not in any voice chat
             await interaction.response.send_message("Not in any voice chat")
             return False
         
