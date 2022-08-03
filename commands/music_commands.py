@@ -16,8 +16,6 @@ class Music_Commands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-        #self.disconnect_timer.start()
-
         self.song_queue = deque()
         self.is_playing = False 
         self.user_who_want_to_skip:list = []
@@ -56,17 +54,15 @@ class Music_Commands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: wavelink.player, track: wavelink.Track, reason):
-        if len(self.song_queue) == 0:
-            #queue is empty
+        if len(self.song_queue) == 0: #queue is empty
             self.is_playing = False
-             #disconnect the bot or make a timer or smth
             return
         
         #else we want to keep playing
         await self.play_song()
 
 
-    async def connect(self, interaction): #TODO add error catching
+    async def connect(self, interaction):
         if not interaction.guild.voice_client:
             voice: wavelink.Player = await interaction.user.voice.channel.connect(cls=custom_player.Custom_Player)
             await interaction.followup.send(f'**Connected** :drum: to `{interaction.user.voice.channel.name}`')
@@ -91,12 +87,9 @@ class Music_Commands(commands.Cog):
 
 
     async def get_voice(self, interaction):
-        print("84")
         voice: wavelink.Player = interaction.guild.voice_client
-        print("86")
-        print(type(voice))
+
         if voice is None: #not connected to voice
-            print("88")
             await interaction.response.send_message("Nothing is playing")
             return None
 
@@ -104,14 +97,11 @@ class Music_Commands(commands.Cog):
 
     
     async def stop_voice_functions(self, voice: discord.VoiceClient):
-        print("stop_voice_functions")
         self.song_queue.clear() #wipe all future songs
-        print(self.song_queue)
         self.is_playing = False
         await voice.stop()            
         await voice.disconnect()
         self.disconnect_timer.stop()
-        print("is playing",self.is_playing)
 
 
     @app_commands.command(name="disconnect", description="disconnect from voice chat")
@@ -131,17 +121,13 @@ class Music_Commands(commands.Cog):
     
     @tasks.loop(seconds=10)
     async def disconnect_timer(self):
-        print("currentloop", self.disconnect_timer.current_loop)
         #When a task is started is runs for the first time, which is too fast
         if self.disconnect_timer.current_loop == 0:
             return
 
         for voice in self.bot.voice_clients:
-            print("peps in vc",len(voice.channel.members), "list ->", voice.channel.members)
             if len(voice.channel.members) < 2: #no-one or bot in vc
                 await self.stop_voice_functions(voice)
-                #await vc.disconnect()
-                print("disconnect")
                 
         
     async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True):
@@ -150,13 +136,8 @@ class Music_Commands(commands.Cog):
 
         URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
         if URL_RE.match(query) and "list=" in query: #playlist
-            print("playlist")
             playlist = await wavelink.YouTubePlaylist.search(query=query)
-            print("125")
             await self.add_playlist(playlist, interaction)
-            #for track in playlist.tracks:
-                #print(track.info)
-                #await self.play_or_add(track, interaction, add_to_bottom)
 
         else: #normal track
             track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
@@ -175,7 +156,6 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue") 
 
         #if not playing we start playing
-        print("is playing",self.is_playing)
         await self.play_if_not()
 
 
@@ -189,7 +169,6 @@ class Music_Commands(commands.Cog):
             index += 1
 
         await interaction.response.send_message(f'**Added** :musical_note: Playlist with {index} tracks to the queue')
-        #await interaction.response.send_message(f'**Added** Playlist `url` with {index} tracks to the queue') 
         await self.play_if_not()
 
 
@@ -218,7 +197,7 @@ class Music_Commands(commands.Cog):
         await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!")   
 
 
-    @app_commands.command(name="play", description="plays a Youtube track") #TODO add playlist support
+    @app_commands.command(name="play", description="plays a Youtube track")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def play(self, interaction: discord.Interaction, *, query: str):
         await self.search_track(interaction, query)
@@ -232,7 +211,7 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="pause", description="Pauses track")
     async def pause(self, interaction: discord.Interaction):
-        voice = await self.get_voice(interaction) #TODO add error checking so people in other vc's cant affect how the bot plays in a different vc
+        voice = await self.get_voice(interaction)
         if voice is None:
             return
 
@@ -274,7 +253,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="skip", description="Calls a vote to skip the track")
-    async def skip(self, interaction: discord.Interaction): #TODO make a list of people who have voted and wipe on new song
+    async def skip(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
         if voice is None:
             return
@@ -310,7 +289,6 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Nothing is playing")
             return
 
-        print("before embed")
         print(self.now_playing_dict)
         embed = discord.Embed(
             title = "**Now Playing** :notes:",
@@ -416,23 +394,17 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Nothing Playing")
             return
 
-        print("interaction",interaction.id)
-
         if self.loop_enabled: #disable loop
-            print("if")
             track, interaction = self.song_queue.pop()
             self.loop_enabled = False
             await interaction.followup.send("**Loop Disabled** :repeat:")
 
         else: #enable loop
-            print("else")
             #add current song to the top of the queue once
             track = await wavelink.YouTubeTrack.search(query=self.now_playing_dict.get('title'), return_first=True)
             self.song_queue.append((track, interaction))
             self.loop_enabled = True
             await interaction.response.send_message("**Loop Enabled** :repeat:")
-
-        print("end of command")
 
 
     @app_commands.command(name="volume", description="Sets the volume of the player, max is 150")
