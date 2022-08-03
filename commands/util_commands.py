@@ -2,12 +2,13 @@ from math import ceil
 import random
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 class Util_Commands(commands.Cog):
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
 
     
     @commands.Cog.listener()
@@ -15,10 +16,8 @@ class Util_Commands(commands.Cog):
         print("util commands lister online")
 
 
-
-
-    @commands.command()
-    async def help(self, ctx, category : str):
+    @commands.command() #TODO redo all of this with choices from 2.0
+    async def helpp(self, ctx, category : str):
         if category.lower() == 'util' or category.lower() == 'utils' or category.lower() == 'utilities':
             embed = discord.Embed(
             title = "**Util Commands**",
@@ -101,29 +100,25 @@ class Util_Commands(commands.Cog):
             return
 
 
-    @commands.command()
-    async def ping(self, ctx):
-        await ctx.send(f'**Pong!** :ping_pong: {ceil(self.client.latency*1000)}ms')
+    @app_commands.command(name='ping', description='Pong!')
+    async def ping(self, interaction: discord.Interaction):
+        await interaction.response.send_message(f'**Pong!** :ping_pong: {ceil(self.client.latency*1000)}ms')
 
 
-    @commands.command(aliases=['r'])
-    async def roll(self, ctx, max : int):
+    @app_commands.command(name='roll', description='Rolls a n-sided die')
+    async def roll(self, interaction: discord.Interaction, max : int):
         if max < 1:
-            await ctx.send("Input invalid")
+            await interaction.response.send_message("Input invalid")
             return
 
 
-        await ctx.send(f'**Rolled** :game_die: {random.randint(1, max)} of a {max}-sided die')
+        await interaction.response.send_message(f'**Rolled** :game_die: {random.randint(1, max)} of a {max}-sided die')
 
 
-    @commands.command(aliases=['multiroll', 'mroll', 'mr'])
-    async def multipleroll(self, ctx, max : int, number_of_rolls : int):
-        if number_of_rolls < 1 or max < 1:
-            await ctx.send("Input invalid")
-            return
-
-        if number_of_rolls > 192:
-            await ctx.send("Input invalid")
+    @app_commands.command(name='multiple-roll', description='Rolls a n-sided die x number of times')
+    async def multipleroll(self, interaction: discord.Interaction, max : int, number_of_rolls : int):
+        if number_of_rolls < 1 or max < 1 or number_of_rolls > 192:
+            await interaction.response.send_message("Input invalid")
             return
 
         sum = 0
@@ -142,7 +137,7 @@ class Util_Commands(commands.Cog):
             description = output,
             color = discord.Color.blue(),
         )
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
 
 

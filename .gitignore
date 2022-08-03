@@ -4,5 +4,7 @@
 #python junk
 __pycache__
 
-#audio junk
-*.opus
+#wavelink dependencies
+lavalink/Lavalink.jar
+lavalink/logs/
+lavalink/plugins

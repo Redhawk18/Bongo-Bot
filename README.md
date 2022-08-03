@@ -3,6 +3,6 @@
 ## Setup
 * first create a `.env` file with only the text `DISCORD_TOKEN=` and put the bot token afterward
 
-* install ffmpeg, for whatever platform you are running
+* run the setup script then the start scripts
 
-* then use pip `pip install -r requirements.txt` to install all libaries
+* then use `pip install -r requirements.txt` to install all python libaries
