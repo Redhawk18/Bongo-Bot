@@ -33,6 +33,7 @@ class Music_Commands(commands.Cog):
     async def cog_load(self):
         self.bot.loop.create_task(self.connect_nodes())
 
+
     async def connect_nodes(self):
         """Connect to our Lavalink nodes."""
         await self.bot.wait_until_ready()
@@ -110,6 +111,7 @@ class Music_Commands(commands.Cog):
         if voice is None:
             return
 
+
         if voice.is_connected():
             await self.stop_voice_functions(voice)
             if not interaction.response.is_done():
@@ -124,6 +126,7 @@ class Music_Commands(commands.Cog):
         #When a task is started is runs for the first time, which is too fast
         if self.disconnect_timer.current_loop == 0:
             return
+
 
         for voice in self.bot.voice_clients:
             if len(voice.channel.members) < 2: #no-one or bot in vc
@@ -167,6 +170,7 @@ class Music_Commands(commands.Cog):
             print(track.info)
 
             index += 1
+
 
         await interaction.response.send_message(f'**Added** :musical_note: Playlist with {index} tracks to the queue')
         await self.play_if_not()
@@ -426,6 +430,7 @@ class Music_Commands(commands.Cog):
         
         else:
             await interaction.response.send_message("Not connected to voice chat")
+
 
 
 

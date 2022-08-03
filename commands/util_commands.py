@@ -141,5 +141,5 @@ class Util_Commands(commands.Cog):
 
 
 
-async def setup(client):
-    await client.add_cog(Util_Commands(client))
+def setup(client):
+    client.add_cog(Util_Commands(client))
