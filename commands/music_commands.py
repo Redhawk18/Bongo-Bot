@@ -1,3 +1,4 @@
+from code import interact
 from collections import deque
 from math import floor
 import re
@@ -80,6 +81,15 @@ class Music_Commands(commands.Cog):
         return voice
 
 
+    async def is_in_voice(self, interaction):
+        """returns True if the user is in a voice chat"""
+        if interaction.guild.voice_client is None: #not in any voice chat
+            await interaction.response.send_message("Not in any voice chat")
+            return False
+        
+        return True
+
+
     async def get_voice(self, interaction):
         print("84")
         voice: wavelink.Player = interaction.guild.voice_client
@@ -102,6 +112,7 @@ class Music_Commands(commands.Cog):
         await voice.disconnect()
         self.disconnect_timer.stop()
         print("is playing",self.is_playing)
+
 
     @app_commands.command(name="disconnect", description="disconnect from voice chat")
     async def disconnect(self, interaction: discord.Interaction):
@@ -134,8 +145,8 @@ class Music_Commands(commands.Cog):
                 
         
     async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True):
-        #if await self.get_voice(interaction) is None: #user is not in voice chat #TODO make the user have to be in voice chat to use this command
-            #return        
+        if not await self.is_in_voice(interaction): #user is not in voice chat
+            return        
 
         URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
         if URL_RE.match(query) and "list=" in query: #playlist
