@@ -260,7 +260,7 @@ class Music_Commands(commands.Cog):
         
         if voice.is_playing():
             await voice.stop()
-            await interaction.response.send_message("**Skipped** :fast_forward:")
+            await interaction.response.send_message("**Skipped** :track_next:")
 
         else:
             await interaction.response.send_message("Nothing is playing")
