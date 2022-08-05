@@ -19,6 +19,7 @@ class Music_Commands(commands.Cog):
 
         self.song_queue = deque()
         self.is_playing = False 
+        self.playing_interaction:discord.Interaction = None
         self.user_who_want_to_skip:list = []
         self.now_playing_dict:dict = None
         self.loop_enabled = False
@@ -56,6 +57,9 @@ class Music_Commands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: wavelink.player, track: wavelink.Track, reason):
+        #old view can cause problems
+        await self.playing_message.edit(view=None)
+
         if len(self.song_queue) == 0: #queue is empty
             self.is_playing = False
             return
@@ -199,7 +203,8 @@ class Music_Commands(commands.Cog):
         self.now_playing_dict = track.info
         #play track
         await voice.play(track)
-        await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!", view=Playing_View(self.bot))    
+        self.playing_interaction = interaction #to remove the view later
+        self.playing_message = await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!", view=Playing_View(self.bot), wait=True)  
 
 
     @app_commands.command(name="play", description="plays a Youtube track")
