@@ -339,7 +339,7 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="queue", description="Lists the queue")
     @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id)) #TODO followup embed send causes webhook problems
-    async def queue(self, interaction: discord.Interaction): #TODO some problem with time footer
+    async def queue(self, interaction: discord.Interaction):
         tempq = self.song_queue.copy()
 
         #incase the queue was empty from the start
@@ -375,7 +375,7 @@ class Music_Commands(commands.Cog):
         #figure the length of the queue
         queue_minutes, queue_seconds = divmod(total_seconds, 60)
         if queue_minutes >= 60:
-            queue_hours, queue_minutes = divmod(minutes, 60)
+            queue_hours, queue_minutes = divmod(queue_minutes, 60)
             embed.set_footer(text=f'Total length {floor(queue_hours)}:{await self.add_zero(floor(queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
         else:
             embed.set_footer(text=f'Total length {floor((queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
