@@ -172,7 +172,6 @@ class Music_Commands(commands.Cog):
         index = 0
         for track in playlist.tracks:
             self.song_queue.appendleft((track, interaction))
-            print(track.info)
 
             index += 1
 
@@ -272,7 +271,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="skip", description="Calls a vote to skip the track")
-    async def skip(self, interaction: discord.Interaction):
+    async def skip(self, interaction: discord.Interaction): #TODO when using the command you get "the app didnt response"
         await self.skip_helper(interaction)
 
     async def skip_helper(self, interaction: discord.Interaction):
@@ -365,6 +364,8 @@ class Music_Commands(commands.Cog):
 
             total_seconds += track.length
             index += 1
+            if index > 50: #giant queues have trouble loading
+                break
 
 
         embed = discord.Embed( #5000 character limit
