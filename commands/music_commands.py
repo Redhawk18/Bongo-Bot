@@ -464,30 +464,26 @@ class Playing_View(View):
         self.bot = bot
 
 
-    @discord.ui.button(label="Pause", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Pause", style=discord.ButtonStyle.green, emoji="⏸")
     async def pause_callback(self, interaction, button):
         await self.bot.get_cog("Music_Commands").pause_helper(interaction)
 
 
-    @discord.ui.button(label="Resume", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Resume", style=discord.ButtonStyle.green, emoji="▶️")
     async def resume_callback(self, interaction, button):
         await self.bot.get_cog("Music_Commands").resume_helper(interaction)  
 
 
-    @discord.ui.button(label="Skip", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Skip", style=discord.ButtonStyle.green, emoji="⏭")
     async def skip_callback(self, interaction, button):    
         await self.bot.get_cog("Music_Commands").skip_helper(interaction)
 
 
-    @discord.ui.button(label="Now Playing", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Now Playing", style=discord.ButtonStyle.green, emoji="🎶")
     async def now_playing_callback(self, interaction, button):
         await self.bot.get_cog("Music_Commands").nowplaying_helper(interaction)
 
 
-    # #loop
-    # @discord.ui.button(label="Loop", style=discord.ButtonStyle.green)
-    # async def loop_callback(self, interaction, button):
-    #     self.bot.get_cog("Music_Commands")
-    #     await Music_Commands.loop_helper(Music_Commands, interaction)
-
-
+    @discord.ui.button(label="Loop", style=discord.ButtonStyle.green, emoji="🔁")
+    async def loop_callback(self, interaction, button):
+        await self.bot.get_cog("Music_Commands").loop_helper(interaction)
