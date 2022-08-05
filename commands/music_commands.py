@@ -5,8 +5,9 @@ import re
 
 import wavelink
 import discord
-from discord import app_commands
+from discord import ButtonStyle, app_commands
 from discord.ext import commands, tasks
+from discord.ui import Button, View
 
 import custom_player
 
@@ -18,6 +19,7 @@ class Music_Commands(commands.Cog):
 
         self.song_queue = deque()
         self.is_playing = False 
+        self.playing_interaction:discord.Interaction = None
         self.user_who_want_to_skip:list = []
         self.now_playing_dict:dict = None
         self.loop_enabled = False
@@ -55,6 +57,9 @@ class Music_Commands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: wavelink.player, track: wavelink.Track, reason):
+        #old view can cause problems
+        await self.playing_message.edit(view=None)
+
         if len(self.song_queue) == 0: #queue is empty
             self.is_playing = False
             return
@@ -198,7 +203,8 @@ class Music_Commands(commands.Cog):
         self.now_playing_dict = track.info
         #play track
         await voice.play(track)
-        await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!")   
+        self.playing_interaction = interaction #to remove the view later
+        self.playing_message = await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!", view=Playing_View(self.bot), wait=True)  
 
 
     @app_commands.command(name="play", description="plays a Youtube track")
@@ -215,6 +221,9 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="pause", description="Pauses track")
     async def pause(self, interaction: discord.Interaction):
+        await self.pause_helper(interaction)
+        
+    async def pause_helper(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
         if voice is None:
             return
@@ -229,6 +238,9 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="resume", description="Resumes track")
     async def resume(self, interaction: discord.Interaction):
+        await self.resume_helper(interaction)
+
+    async def resume_helper(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
         if voice is None:
             return
@@ -244,13 +256,16 @@ class Music_Commands(commands.Cog):
     @app_commands.command(name="force-skip", description="Skips the track")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def forceskip(self, interaction: discord.Interaction):
+        await self.forceskip_helper(interaction)
+
+    async def forceskip_helper(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
         if voice is None:
             return
         
         if voice.is_playing():
             await voice.stop()
-            await interaction.response.send_message("**Skipped** :fast_forward:")
+            await interaction.response.send_message("**Skipped** :track_next:")
 
         else:
             await interaction.response.send_message("Nothing is playing")
@@ -258,6 +273,9 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="skip", description="Calls a vote to skip the track")
     async def skip(self, interaction: discord.Interaction):
+        await self.skip_helper(interaction)
+
+    async def skip_helper(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
         if voice is None:
             return
@@ -277,7 +295,7 @@ class Music_Commands(commands.Cog):
             threshold = floor((len(voice_channel.members)-1)/2) #-1 for the bot
 
             if len(self.user_who_want_to_skip) >= threshold: #enough people
-                await self.forceskip(interaction)
+                await self.forceskip_helper(interaction)
             
             else: #not enough people
                 await interaction.response.send_message(f'**Skipping? ({len(self.user_who_want_to_skip)}/{threshold} people) or use `forceskip`**')
@@ -287,8 +305,11 @@ class Music_Commands(commands.Cog):
             return
 
 
-    @app_commands.command(name="now-playing", description="Show the playing song") #add markdown formate for field links
+    @app_commands.command(name="now-playing", description="Show the playing song")
     async def nowplaying(self, interaction: discord.Interaction):
+        await self.nowplaying_helper(interaction)
+
+    async def nowplaying_helper(self, interaction: discord.Interaction):
         if not self.is_playing:
             await interaction.response.send_message("Nothing is playing")
             return
@@ -312,7 +333,8 @@ class Music_Commands(commands.Cog):
         else:
             embed.add_field(name="Duration", value=f'{floor(minutes)}:{await self.add_zero(floor(seconds))}')
 
-        await interaction.response.send_message(embed=embed)   
+        await interaction.response.send_message(embed=embed) 
+
 
 
     @app_commands.command(name="queue", description="Lists the queue")
@@ -394,6 +416,9 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="loop", description="Loops the current song until disabled")
     async def loop(self, interaction: discord.Interaction):
+        await self.loop_helper(interaction)
+
+    async def loop_helper(self, interaction: discord.Interaction):
         if not self.is_playing:
             await interaction.response.send_message("Nothing Playing")
             return
@@ -433,6 +458,37 @@ class Music_Commands(commands.Cog):
 
 
 
-
 async def setup(bot):
     await bot.add_cog(Music_Commands(bot))
+
+
+class Playing_View(View):
+    """Hold the views for the playing output"""
+    def __init__(self, bot):
+        super().__init__(timeout=None)
+        self.bot = bot
+
+
+    @discord.ui.button(label="Pause", style=discord.ButtonStyle.gray, emoji="⏸")
+    async def pause_callback(self, interaction, button):
+        await self.bot.get_cog("Music_Commands").pause_helper(interaction)
+
+
+    @discord.ui.button(label="Resume", style=discord.ButtonStyle.gray, emoji="▶️")
+    async def resume_callback(self, interaction, button):
+        await self.bot.get_cog("Music_Commands").resume_helper(interaction)  
+
+
+    @discord.ui.button(label="Skip", style=discord.ButtonStyle.gray, emoji="⏭")
+    async def skip_callback(self, interaction, button):    
+        await self.bot.get_cog("Music_Commands").skip_helper(interaction)
+
+
+    @discord.ui.button(label="Now Playing", style=discord.ButtonStyle.gray, emoji="🎶")
+    async def now_playing_callback(self, interaction, button):
+        await self.bot.get_cog("Music_Commands").nowplaying_helper(interaction)
+
+
+    @discord.ui.button(label="Loop", style=discord.ButtonStyle.gray, emoji="🔁")
+    async def loop_callback(self, interaction, button):
+        await self.bot.get_cog("Music_Commands").loop_helper(interaction)
