@@ -83,14 +83,14 @@ class Music_Commands(commands.Cog):
         return voice
 
 
-    async def is_in_voice(self, interaction: discord.Integration):
-        """returns True if the user is in a voice chat"""
+    async def able_to_use_commands(self, interaction: discord.Integration):
+        """returns True if the user is in the voice chat, and not deafed"""
         if interaction.user.voice is None: #not in any voice chat
             await interaction.response.send_message("Not in any voice chat")
             return False
 
         if interaction.user.voice.deaf or interaction.user.voice.self_deaf:
-            await interaction.response.send_message("Deafed users can not use music commands")
+            await interaction.response.send_message("Deafed users can not use playing commands")
             return False
         
         return True
@@ -143,7 +143,7 @@ class Music_Commands(commands.Cog):
                 
         
     async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True):
-        if not await self.is_in_voice(interaction): #user is not in voice chat
+        if not await self.able_to_use_commands(interaction): #user is not in voice chat
             return        
 
         URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
@@ -228,7 +228,7 @@ class Music_Commands(commands.Cog):
         
     async def pause_helper(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
-        if voice is None:
+        if voice is None or not await self.able_to_use_commands(interaction):
             return
 
         if not voice.is_paused():
@@ -245,7 +245,7 @@ class Music_Commands(commands.Cog):
 
     async def resume_helper(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
-        if voice is None:
+        if voice is None or not await self.able_to_use_commands(interaction):
             return
 
         if voice.is_paused():
@@ -263,7 +263,7 @@ class Music_Commands(commands.Cog):
 
     async def forceskip_helper(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
-        if voice is None:
+        if voice is None or not await self.able_to_use_commands(interaction):
             return
         
         if voice.is_playing():
@@ -280,7 +280,7 @@ class Music_Commands(commands.Cog):
 
     async def skip_helper(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
-        if voice is None:
+        if voice is None or not await self.able_to_use_commands(interaction):
             return
 
         if voice.is_playing():
@@ -424,6 +424,9 @@ class Music_Commands(commands.Cog):
         await self.loop_helper(interaction)
 
     async def loop_helper(self, interaction: discord.Interaction):
+        if not await self.able_to_use_commands(interaction):
+            return
+
         if not self.is_playing:
             await interaction.response.send_message("Nothing Playing")
             return
@@ -451,7 +454,7 @@ class Music_Commands(commands.Cog):
         volume = percent/100
 
         voice = await self.get_voice(interaction)
-        if voice is None:
+        if voice is None or not await self.able_to_use_commands(interaction):
             return
 
         if voice.is_connected():
@@ -468,7 +471,7 @@ async def setup(bot):
 
 
 class Playing_View(View):
-    """Hold the views for the playing output"""
+    """The view for the playing output"""
     def __init__(self, bot):
         super().__init__(timeout=None)
         self.bot = bot
