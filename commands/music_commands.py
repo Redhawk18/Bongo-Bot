@@ -212,7 +212,7 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="play", description="plays a Youtube track")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
-    async def play(self, interaction: discord.Interaction, *, query: str):
+    async def play(self, interaction: discord.Interaction, *, query: str): #TODO add logic to switch vc's if nothing is playing
         await self.search_track(interaction, query)
 
 
@@ -341,23 +341,23 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="queue", description="Lists the queue")
-    @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id)) #TODO followup embed send causes webhook problems
+    @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
     async def queue(self, interaction: discord.Interaction):
-        tempq = self.song_queue.copy()
-
-        #incase the queue was empty from the start
-        if len(tempq) == 0:
+        if len(self.song_queue) == 0: #incase the queue was empty from the start
             await interaction.response.send_message("The queue is empty")
             return
+
         await interaction.response.send_message("Queue is loading")
 
+        tempq = self.song_queue.copy()
+        
         #store every element in a string
         index = 0
         output = ""
         total_seconds = 0
         while tempq:
             #get the url of the video
-            track, interaction = tempq.pop()
+            track, player_interaction = tempq.pop()
 
             minutes, seconds = divmod(track.length, 60)
             if minutes >= 60:
@@ -385,7 +385,8 @@ class Music_Commands(commands.Cog):
         else:
             embed.set_footer(text=f'Total length {floor((queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
         
-        await interaction.followup.send(embed=embed)
+
+        await interaction.edit_original_message(content="content", embed=embed)
 
 
     async def add_zero(self, number):
