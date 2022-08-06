@@ -88,6 +88,10 @@ class Music_Commands(commands.Cog):
         if interaction.user.voice is None: #not in any voice chat
             await interaction.response.send_message("Not in any voice chat")
             return False
+
+        if interaction.user.voice.deaf or interaction.user.voice.self_deaf:
+            await interaction.response.send_message("Deafed users can not use music commands")
+            return False
         
         return True
 
@@ -271,7 +275,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="skip", description="Calls a vote to skip the track")
-    async def skip(self, interaction: discord.Interaction): #TODO when using the command you get "the app didnt response"
+    async def skip(self, interaction: discord.Interaction):
         await self.skip_helper(interaction)
 
     async def skip_helper(self, interaction: discord.Interaction):
