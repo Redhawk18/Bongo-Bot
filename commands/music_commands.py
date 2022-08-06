@@ -290,14 +290,14 @@ class Music_Commands(commands.Cog):
             self.user_who_want_to_skip.append(interaction.user.id)
 
             #check if its passed threshold
-            voice_channel = interaction.message.author.voice.channel
+            voice_channel = interaction.user.voice.channel
             threshold = floor((len(voice_channel.members)-1)/2) #-1 for the bot
 
             if len(self.user_who_want_to_skip) >= threshold: #enough people
                 await self.forceskip_helper(interaction)
             
             else: #not enough people
-                await interaction.response.send_message(f'**Skipping? ({len(self.user_who_want_to_skip)}/{threshold} people) or use `forceskip`**')
+                await interaction.response.send_message(f'**Skipping? ({len(self.user_who_want_to_skip)}/{threshold} votes needed) or use `forceskip`**')
 
         else:
             await interaction.response.send_message("Nothing is playing")
