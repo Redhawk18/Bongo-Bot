@@ -119,15 +119,16 @@ class Music_Commands(commands.Cog):
     async def stop_voice_functions(self, voice: discord.VoiceClient):
         self.song_queue.clear() #wipe all future songs
         self.is_playing = False
+        await self.playing_message.edit(view=None) #delete playing view
         await voice.stop()            
         await voice.disconnect()
         self.disconnect_timer.stop()
 
 
     @app_commands.command(name="disconnect", description="disconnect from voice chat")
-    async def disconnect(self, interaction: discord.Interaction): #TODO add player command check here
+    async def disconnect(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
-        if voice is None:
+        if voice is None or not await self.able_to_use_commands(interaction):
             return
 
 
