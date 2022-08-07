@@ -130,12 +130,11 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Already disconnected") 
 
     
-    @tasks.loop(seconds=10)
+    @tasks.loop(minutes=10)
     async def disconnect_timer(self):
         #When a task is started is runs for the first time, which is too fast
         if self.disconnect_timer.current_loop == 0:
             return
-
 
         for voice in self.bot.voice_clients:
             if len(voice.channel.members) < 2: #no-one or bot in vc
@@ -446,11 +445,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="volume", description="Sets the volume of the player, max is 150")
-    async def volume(self, interaction: discord.Interaction, percent: float):
-        if percent <= 0 or percent > 150:
-            await interaction.response.send_message("Invalid input")
-            return
-
+    async def volume(self, interaction: discord.Interaction, percent: app_commands.Range[float, 0, 150]):
         #turn percent into a float between 0-1.5
         volume = percent/100
 

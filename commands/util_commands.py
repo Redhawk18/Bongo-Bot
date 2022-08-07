@@ -106,21 +106,12 @@ class Util_Commands(commands.Cog):
 
 
     @app_commands.command(name='roll', description='Rolls a n-sided die')
-    async def roll(self, interaction: discord.Interaction, max : int):
-        if max < 1:
-            await interaction.response.send_message("Input invalid")
-            return
-
-
+    async def roll(self, interaction: discord.Interaction, max: app_commands.Range[int, 2]):
         await interaction.response.send_message(f'**Rolled** :game_die: {random.randint(1, max)} of a {max}-sided die')
 
 
     @app_commands.command(name='multiple-roll', description='Rolls a n-sided die x number of times')
-    async def multipleroll(self, interaction: discord.Interaction, max : int, number_of_rolls : int):
-        if number_of_rolls < 1 or max < 1 or number_of_rolls > 192:
-            await interaction.response.send_message("Input invalid")
-            return
-
+    async def multipleroll(self, interaction: discord.Interaction, max: app_commands.Range[int, 2], number_of_rolls: app_commands.Range[int, 1, 192]):
         sum = 0
         output = f'A {max}-sided die was rolled {number_of_rolls} times\n'
         for i in range(number_of_rolls):
