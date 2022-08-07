@@ -84,22 +84,24 @@ class Music_Commands(commands.Cog):
 
 
     async def able_to_use_commands(self, interaction: discord.Integration):
-        """returns True if the user is in the voice chat, and not deafed"""
+        """returns True if the user is mets all conditions to use playing commands"""
         if interaction.user.voice is None: #not in any voice chat
             await interaction.response.send_message("Not in any voice chat")
             return False
 
-        #in a different voice chat
-        for voice in self.bot.voice_clients:
-            if voice != interaction.user.voice:
-                await interaction.response.send_message("Not in the same voice channel")
-                return False
-
-        if interaction.user.voice.deaf or interaction.user.voice.self_deaf:
+        if interaction.user.voice.deaf or interaction.user.voice.self_deaf: #deafen
             await interaction.response.send_message("Deafed users can not use playing commands")
             return False
-
         
+        for voice in self.bot.voice_clients:
+            if voice.channel.id != interaction.user.voice.channel.id: #in a different voice chat
+                if self.is_playing: #bot is busy
+                    await interaction.response.send_message("Not in the same voice channel")
+                    return False
+
+                elif not self.is_playing: #bot is idling
+                    await voice.disconnect()
+                    return True
         
         return True
 
@@ -123,7 +125,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="disconnect", description="disconnect from voice chat")
-    async def disconnect(self, interaction: discord.Interaction):
+    async def disconnect(self, interaction: discord.Interaction): #TODO add player command check here
         voice = await self.get_voice(interaction)
         if voice is None:
             return
@@ -219,7 +221,7 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="play", description="plays a Youtube track")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
-    async def play(self, interaction: discord.Interaction, *, query: str): #TODO add logic to switch vc's if nothing is playing
+    async def play(self, interaction: discord.Interaction, *, query: str):
         await self.search_track(interaction, query)
 
 
