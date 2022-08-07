@@ -1,10 +1,6 @@
-import wavelink
-
 from typing import Optional
 
-import discord
-from discord.channel import VoiceChannel
-
+import wavelink
 from wavelink import abc
 from wavelink import PartialTrack
 

@@ -1,13 +1,11 @@
-from code import interact
 from collections import deque
 from math import floor
 import re
 
-import wavelink
 import discord
-from discord import ButtonStyle, app_commands
+from discord import app_commands
 from discord.ext import commands, tasks
-from discord.ui import Button, View
+import wavelink
 
 import custom_player
 
@@ -477,7 +475,7 @@ async def setup(bot):
     await bot.add_cog(Music_Commands(bot))
 
 
-class Playing_View(View):
+class Playing_View(discord.ui.View):
     """The view for the playing output"""
     def __init__(self, bot):
         super().__init__(timeout=None)
