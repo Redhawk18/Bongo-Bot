@@ -29,7 +29,7 @@ class Useless_Commands(commands.Cog):
         TROLLED_USER_ID = int(os.getenv('TROLLED_USER_ID'))
 
         if TROLLED_USER_ID == message.author.id:
-            if random.randint(1, 15) == 15: #1 in 15 messages
+            if random.randint(1, 15) == 1: #1 in 15 messages
                 await message.add_reaction("🐧")
 
 

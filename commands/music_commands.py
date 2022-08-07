@@ -1,13 +1,11 @@
-from code import interact
 from collections import deque
 from math import floor
 import re
 
-import wavelink
 import discord
-from discord import ButtonStyle, app_commands
+from discord import app_commands
 from discord.ext import commands, tasks
-from discord.ui import Button, View
+import wavelink
 
 import custom_player
 
@@ -83,11 +81,25 @@ class Music_Commands(commands.Cog):
         return voice
 
 
-    async def is_in_voice(self, interaction: discord.Integration):
-        """returns True if the user is in a voice chat"""
+    async def able_to_use_commands(self, interaction: discord.Integration):
+        """returns True if the user is mets all conditions to use playing commands"""
         if interaction.user.voice is None: #not in any voice chat
             await interaction.response.send_message("Not in any voice chat")
             return False
+
+        if interaction.user.voice.deaf or interaction.user.voice.self_deaf: #deafen
+            await interaction.response.send_message("Deafed users can not use playing commands")
+            return False
+        
+        for voice in self.bot.voice_clients:
+            if voice.channel.id != interaction.user.voice.channel.id: #in a different voice chat
+                if self.is_playing: #bot is busy
+                    await interaction.response.send_message("Not in the same voice channel")
+                    return False
+
+                elif not self.is_playing: #bot is idling
+                    await voice.disconnect()
+                    return True
         
         return True
 
@@ -105,6 +117,7 @@ class Music_Commands(commands.Cog):
     async def stop_voice_functions(self, voice: discord.VoiceClient):
         self.song_queue.clear() #wipe all future songs
         self.is_playing = False
+        await self.playing_message.edit(view=None) #delete playing view
         await voice.stop()            
         await voice.disconnect()
         self.disconnect_timer.stop()
@@ -113,7 +126,7 @@ class Music_Commands(commands.Cog):
     @app_commands.command(name="disconnect", description="disconnect from voice chat")
     async def disconnect(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
-        if voice is None:
+        if voice is None or not await self.able_to_use_commands(interaction):
             return
 
 
@@ -126,12 +139,11 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Already disconnected") 
 
     
-    @tasks.loop(seconds=10)
+    @tasks.loop(minutes=10)
     async def disconnect_timer(self):
         #When a task is started is runs for the first time, which is too fast
         if self.disconnect_timer.current_loop == 0:
             return
-
 
         for voice in self.bot.voice_clients:
             if len(voice.channel.members) < 2: #no-one or bot in vc
@@ -139,7 +151,7 @@ class Music_Commands(commands.Cog):
                 
         
     async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True):
-        if not await self.is_in_voice(interaction): #user is not in voice chat
+        if not await self.able_to_use_commands(interaction): #user is not in voice chat
             return        
 
         URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
@@ -172,7 +184,6 @@ class Music_Commands(commands.Cog):
         index = 0
         for track in playlist.tracks:
             self.song_queue.appendleft((track, interaction))
-            print(track.info)
 
             index += 1
 
@@ -225,7 +236,7 @@ class Music_Commands(commands.Cog):
         
     async def pause_helper(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
-        if voice is None:
+        if voice is None or not await self.able_to_use_commands(interaction):
             return
 
         if not voice.is_paused():
@@ -242,7 +253,7 @@ class Music_Commands(commands.Cog):
 
     async def resume_helper(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
-        if voice is None:
+        if voice is None or not await self.able_to_use_commands(interaction):
             return
 
         if voice.is_paused():
@@ -260,7 +271,7 @@ class Music_Commands(commands.Cog):
 
     async def forceskip_helper(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
-        if voice is None:
+        if voice is None or not await self.able_to_use_commands(interaction):
             return
         
         if voice.is_playing():
@@ -277,7 +288,7 @@ class Music_Commands(commands.Cog):
 
     async def skip_helper(self, interaction: discord.Interaction):
         voice = await self.get_voice(interaction)
-        if voice is None:
+        if voice is None or not await self.able_to_use_commands(interaction):
             return
 
         if voice.is_playing():
@@ -291,14 +302,14 @@ class Music_Commands(commands.Cog):
             self.user_who_want_to_skip.append(interaction.user.id)
 
             #check if its passed threshold
-            voice_channel = interaction.message.author.voice.channel
+            voice_channel = interaction.user.voice.channel
             threshold = floor((len(voice_channel.members)-1)/2) #-1 for the bot
 
             if len(self.user_who_want_to_skip) >= threshold: #enough people
                 await self.forceskip_helper(interaction)
             
             else: #not enough people
-                await interaction.response.send_message(f'**Skipping? ({len(self.user_who_want_to_skip)}/{threshold} people) or use `forceskip`**')
+                await interaction.response.send_message(f'**Skipping? ({len(self.user_who_want_to_skip)}/{threshold} votes needed) or use `forceskip`**')
 
         else:
             await interaction.response.send_message("Nothing is playing")
@@ -338,23 +349,23 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="queue", description="Lists the queue")
-    @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id)) #TODO followup embed send causes webhook problems
-    async def queue(self, interaction: discord.Interaction): #TODO some problem with time footer
-        tempq = self.song_queue.copy()
-
-        #incase the queue was empty from the start
-        if len(tempq) == 0:
+    @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
+    async def queue(self, interaction: discord.Interaction):
+        if len(self.song_queue) == 0: #incase the queue was empty from the start
             await interaction.response.send_message("The queue is empty")
             return
+
         await interaction.response.send_message("Queue is loading")
 
+        tempq = self.song_queue.copy()
+        
         #store every element in a string
         index = 0
         output = ""
         total_seconds = 0
         while tempq:
             #get the url of the video
-            track, interaction = tempq.pop()
+            track, player_interaction = tempq.pop()
 
             minutes, seconds = divmod(track.length, 60)
             if minutes >= 60:
@@ -365,6 +376,8 @@ class Music_Commands(commands.Cog):
 
             total_seconds += track.length
             index += 1
+            if index > 50: #giant queues have trouble loading
+                break
 
 
         embed = discord.Embed( #5000 character limit
@@ -375,12 +388,13 @@ class Music_Commands(commands.Cog):
         #figure the length of the queue
         queue_minutes, queue_seconds = divmod(total_seconds, 60)
         if queue_minutes >= 60:
-            queue_hours, queue_minutes = divmod(minutes, 60)
+            queue_hours, queue_minutes = divmod(queue_minutes, 60)
             embed.set_footer(text=f'Total length {floor(queue_hours)}:{await self.add_zero(floor(queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
         else:
             embed.set_footer(text=f'Total length {floor((queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
         
-        await interaction.followup.send(embed=embed)
+
+        await interaction.edit_original_message(content="content", embed=embed)
 
 
     async def add_zero(self, number):
@@ -419,6 +433,9 @@ class Music_Commands(commands.Cog):
         await self.loop_helper(interaction)
 
     async def loop_helper(self, interaction: discord.Interaction):
+        if not await self.able_to_use_commands(interaction):
+            return
+
         if not self.is_playing:
             await interaction.response.send_message("Nothing Playing")
             return
@@ -437,16 +454,12 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="volume", description="Sets the volume of the player, max is 150")
-    async def volume(self, interaction: discord.Interaction, percent: float):
-        if percent <= 0 or percent > 150:
-            await interaction.response.send_message("Invalid input")
-            return
-
+    async def volume(self, interaction: discord.Interaction, percent: app_commands.Range[float, 0, 150]):
         #turn percent into a float between 0-1.5
         volume = percent/100
 
         voice = await self.get_voice(interaction)
-        if voice is None:
+        if voice is None or not await self.able_to_use_commands(interaction):
             return
 
         if voice.is_connected():
@@ -462,8 +475,8 @@ async def setup(bot):
     await bot.add_cog(Music_Commands(bot))
 
 
-class Playing_View(View):
-    """Hold the views for the playing output"""
+class Playing_View(discord.ui.View):
+    """The view for the playing output"""
     def __init__(self, bot):
         super().__init__(timeout=None)
         self.bot = bot
