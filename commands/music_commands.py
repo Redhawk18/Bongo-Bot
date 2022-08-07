@@ -89,9 +89,17 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Not in any voice chat")
             return False
 
+        #in a different voice chat
+        for voice in self.bot.voice_clients:
+            if voice != interaction.user.voice:
+                await interaction.response.send_message("Not in the same voice channel")
+                return False
+
         if interaction.user.voice.deaf or interaction.user.voice.self_deaf:
             await interaction.response.send_message("Deafed users can not use playing commands")
             return False
+
+        
         
         return True
 
