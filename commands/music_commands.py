@@ -1,5 +1,5 @@
 from collections import deque
-from math import floor
+from math import ceil, floor
 import re
 
 import discord
@@ -303,7 +303,7 @@ class Music_Commands(commands.Cog):
 
             #check if its passed threshold
             voice_channel = interaction.user.voice.channel
-            threshold = floor((len(voice_channel.members)-1)/2) #-1 for the bot
+            threshold = ceil((len(voice_channel.members)-1)/2) #-1 for the bot
 
             if len(self.user_who_want_to_skip) >= threshold: #enough people
                 await self.forceskip_helper(interaction)
