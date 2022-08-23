@@ -8,6 +8,6 @@ mkdir lavalink
 cd lavalink
 
 #download lavalink
-wget https://github.com/freyacodes/Lavalink/releases/download/3.5-rc2/Lavalink.jar
+wget https://github.com/freyacodes/Lavalink/releases/download/3.5-rc3/Lavalink.jar
 
 echo "Lavalink setup complete"
