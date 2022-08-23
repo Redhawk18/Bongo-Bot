@@ -17,7 +17,8 @@ class Music_Commands(commands.Cog):
 
         self.song_queue = deque()
         self.is_playing = False 
-        self.playing_interaction:discord.Interaction = None
+        self.playing_view_channel_id:int = None
+        self.playing_view_message_id:int = None
         self.user_who_want_to_skip:list = []
         self.now_playing_dict:dict = None
         self.loop_enabled = False
@@ -56,7 +57,8 @@ class Music_Commands(commands.Cog):
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: wavelink.player, track: wavelink.Track, reason):
         #old view can cause problems
-        await self.playing_message.edit(view=None)
+        playing_view = await self.bot.get_channel(self.playing_view_channel_id).fetch_message(self.playing_view_message_id)
+        await playing_view.delete()
 
         if len(self.song_queue) == 0: #queue is empty
             self.is_playing = False
@@ -214,20 +216,23 @@ class Music_Commands(commands.Cog):
         self.now_playing_dict = track.info
         #play track
         await voice.play(track)
-        self.playing_interaction = interaction #to remove the view later
-        self.playing_message = await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!", view=Playing_View(self.bot), wait=True)  
+        playing_message = await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!", wait=True)  
+        playing_view = await playing_message.channel.send(view=Playing_View(self.bot))
+
+        self.playing_view_channel_id = playing_view.channel.id
+        self.playing_view_message_id = playing_view.id
+        
 
 
     @app_commands.command(name="play", description="plays a Youtube track")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
-    async def play(self, interaction: discord.Interaction, *, query: str):
-        await self.search_track(interaction, query)
+    async def play(self, interaction: discord.Interaction, *, query: str, play_next: bool=False, start_seconds: int=None): #TODO add optional commands
+        await self.search_track(interaction, query, add_to_bottom=play_next)
 
 
-    @app_commands.command(name="play-next", description="plays a Youtube track after the current one")
-    @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
-    async def play_next(self, interaction: discord.Interaction, *, query: str):
-        await self.search_track(interaction, query, add_to_bottom=False)
+    @app_commands.command(name="playtest", description="plays a Youtube track after the current one")
+    async def playtest(self, interaction: discord.Interaction, *, query: str, start: int=None, end: int=None, play_next: bool=False):
+        await interaction.response.send_message(query, start, end, play_next)
 
 
     @app_commands.command(name="pause", description="Pauses track")
