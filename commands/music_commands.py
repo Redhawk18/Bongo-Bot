@@ -152,7 +152,8 @@ class Music_Commands(commands.Cog):
                 await self.stop_voice_functions(voice)
                 
         
-    async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True):
+    async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True, start=None, end=None):
+        print("start", start)
         if not await self.able_to_use_commands(interaction): #user is not in voice chat
             return        
 
@@ -163,18 +164,21 @@ class Music_Commands(commands.Cog):
 
         else: #normal track
             track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
-            await self.add_song(track, interaction, add_to_bottom)    
+            print("start", start)
+            await self.add_song(track, interaction, add_to_bottom, start=start, end=end)    
 
 
-    async def add_song(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True):
+    async def add_song(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True, start=None, end=None):
         """Takes a track and adds it to the queue, and if nothing is playing this sends it to play"""
+        print("start", start)
+
         #add to queue
         if add_to_bottom:
-            self.song_queue.appendleft((track, interaction))
+            self.song_queue.appendleft((track, interaction, start, end))
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to queue")
         
         else: #playnext
-            self.song_queue.append((track, interaction))
+            self.song_queue.append((track, interaction, start, end))
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue") 
 
         #if not playing we start playing
@@ -203,7 +207,9 @@ class Music_Commands(commands.Cog):
         """plays the first song in the queue"""
         self.user_who_want_to_skip.clear() #reset list
 
-        track, interaction = self.song_queue.pop()
+        track, interaction, start, end = self.song_queue.pop()
+        print("start", start)
+        print("end", end)
 
         if self.loop_enabled:
             #add the track back into the front
@@ -215,7 +221,7 @@ class Music_Commands(commands.Cog):
 
         self.now_playing_dict = track.info
         #play track
-        await voice.play(track)
+        await voice.play(track, start)
         playing_message = await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!", wait=True)  
         playing_view = await playing_message.channel.send(view=Playing_View(self.bot))
 
@@ -226,13 +232,13 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="play", description="plays a Youtube track")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
-    async def play(self, interaction: discord.Interaction, *, query: str, play_next: bool=False, start_seconds: int=None): #TODO add optional commands
-        await self.search_track(interaction, query, add_to_bottom=play_next)
+    async def play(self, interaction: discord.Interaction, *, query: str, play_next: bool=False, start_millaseconds: int=None): #TODO add optional commands
+        await self.search_track(interaction, query, add_to_bottom=play_next, start=start_millaseconds)
 
 
-    @app_commands.command(name="playtest", description="plays a Youtube track after the current one")
-    async def playtest(self, interaction: discord.Interaction, *, query: str, start: int=None, end: int=None, play_next: bool=False):
-        await interaction.response.send_message(query, start, end, play_next)
+    # @app_commands.command(name="playtest", description="plays a Youtube track after the current one")
+    # async def playtest(self, interaction: discord.Interaction, *, query: str, start: int=None, end: int=None, play_next: bool=False):
+    #     await interaction.response.send_message(query, start, end, play_next)
 
 
     @app_commands.command(name="pause", description="Pauses track")
