@@ -1,5 +1,5 @@
 from collections import deque
-from math import ceil, floor
+from math import floor
 import re
 
 import discord
@@ -17,8 +17,7 @@ class Music_Commands(commands.Cog):
 
         self.song_queue = deque()
         self.is_playing = False 
-        self.playing_view_channel_id:int = None
-        self.playing_view_message_id:int = None
+        self.playing_interaction:discord.Interaction = None
         self.user_who_want_to_skip:list = []
         self.now_playing_dict:dict = None
         self.loop_enabled = False
@@ -57,8 +56,7 @@ class Music_Commands(commands.Cog):
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: wavelink.player, track: wavelink.Track, reason):
         #old view can cause problems
-        playing_view = await self.bot.get_channel(self.playing_view_channel_id).fetch_message(self.playing_view_message_id)
-        await playing_view.delete()
+        await self.playing_message.edit(view=None)
 
         if len(self.song_queue) == 0: #queue is empty
             self.is_playing = False
@@ -119,7 +117,9 @@ class Music_Commands(commands.Cog):
     async def stop_voice_functions(self, voice: discord.VoiceClient):
         self.song_queue.clear() #wipe all future songs
         self.is_playing = False
-        await self.playing_message.edit(view=None) #delete playing view
+        if not self.playing_interaction:
+            await self.playing_message.edit(view=None) #delete playing view
+        self.playing_interaction = None
         await voice.stop()            
         await voice.disconnect()
         self.disconnect_timer.stop()
@@ -151,29 +151,8 @@ class Music_Commands(commands.Cog):
             if len(voice.channel.members) < 2: #no-one or bot in vc
                 await self.stop_voice_functions(voice)
                 
-
-    async def get_milliseconds_from_string(self, time_string:str):
-        "takes a time string and returns the time in milliseconds `1:34` -> `94000`"
-        list_of_units = [int(x) for x in time_string.split(":")]
-
-        print(len(list_of_units))
-        print(list_of_units)
-
-        list_of_units.reverse() #makes time more predictable to deal with
-        total_seconds = 0
-        if len(list_of_units) == 3: #hours
-            total_seconds += (list_of_units[2] * 3600) #seconds in an hour
-
-        if len(list_of_units) == 2: #minutes
-            total_seconds += (list_of_units[1] * 60)
-
-        total_seconds += list_of_units[0] #total seconds
-
-        return (total_seconds * 1000) #turn into milliseconds
-
         
-    async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True, start=None, end=None):
-        print("start", start)
+    async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True):
         if not await self.able_to_use_commands(interaction): #user is not in voice chat
             return        
 
@@ -184,21 +163,18 @@ class Music_Commands(commands.Cog):
 
         else: #normal track
             track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
-            print("start", start)
-            await self.add_song(track, interaction, add_to_bottom, start=start, end=end)    
+            await self.add_song(track, interaction, add_to_bottom)    
 
 
-    async def add_song(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True, start=None, end=None):
+    async def add_song(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True):
         """Takes a track and adds it to the queue, and if nothing is playing this sends it to play"""
-        print("start", start)
-
         #add to queue
         if add_to_bottom:
-            self.song_queue.appendleft((track, interaction, start, end))
+            self.song_queue.appendleft((track, interaction))
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to queue")
         
         else: #playnext
-            self.song_queue.append((track, interaction, start, end))
+            self.song_queue.append((track, interaction))
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue") 
 
         #if not playing we start playing
@@ -227,9 +203,7 @@ class Music_Commands(commands.Cog):
         """plays the first song in the queue"""
         self.user_who_want_to_skip.clear() #reset list
 
-        track, interaction, start, end = self.song_queue.pop()
-        print("start", start)
-        print("end", end)
+        track, interaction = self.song_queue.pop()
 
         if self.loop_enabled:
             #add the track back into the front
@@ -241,22 +215,21 @@ class Music_Commands(commands.Cog):
 
         self.now_playing_dict = track.info
         #play track
-        await voice.play(track, start=start)
-        playing_message = await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!", wait=True)  
-        playing_view = await playing_message.channel.send(view=Playing_View(self.bot))
-
-        self.playing_view_channel_id = playing_view.channel.id
-        self.playing_view_message_id = playing_view.id        
+        await voice.play(track)
+        self.playing_interaction = interaction #to remove the view later
+        self.playing_message = await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!", view=Playing_View(self.bot), wait=True)  
 
 
-    @app_commands.command(name="play", description="plays a Youtube track, start time need to formated with colons")
+    @app_commands.command(name="play", description="plays a Youtube track")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
-    async def play(self, interaction: discord.Interaction, *, query: str, play_next: bool=False, start_time: str=None):
-        if start_time is not None: #parser
-            start_time = await self.get_milliseconds_from_string(start_time)
-            print("start_time after", start_time,type(start_time))
+    async def play(self, interaction: discord.Interaction, *, query: str):
+        await self.search_track(interaction, query)
 
-        await self.search_track(interaction, query, add_to_bottom=play_next, start=start_time)
+
+    @app_commands.command(name="play-next", description="plays a Youtube track after the current one")
+    @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
+    async def play_next(self, interaction: discord.Interaction, *, query: str):
+        await self.search_track(interaction, query, add_to_bottom=False)
 
 
     @app_commands.command(name="pause", description="Pauses track")
@@ -332,7 +305,7 @@ class Music_Commands(commands.Cog):
 
             #check if its passed threshold
             voice_channel = interaction.user.voice.channel
-            threshold = ceil((len(voice_channel.members)-1)/2) #-1 for the bot
+            threshold = floor((len(voice_channel.members)-1)/2) #-1 for the bot
 
             if len(self.user_who_want_to_skip) >= threshold: #enough people
                 await self.forceskip_helper(interaction)
