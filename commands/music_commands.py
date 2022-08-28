@@ -152,12 +152,14 @@ class Music_Commands(commands.Cog):
                 await self.stop_voice_functions(voice)
 
 
-    async def get_milliseconds_from_string(self, time_string:str):
-        "takes a time string and returns the time in milliseconds `1:34` -> `94000`"
-        list_of_units = [int(x) for x in time_string.split(":")]
+    async def get_milliseconds_from_string(self, time_string: str, interaction: discord.Interaction):
+        "takes a time string and returns the time in milliseconds `1:34` -> `94000`, errors return `-1`"
+        TIME_RE = re.compile("^[0-5]?\d:[0-5]?\d:[0-5]\d|[0-5]?\d:[0-5]\d|\d+$")
+        if not TIME_RE.match(time_string):
+            await interaction.response.send_message("Invalid time stamp")
+            return -1
 
-        print(len(list_of_units))
-        print(list_of_units)
+        list_of_units = [int(x) for x in time_string.split(":")]
 
         list_of_units.reverse() #makes time more predictable to deal with
         total_seconds = 0
@@ -253,7 +255,9 @@ class Music_Commands(commands.Cog):
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def play(self, interaction: discord.Interaction, *, query: str, play_next: bool=False, start_time: str=None):
         if start_time is not None: #parser
-            start_time = await self.get_milliseconds_from_string(start_time)
+            start_time = await self.get_milliseconds_from_string(start_time, interaction)
+            if start_time == -1: #time code was invalid
+                return
             print("start_time after", start_time,type(start_time))
 
         await self.search_track(interaction, query, add_to_bottom=play_next, start=start_time)
