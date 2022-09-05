@@ -48,7 +48,8 @@ async def main():
                 await bot.load_extension(f'commands.{filename[:-3]}')
         
         #start bot
-        logging.basicConfig(level=logging.INFO)
+        discord.utils.setup_logging(level=logging.INFO)
+        #logging.basicConfig(level=logging.INFO)
         await bot.start(TOKEN)
         
     
