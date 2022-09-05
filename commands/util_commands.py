@@ -21,33 +21,28 @@ class Util_Commands(commands.Cog):
         await interaction.response.send_message(f'**Pong!** :ping_pong: {ceil(self.client.latency*1000)}ms')
 
 
-    @app_commands.command(name="roll", description="Rolls a n-sided die")
-    async def roll(self, interaction: discord.Interaction, max: app_commands.Range[int, 2]):
-        await interaction.response.send_message(f'**Rolled** :game_die: {random.randint(1, max)} of a {max}-sided die')
-
-
-    @app_commands.command(name="multiple-roll", description="Rolls a n-sided die x number of times")
-    async def multipleroll(self, interaction: discord.Interaction, max: app_commands.Range[int, 2], number_of_rolls: app_commands.Range[int, 1, 192]):
+    @app_commands.command(name="roll", description="Rolls a sided die, however many times")
+    async def roll(self, interaction: discord.Interaction, die_sides: app_commands.Range[int, 2], rolls: app_commands.Range[int, 1, 24]=1):
         sum = 0
-        output = f'A {max}-sided die was rolled {number_of_rolls} times\n'
-        for i in range(number_of_rolls):
-            current_roll = random.randint(1, max)
+        output = f'A {die_sides}-sided die was rolled {rolls} times\n'
+        for i in range(rolls):
+            current_roll = random.randint(1, die_sides)
             sum += current_roll
             output += f'Rolled {current_roll} :game_die:\n'
 
         #sum print
         output += "\n"
-        output += f'The sum is **{sum} of {number_of_rolls * max}**'
+        output += f'The sum is **{sum} of {rolls * die_sides}**'
 
         embed = discord.Embed(
-            title = "**Multiple Rolled** :game_die:",
+            title = "**Roll** :game_die:",
             description = output,
             color = discord.Color.blue(),
         )
         await interaction.response.send_message(embed=embed)
 
 
-    @app_commands.command(name="poll", description='creates a poll with emotes to vote by')
+    @app_commands.command(name="poll", description="creates a poll with emotes to vote by")
     async def poll(self, interaction: discord.Interaction, title: str, option1: str, option2: str, option3: str=None, option4: str=None, option5: str=None, option6: str=None ,option7: str=None, option8: str=None, option9: str=None, option10: str=None):
         #take every option and put it in a list to loop through
         options = []
