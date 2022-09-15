@@ -57,8 +57,7 @@ class Music_Commands(commands.Cog):
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: wavelink.player, track: wavelink.Track, reason):
         #old view can cause problems
-        playing_view = self.bot.get_channel(self.playing_view_channel_id).get_partial_message(self.playing_view_message_id)
-        await playing_view.delete()
+        await self.delete_view()
 
         if len(self.song_queue) == 0: #queue is empty
             self.is_playing = False
@@ -119,11 +118,14 @@ class Music_Commands(commands.Cog):
     async def stop_voice_functions(self, voice: discord.VoiceClient):
         self.song_queue.clear() #wipe all future songs
         self.is_playing = False
-        playing_view = self.bot.get_channel(self.playing_view_channel_id).get_partial_message(self.playing_view_message_id)
-        await playing_view.delete()
+        await self.delete_view()
         await voice.stop()
         await voice.disconnect()
         self.disconnect_timer.stop()
+
+    async def delete_view(self):
+        playing_view = self.bot.get_channel(self.playing_view_channel_id).get_partial_message(self.playing_view_message_id)
+        await playing_view.delete()
 
 
     @app_commands.command(name="disconnect", description="disconnect from voice chat")
@@ -142,7 +144,7 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Already disconnected")
 
 
-    @tasks.loop(seconds=1)
+    @tasks.loop(minutes=10)
     async def disconnect_timer(self):
         #When a task is started is runs for the first time, which is too fast
         if self.disconnect_timer.current_loop == 0:
