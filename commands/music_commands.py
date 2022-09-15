@@ -57,7 +57,7 @@ class Music_Commands(commands.Cog):
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: wavelink.player, track: wavelink.Track, reason):
         #old view can cause problems
-        playing_view = await self.bot.get_channel(self.playing_view_channel_id).fetch_message(self.playing_view_message_id)
+        playing_view = self.bot.get_channel(self.playing_view_channel_id).get_partial_message(self.playing_view_message_id)
         await playing_view.delete()
 
         if len(self.song_queue) == 0: #queue is empty
@@ -119,7 +119,8 @@ class Music_Commands(commands.Cog):
     async def stop_voice_functions(self, voice: discord.VoiceClient):
         self.song_queue.clear() #wipe all future songs
         self.is_playing = False
-        await self.playing_message.edit(view=None) #delete playing view
+        playing_view = self.bot.get_channel(self.playing_view_channel_id).get_partial_message(self.playing_view_message_id)
+        await playing_view.delete()
         await voice.stop()
         await voice.disconnect()
         self.disconnect_timer.stop()
@@ -141,7 +142,7 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Already disconnected")
 
 
-    @tasks.loop(minutes=10)
+    @tasks.loop(seconds=1)
     async def disconnect_timer(self):
         #When a task is started is runs for the first time, which is too fast
         if self.disconnect_timer.current_loop == 0:
@@ -175,7 +176,6 @@ class Music_Commands(commands.Cog):
 
 
     async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True, start=None, end=None):
-        print("start", start)
         if not await self.able_to_use_commands(interaction): #user is not in voice chat
             return
 
@@ -186,13 +186,11 @@ class Music_Commands(commands.Cog):
 
         else: #normal track
             track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
-            print("start", start)
             await self.add_song(track, interaction, add_to_bottom, start=start, end=end)
 
 
     async def add_song(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True, start=None, end=None):
         """Takes a track and adds it to the queue, and if nothing is playing this sends it to play"""
-        print("start", start)
 
         #add to queue
         if add_to_bottom:
@@ -230,8 +228,6 @@ class Music_Commands(commands.Cog):
         self.user_who_want_to_skip.clear() #reset list
 
         track, interaction, start, end = self.song_queue.pop()
-        print("start", start)
-        print("end", end)
 
         if self.loop_enabled:
             #add the track back into the front
@@ -245,10 +241,10 @@ class Music_Commands(commands.Cog):
         #play track
         await voice.play(track, start=start)
         playing_message = await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!", wait=True)
-        playing_view = await playing_message.channel.send(view=Playing_View(self.bot))
+        view = await playing_message.channel.send(view=Playing_View(self.bot))
 
-        self.playing_view_channel_id = playing_view.channel.id
-        self.playing_view_message_id = playing_view.id
+        self.playing_view_channel_id = playing_message.channel.id
+        self.playing_view_message_id = view.id
 
 
     @app_commands.command(name="play", description="plays a Youtube track, start time need to formated with colons")
@@ -258,7 +254,6 @@ class Music_Commands(commands.Cog):
             start_time = await self.get_milliseconds_from_string(start_time, interaction)
             if start_time == -1: #time code was invalid
                 return
-            print("start_time after", start_time,type(start_time))
 
         await self.search_track(interaction, query, add_to_bottom=play_next, start=start_time)
 
