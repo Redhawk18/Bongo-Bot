@@ -15,13 +15,15 @@ class Music_Commands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-        self.song_queue = deque()
-        self.is_playing = False
-        self.playing_view_channel_id:int = None
-        self.playing_view_message_id:int = None
-        self.user_who_want_to_skip:list = []
-        self.now_playing_dict:dict = None
-        self.loop_enabled = False
+        self.server_info = {
+            "song_queue": deque(),
+            "is_playing": False,
+            "playing_view_channel_id": None,
+            "playing_view_message_id": None,
+            "user_who_want_to_skip": [],
+            "now_playing_dict": None,
+            "loop_enabled": False,
+        }
 
 
 
