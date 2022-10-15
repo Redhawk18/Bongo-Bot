@@ -179,6 +179,17 @@ class Music_Commands(commands.Cog):
         return (total_seconds * 1000) #turn into milliseconds
 
 
+    @app_commands.command(name="play", description="plays a Youtube track, start time need to formated with colons")
+    @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
+    async def play(self, interaction: discord.Interaction, *, query: str, play_next: bool=False, start_time: str=None):
+        if start_time is not None: #parser
+            start_time = await self.get_milliseconds_from_string(start_time, interaction)
+            if start_time == -1: #time code was invalid
+                return
+
+        await self.search_track(interaction, query, add_to_bottom=play_next, start=start_time)
+
+
     async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True, start=None, end=None):
         if not await self.able_to_use_commands(interaction): #user is not in voice chat
             return
@@ -251,15 +262,7 @@ class Music_Commands(commands.Cog):
         self.playing_view_message_id = view.id
 
 
-    @app_commands.command(name="play", description="plays a Youtube track, start time need to formated with colons")
-    @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
-    async def play(self, interaction: discord.Interaction, *, query: str, play_next: bool=False, start_time: str=None):
-        if start_time is not None: #parser
-            start_time = await self.get_milliseconds_from_string(start_time, interaction)
-            if start_time == -1: #time code was invalid
-                return
 
-        await self.search_track(interaction, query, add_to_bottom=play_next, start=start_time)
 
 
     @app_commands.command(name="pause", description="Pauses track")

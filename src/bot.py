@@ -20,8 +20,6 @@ bot_intents.members = True
 bot_intents.message_content = True
 bot_intents.voice_states = True
 
-#handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
-
 bot = commands.Bot(command_prefix='!', intents=bot_intents)
 
 
@@ -49,10 +47,7 @@ async def main():
         
         #start bot
         discord.utils.setup_logging(level=logging.INFO)
-        #logging.basicConfig(level=logging.INFO)
         await bot.start(TOKEN)
-        
-    
-   
+
 
 asyncio.run(main())
