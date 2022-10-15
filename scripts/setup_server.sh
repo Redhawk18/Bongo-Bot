@@ -10,5 +10,4 @@ cd lavalink
 #download lavalink
 wget https://github.com/freyacodes/Lavalink/releases/download/3.5-rc4/Lavalink.jar
 
-
 echo "Lavalink setup complete"

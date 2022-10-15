@@ -7,7 +7,7 @@ from discord import app_commands
 from discord.ext import commands, tasks
 import wavelink
 
-import custom_player
+import src.custom_player as custom_player
 
 class Music_Commands(commands.Cog):
     """Music cog to hold Wavelink related commands and listeners."""
