@@ -84,7 +84,7 @@ class Music_Commands(commands.Cog):
         return voice
 
 
-    async def able_to_use_commands(self, interaction: discord.Integration):
+    async def able_to_use_commands(self, interaction: discord.Interaction):
         """returns True if the user is mets all conditions to use playing commands"""
         if interaction.user.voice is None: #not in any voice chat
             await interaction.response.send_message("Not in any voice chat")
@@ -447,7 +447,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="queue-remove", description="Removes a song from the queue based on its track number")
-    async def queueremove(self, interaction: discord.Integration, queue_position : int):
+    async def queueremove(self, interaction: discord.Interaction, queue_position : int):
         if queue_position > len(self.q) or queue_position < 0:
             await interaction.response.send_message("Input invalid")
             return
