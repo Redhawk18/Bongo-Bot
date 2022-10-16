@@ -7,7 +7,8 @@ from discord import app_commands
 from discord.ext import commands, tasks
 import wavelink
 
-import src.custom_player as custom_player
+from custom_player import Custom_Player
+import server_infomation
 
 class Music_Commands(commands.Cog):
     """Music cog to hold Wavelink related commands and listeners."""
@@ -53,11 +54,11 @@ class Music_Commands(commands.Cog):
         print(f'Node: <{node.identifier}> is ready!')
 
     @commands.Cog.listener()
-    async def on_wavelink_track_start(self, player: wavelink.Player, track: wavelink.Track):
-        self.is_playing = True
+    async def on_wavelink_track_start(self, player: Custom_Player, track: wavelink.Track):
+        self.severs_variables[player.guild.id].is_playing = True
 
     @commands.Cog.listener()
-    async def on_wavelink_track_end(self, player: wavelink.player, track: wavelink.Track, reason):
+    async def on_wavelink_track_end(self, player: Custom_Player, track: wavelink.Track, reason):
         #old view can cause problems
         await self.delete_view()
 
@@ -71,11 +72,11 @@ class Music_Commands(commands.Cog):
 
     async def connect(self, interaction):
         if not interaction.guild.voice_client:
-            voice: wavelink.Player = await interaction.user.voice.channel.connect(cls=custom_player.Custom_Player)
+            voice: Custom_Player = await interaction.user.voice.channel.connect(cls=Custom_Player)
             await interaction.followup.send(f'**Connected** :drum: to `{interaction.user.voice.channel.name}`')
 
         else: #already connected
-            voice: wavelink.Player = interaction.guild.voice_client
+            voice: Custom_Player = interaction.guild.voice_client
 
         #start disconnect timer
         if not self.disconnect_timer.is_running():
@@ -108,7 +109,7 @@ class Music_Commands(commands.Cog):
 
 
     async def get_voice(self, interaction):
-        voice: wavelink.Player = interaction.guild.voice_client
+        voice: Custom_Player = interaction.guild.voice_client
 
         if voice is None: #not connected to voice
             await interaction.response.send_message("Nothing is playing")
