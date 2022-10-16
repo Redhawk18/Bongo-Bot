@@ -29,7 +29,7 @@ async def on_ready():
     print('------')
 
     #sync new commands
-    await bot.tree.sync()
+    #await bot.tree.sync()
 
 
 @bot.tree.error
@@ -41,7 +41,7 @@ async def on_error(interaction: discord.Interaction, error: discord.app_commands
 async def main():
     async with bot:
         #load cogs
-        for filename in os.listdir('./commands'):
+        for filename in os.listdir('./src/commands'):
             if filename.endswith('.py'):
                 await bot.load_extension(f'commands.{filename[:-3]}')
         
