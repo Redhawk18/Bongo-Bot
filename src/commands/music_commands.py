@@ -1,4 +1,4 @@
-from collections import deque
+from collections import defaultdict
 from math import ceil, floor
 import re
 
@@ -15,17 +15,7 @@ class Music_Commands(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-        self.server_info = {
-            "song_queue": deque(),
-            "is_playing": False,
-            "playing_view_channel_id": None,
-            "playing_view_message_id": None,
-            "user_who_want_to_skip": [],
-            "now_playing_dict": None,
-            "loop_enabled": False,
-        }
-
+        self.severs_variables = defaultdict(server_infomation.Server_Infomation) 
 
 
     @commands.Cog.listener()
@@ -55,19 +45,21 @@ class Music_Commands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_track_start(self, player: Custom_Player, track: wavelink.Track):
+        print(f'Now playing "{track.title}" in guild {player.guild.id}')
         self.severs_variables[player.guild.id].is_playing = True
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: Custom_Player, track: wavelink.Track, reason):
+        print(f'Finished playing "{track.title}" in guild {player.guild.id}')
         #old view can cause problems
-        await self.delete_view()
+        await self.delete_view(player.guild.id)
 
-        if len(self.song_queue) == 0: #queue is empty
-            self.is_playing = False
+        if len(self.severs_variables[player.guild.id].song_queue) == 0: #queue is empty
+            self.severs_variables[player.guild.id].is_playing = False
             return
 
         #else we want to keep playing
-        await self.play_song()
+        await self.play_song(player.guild.id)
 
 
     async def connect(self, interaction):
@@ -95,13 +87,14 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Deafed users can not use playing commands")
             return False
 
-        for voice in self.bot.voice_clients:
-            if voice.channel.id != interaction.user.voice.channel.id: #in a different voice chat
-                if self.is_playing: #bot is busy
+        voice = interaction.guild.voice_client
+        if voice is not None:
+            if voice.channel.id != interaction.user.voice.channel.id: #bot is in a different voice chat than user
+                if self.severs_variables[interaction.guild_id].is_playing: #bot is busy
                     await interaction.response.send_message("Not in the same voice channel")
                     return False
 
-                elif not self.is_playing: #bot is idling
+                elif not self.severs_variables[interaction.guild_id].is_playing: #bot is idling
                     await voice.disconnect()
                     return True
 
@@ -118,16 +111,17 @@ class Music_Commands(commands.Cog):
         return voice
 
 
-    async def stop_voice_functions(self, voice: discord.VoiceClient):
-        self.song_queue.clear() #wipe all future songs
-        self.is_playing = False
-        await self.delete_view()
+    async def stop_voice_functions(self, voice: discord.VoiceClient): #FIXME 
+        self.severs_variables[voice.guild.id].song_queue.clear() #wipe all future songs
+        self.severs_variables[voice.guild.id].is_playing = False
+        await self.delete_view(voice.guild.id)
         await voice.stop()
         await voice.disconnect()
         self.disconnect_timer.stop()
 
-    async def delete_view(self):
-        playing_view = self.bot.get_channel(self.playing_view_channel_id).get_partial_message(self.playing_view_message_id)
+
+    async def delete_view(self, guild_id):
+        playing_view = self.bot.get_channel(self.severs_variables[guild_id].playing_view_channel_id).get_partial_message(self.severs_variables[guild_id].playing_view_message_id)
         await playing_view.delete()
 
 
@@ -136,7 +130,6 @@ class Music_Commands(commands.Cog):
         voice = await self.get_voice(interaction)
         if voice is None or not await self.able_to_use_commands(interaction):
             return
-
 
         if voice.is_connected():
             await self.stop_voice_functions(voice)
@@ -154,7 +147,7 @@ class Music_Commands(commands.Cog):
             return
 
         for voice in self.bot.voice_clients:
-            if len(voice.channel.members) < 2: #no-one or bot in vc
+            if len(voice.channel.members) < 2: #no one in voice
                 await self.stop_voice_functions(voice)
 
 
@@ -188,10 +181,12 @@ class Music_Commands(commands.Cog):
             if start_time == -1: #time code was invalid
                 return
 
-        await self.search_track(interaction, query, add_to_bottom=play_next, start=start_time)
+        #print("play", query, play_next, start_time)
+        await self.search_track(interaction, query, add_to_bottom=True, start=start_time)
 
 
     async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True, start=None, end=None):
+        #print("search_track", query, add_to_bottom, start)
         if not await self.able_to_use_commands(interaction): #user is not in voice chat
             return
 
@@ -205,65 +200,62 @@ class Music_Commands(commands.Cog):
             await self.add_song(track, interaction, add_to_bottom, start=start, end=end)
 
 
-    async def add_song(self, track: wavelink.YouTubeTrack, interaction, add_to_bottom=True, start=None, end=None):
+    async def add_song(self, track: wavelink.YouTubeTrack, interaction: discord.Interaction, add_to_bottom=True, start=None, end=None):
+        #print("add_song", add_to_bottom, start)
         """Takes a track and adds it to the queue, and if nothing is playing this sends it to play"""
 
         #add to queue
         if add_to_bottom:
-            self.song_queue.appendleft((track, interaction, start, end))
+            self.severs_variables[interaction.guild_id].song_queue.appendleft((track, interaction, start, end))
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to queue")
 
-        else: #playnext
-            self.song_queue.append((track, interaction, start, end))
+        else: #add to top
+            self.severs_variables[interaction.guild_id].song_queue.append((track, interaction, start, end))
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue")
 
         #if not playing we start playing
-        await self.play_if_not()
+        await self.play_if_not(interaction.guild_id)
 
 
     async def add_playlist(self, playlist: wavelink.YouTubePlaylist, interaction):
         "Adds each video individually to the queue"
         index = 0
         for track in playlist.tracks:
-            self.song_queue.appendleft((track, interaction))
+            self.severs_variables[interaction.guild_id].song_queue.appendleft((track, interaction, None, None))
 
             index += 1
 
 
         await interaction.response.send_message(f'**Added** :musical_note: Playlist with {index} tracks to the queue')
-        await self.play_if_not()
+        await self.play_if_not(interaction.guild_id)
 
 
-    async def play_if_not(self):
-        if not self.is_playing:
-            await self.play_song()
+    async def play_if_not(self, guild_id):
+        if not self.severs_variables[guild_id].is_playing:
+            await self.play_song(guild_id)
 
 
-    async def play_song(self):
+    async def play_song(self, guild_id):
         """plays the first song in the queue"""
-        self.user_who_want_to_skip.clear() #reset list
+        self.severs_variables[guild_id].user_who_want_to_skip.clear() #reset list
+        track, interaction, start, end = self.severs_variables[guild_id].song_queue.pop() #FIXME remove end
 
-        track, interaction, start, end = self.song_queue.pop()
-
-        if self.loop_enabled:
+        if self.severs_variables[guild_id].loop_enabled:
             #add the track back into the front
-            self.song_queue.append((track, interaction))
-
+            self.severs_variables[guild_id].song_queue.append((track, interaction))
 
         #connect bot to voice chat
         voice = await self.connect(interaction)
 
-        self.now_playing_dict = track.info
+        self.severs_variables[guild_id].now_playing_dict = track.info
         #play track
+        
         await voice.play(track, start=start)
         playing_message = await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!", wait=True)
         view = await playing_message.channel.send(view=Playing_View(self.bot))
 
-        self.playing_view_channel_id = playing_message.channel.id
-        self.playing_view_message_id = view.id
-
-
-
+        self.severs_variables[guild_id].playing_view_channel_id = playing_message.channel.id
+        self.severs_variables[guild_id].playing_view_message_id = view.id
 
 
     @app_commands.command(name="pause", description="Pauses track")
@@ -329,19 +321,19 @@ class Music_Commands(commands.Cog):
 
         if voice.is_playing():
             #check list if the user is the same
-            for id in self.user_who_want_to_skip:
+            for id in self.severs_variables[interaction.guild_id].user_who_want_to_skip:
                 if id == interaction.user.id: #already voted
                     await interaction.response.send_message("You already voted")
                     return
 
             #add user id to list
-            self.user_who_want_to_skip.append(interaction.user.id)
+            self.severs_variables[interaction.guild_id].user_who_want_to_skip.append(interaction.user.id)
 
             #check if its passed threshold
             voice_channel = interaction.user.voice.channel
             threshold = ceil((len(voice_channel.members)-1)/2) #-1 for the bot
 
-            if len(self.user_who_want_to_skip) >= threshold: #enough people
+            if len(self.severs_variables[interaction.guild_id].user_who_want_to_skip) >= threshold: #enough people
                 await self.forceskip_helper(interaction)
 
             else: #not enough people
@@ -357,22 +349,22 @@ class Music_Commands(commands.Cog):
         await self.nowplaying_helper(interaction)
 
     async def nowplaying_helper(self, interaction: discord.Interaction):
-        if not self.is_playing:
+        if not self.severs_variables[interaction.guild_id].is_playing:
             await interaction.response.send_message("Nothing is playing")
             return
 
-        print(self.now_playing_dict)
+        print(self.severs_variables[interaction.guild_id].now_playing_dict)
         embed = discord.Embed(
             title = "**Now Playing** :notes:",
-            url = self.now_playing_dict.get('uri'),
+            url = self.severs_variables[interaction.guild_id].now_playing_dict.get('uri'),
             color = discord.Color.red(),
             description=""
         )
-        embed.set_thumbnail(url="https://i.ytimg.com/vi_webp/" + self.now_playing_dict.get('identifier') + "/maxresdefault.webp")
-        embed.add_field(name="Title", value=self.now_playing_dict.get('title'), inline=False)
-        embed.add_field(name="Uploader", value=self.now_playing_dict.get('author'))
+        embed.set_thumbnail(url="https://i.ytimg.com/vi_webp/" + self.severs_variables[interaction.guild_id].now_playing_dict.get('identifier') + "/maxresdefault.webp")
+        embed.add_field(name="Title", value=self.severs_variables[interaction.guild_id].now_playing_dict.get('title'), inline=False)
+        embed.add_field(name="Uploader", value=self.severs_variables[interaction.guild_id].now_playing_dict.get('author'))
 
-        total_seconds = self.now_playing_dict.get('length')/1000
+        total_seconds = self.severs_variables[interaction.guild_id].now_playing_dict.get('length')/1000
         minutes, seconds = divmod(total_seconds, 60)
         hours, minutes = divmod(minutes, 60)
         if hours > 0:
@@ -383,17 +375,16 @@ class Music_Commands(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
 
-
     @app_commands.command(name="queue", description="Lists the queue")
     @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
     async def queue(self, interaction: discord.Interaction):
-        if len(self.song_queue) == 0: #incase the queue was empty from the start
+        if len(self.severs_variables[interaction.guild_id].song_queue) == 0: #incase the queue was empty from the start
             await interaction.response.send_message("The queue is empty")
             return
 
         await interaction.response.send_message("Queue is loading")
 
-        tempq = self.song_queue.copy()
+        tempq = self.severs_variables[interaction.guild_id].song_queue.copy()
 
         #store every element in a string
         index = 0
@@ -401,7 +392,7 @@ class Music_Commands(commands.Cog):
         total_seconds = 0
         while tempq:
             #get the url of the video
-            track, player_interaction = tempq.pop()
+            track, player_interaction, start, end = tempq.pop() #FIXME
 
             minutes, seconds = divmod(track.length, 60)
             if minutes >= 60:
@@ -443,7 +434,7 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="queue-clear", description="Clears everything in the queue")
     async def queueclear(self, interaction: discord.Interaction):
-        self.song_queue.clear()
+        self.severs_variables[interaction.guild_id].song_queue.clear()
         await interaction.response.send_message("**Cleared queue** :books:")
 
 
@@ -454,13 +445,13 @@ class Music_Commands(commands.Cog):
             return
 
         #because of how the remove function works we have to make a copy
-        tempq = self.song_queue.copy()
+        tempq = self.severs_variables[interaction.guild_id].song_queue.copy()
 
         for index in range(queue_position -1): #so we dont have to save what's popped
             tempq.pop()
 
         #we should have the url of the track we want to remove
-        self.song_queue.remove(tempq.pop())
+        self.severs_variables[interaction.guild_id].song_queue.remove(tempq.pop())
         await interaction.response.send_message("**Removed from queue** :books:")
 
 
@@ -472,20 +463,20 @@ class Music_Commands(commands.Cog):
         if not await self.able_to_use_commands(interaction):
             return
 
-        if not self.is_playing:
+        if not self.severs_variables[interaction.guild_id].is_playing:
             await interaction.response.send_message("Nothing Playing")
             return
 
-        if self.loop_enabled: #disable loop
-            track, interaction = self.song_queue.pop()
-            self.loop_enabled = False
+        if self.severs_variables[interaction.guild_id].loop_enabled: #disable loop
+            track, interaction = self.severs_variables[interaction.guild_id].song_queue.pop()
+            self.severs_variables[interaction.guild_id].loop_enabled = False
             await interaction.followup.send("**Loop Disabled** :repeat:")
 
         else: #enable loop
             #add current song to the top of the queue once
-            track = await wavelink.YouTubeTrack.search(query=self.now_playing_dict.get('title'), return_first=True)
-            self.song_queue.append((track, interaction))
-            self.loop_enabled = True
+            track = await wavelink.YouTubeTrack.search(query=self.severs_variables[interaction.guild_id].now_playing_dict.get('title'), return_first=True)
+            self.severs_variables[interaction.guild_id].song_queue.append((track, interaction))
+            self.severs_variables[interaction.guild_id].loop_enabled = True
             await interaction.response.send_message("**Loop Enabled** :repeat:")
 
 
