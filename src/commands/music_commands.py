@@ -420,8 +420,8 @@ class Music_Commands(commands.Cog):
         else:
             embed.set_footer(text=f'Total length {floor((queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
 
-
-        await interaction.edit_original_message(content="content", embed=embed)
+        #await interaction.followup.send(embed=embed)
+        await interaction.edit_original_response(content="", embed=embed)
 
 
     async def add_zero(self, number):
