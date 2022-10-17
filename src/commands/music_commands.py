@@ -242,7 +242,7 @@ class Music_Commands(commands.Cog):
 
         if self.severs_variables[guild_id].loop_enabled:
             #add the track back into the front
-            self.severs_variables[guild_id].song_queue.append((track, interaction))
+            self.severs_variables[guild_id].song_queue.append((track, interaction, start, end))
 
         #connect bot to voice chat
         voice = await self.connect(interaction)
@@ -353,7 +353,6 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Nothing is playing")
             return
 
-        print(self.severs_variables[interaction.guild_id].now_playing_dict)
         embed = discord.Embed(
             title = "**Now Playing** :notes:",
             url = self.severs_variables[interaction.guild_id].now_playing_dict.get('uri'),
@@ -466,19 +465,18 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Nothing Playing")
             return
 
-        await interaction.response.send_message("fix this")
         #FIXME fix all of this
-        # if self.severs_variables[interaction.guild_id].loop_enabled: #disable loop
-        #     track, player_interaction, start, end = self.severs_variables[interaction.guild_id].song_queue.pop()
-        #     self.severs_variables[interaction.guild_id].loop_enabled = False
-        #     await interaction.followup.send("**Loop Disabled** :repeat:")
+        if self.severs_variables[interaction.guild_id].loop_enabled: #disable loop
+            track, player_interaction, start, end = self.severs_variables[interaction.guild_id].song_queue.pop()
+            self.severs_variables[interaction.guild_id].loop_enabled = False
+            await interaction.response.send_message("**Loop Disabled** :repeat:")
 
-        # else: #enable loop
-        #     #add current song to the top of the queue once
-        #     track = await wavelink.YouTubeTrack.search(query=self.severs_variables[interaction.guild_id].now_playing_dict.get('title'), return_first=True)
-        #     self.severs_variables[interaction.guild_id].song_queue.append((track, interaction, None, None))
-        #     self.severs_variables[interaction.guild_id].loop_enabled = True
-        #     await interaction.response.send_message("**Loop Enabled** :repeat:")
+        else: #enable loop
+            #add current song to the top of the queue once
+            track = await wavelink.YouTubeTrack.search(query=self.severs_variables[interaction.guild_id].now_playing_dict.get('title'), return_first=True)
+            self.severs_variables[interaction.guild_id].song_queue.append((track, interaction, None, None))
+            self.severs_variables[interaction.guild_id].loop_enabled = True
+            await interaction.response.send_message("**Loop Enabled** :repeat:")
 
 
     @app_commands.command(name="volume", description="Sets the volume of the player, max is 150")
