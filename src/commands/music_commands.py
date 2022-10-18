@@ -243,7 +243,7 @@ class Music_Commands(commands.Cog):
         #connect bot to voice chat
         voice = await self.connect(interaction)
 
-        self.severs_variables[guild_id].now_playing_dict = track.info
+        self.severs_variables[guild_id].now_playing_track = track
         #play track
         
         await voice.play(track, start=start)
@@ -351,15 +351,15 @@ class Music_Commands(commands.Cog):
 
         embed = discord.Embed(
             title = "**Now Playing** :notes:",
-            url = self.severs_variables[interaction.guild_id].now_playing_dict.get('uri'),
+            url = self.severs_variables[interaction.guild_id].now_playing_track.uri,
             color = discord.Color.red(),
             description=""
         )
-        embed.set_thumbnail(url="https://i.ytimg.com/vi_webp/" + self.severs_variables[interaction.guild_id].now_playing_dict.get('identifier') + "/maxresdefault.webp")
-        embed.add_field(name="Title", value=self.severs_variables[interaction.guild_id].now_playing_dict.get('title'), inline=False)
-        embed.add_field(name="Uploader", value=self.severs_variables[interaction.guild_id].now_playing_dict.get('author'))
+        embed.set_thumbnail(url="https://i.ytimg.com/vi_webp/" + self.severs_variables[interaction.guild_id].now_playing_track.identifier + "/maxresdefault.webp")
+        embed.add_field(name="Title", value=self.severs_variables[interaction.guild_id].now_playing_track.title, inline=False)
+        embed.add_field(name="Uploader", value=self.severs_variables[interaction.guild_id].now_playing_track.author)
 
-        total_seconds = self.severs_variables[interaction.guild_id].now_playing_dict.get('length')/1000
+        total_seconds = self.severs_variables[interaction.guild_id].now_playing_track.length
         minutes, seconds = divmod(total_seconds, 60)
         hours, minutes = divmod(minutes, 60)
         if hours > 0:
@@ -461,7 +461,6 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Nothing Playing")
             return
 
-        #FIXME fix all of this
         if self.severs_variables[interaction.guild_id].loop_enabled: #disable loop
             track, player_interaction, start, end = self.severs_variables[interaction.guild_id].song_queue.pop()
             self.severs_variables[interaction.guild_id].loop_enabled = False
@@ -469,7 +468,7 @@ class Music_Commands(commands.Cog):
 
         else: #enable loop
             #add current song to the top of the queue once
-            track = await wavelink.YouTubeTrack.search(query=self.severs_variables[interaction.guild_id].now_playing_dict.get('title'), return_first=True)
+            track = self.severs_variables[interaction.guild_id].now_playing_track
             self.severs_variables[interaction.guild_id].song_queue.append((track, interaction, None, None))
             self.severs_variables[interaction.guild_id].loop_enabled = True
             await interaction.response.send_message("**Loop Enabled** :repeat:")

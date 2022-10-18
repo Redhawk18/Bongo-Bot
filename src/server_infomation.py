@@ -10,7 +10,7 @@ class Server_Infomation():
         self.playing_view_channel_id = None
         self.playing_view_message_id = None
         self.user_who_want_to_skip = []
-        self.now_playing_dict = None
+        self.now_playing_track = None
         self.loop_enabled = False
 
     def __str__(self):
