@@ -174,6 +174,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="play", description="plays a Youtube track, start time need to formated with colons")
+    @app_commands.describe(query="What to search youtube for", play_next="If this track should be put at the front of the queue", start_time="time stamp to start the video at, for example 1:34 or 1:21:19")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def play(self, interaction: discord.Interaction, *, query: str, play_next: bool=False, start_time: str=None):
         if start_time is not None: #parser
@@ -433,6 +434,7 @@ class Music_Commands(commands.Cog):
 
 
     @app_commands.command(name="queue-remove", description="Removes a song from the queue based on its track number")
+    @app_commands.describe(queue_position="The position of the track to be removed")
     async def queueremove(self, interaction: discord.Interaction, queue_position : int):
         if queue_position > len(self.q) or queue_position < 0:
             await interaction.response.send_message("Input invalid")
@@ -474,7 +476,8 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("**Loop Enabled** :repeat:")
 
 
-    @app_commands.command(name="volume", description="Sets the volume of the player, max is 150")
+    @app_commands.command(name="volume", description="Sets the volume of the player")
+    @app_commands.describe(percent="Volume of the player")
     async def volume(self, interaction: discord.Interaction, percent: app_commands.Range[float, 0, 150]):
         #turn percent into a float between 0-1.5
         volume = percent/100

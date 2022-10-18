@@ -22,6 +22,7 @@ class Util_Commands(commands.Cog):
 
 
     @app_commands.command(name="roll", description="Rolls a sided die, however many times")
+    @app_commands.describe(die_sides="How many sides the die has", rolls="How many times the die is rolled")
     async def roll(self, interaction: discord.Interaction, die_sides: app_commands.Range[int, 2], rolls: app_commands.Range[int, 1, 24]=1):
         sum = 0
         output = f'A {die_sides}-sided die was rolled {rolls} times\n'
@@ -43,6 +44,7 @@ class Util_Commands(commands.Cog):
 
 
     @app_commands.command(name="poll", description="creates a poll with emotes to vote by")
+    @app_commands.describe(title="the title of the poll")
     async def poll(self, interaction: discord.Interaction, title: str, option1: str, option2: str, option3: str=None, option4: str=None, option5: str=None, option6: str=None ,option7: str=None, option8: str=None, option9: str=None, option10: str=None):
         #take every option and put it in a list to loop through
         options = []

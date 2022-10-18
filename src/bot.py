@@ -29,7 +29,7 @@ async def on_ready():
     print('------')
 
     #sync new commands
-    #await bot.tree.sync()
+    await bot.tree.sync()
 
 
 @bot.tree.error
