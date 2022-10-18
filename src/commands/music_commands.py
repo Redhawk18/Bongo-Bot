@@ -45,12 +45,12 @@ class Music_Commands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_track_start(self, player: Custom_Player, track: wavelink.Track):
-        print(f'Now playing "{track.title}" in guild {player.guild.id}')
+        print(f'Now playing "{track.title}" in "{player.guild.name}" {player.guild.id}')
         self.severs_variables[player.guild.id].is_playing = True
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: Custom_Player, track: wavelink.Track, reason):
-        print(f'Finished playing "{track.title}" in guild {player.guild.id}')
+        print(f'Finished playing "{track.title}" in "{player.guild.name}" {player.guild.id}')
         #old view can cause problems
         await self.delete_view(player.guild.id)
 
