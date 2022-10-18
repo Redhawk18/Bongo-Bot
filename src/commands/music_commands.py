@@ -181,12 +181,10 @@ class Music_Commands(commands.Cog):
             if start_time == -1: #time code was invalid
                 return
 
-        #print("play", query, play_next, start_time)
-        await self.search_track(interaction, query, add_to_bottom=True, start=start_time)
+        await self.search_track(interaction, query, play_next, start_time)
 
 
-    async def search_track(self, interaction: discord.Interaction, query, add_to_bottom=True, start=None, end=None):
-        #print("search_track", query, add_to_bottom, start)
+    async def search_track(self, interaction: discord.Interaction, query, play_next, start, end=None):
         if not await self.able_to_use_commands(interaction): #user is not in voice chat
             return
 
@@ -197,21 +195,20 @@ class Music_Commands(commands.Cog):
 
         else: #normal track
             track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
-            await self.add_song(track, interaction, add_to_bottom, start=start, end=end)
+            await self.add_song(track, interaction, play_next, start, end=end)
 
 
-    async def add_song(self, track: wavelink.YouTubeTrack, interaction: discord.Interaction, add_to_bottom=True, start=None, end=None):
-        #print("add_song", add_to_bottom, start)
+    async def add_song(self, track: wavelink.YouTubeTrack, interaction: discord.Interaction, play_next, start, end=None):
         """Takes a track and adds it to the queue, and if nothing is playing this sends it to play"""
 
         #add to queue
-        if add_to_bottom:
-            self.severs_variables[interaction.guild_id].song_queue.appendleft((track, interaction, start, end))
-            await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to queue")
-
-        else: #add to top
+        if play_next:
             self.severs_variables[interaction.guild_id].song_queue.append((track, interaction, start, end))
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue")
+
+        else: #add to top
+            self.severs_variables[interaction.guild_id].song_queue.appendleft((track, interaction, start, end))
+            await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to queue")
 
         #if not playing we start playing
         await self.play_if_not(interaction.guild_id)
@@ -224,7 +221,6 @@ class Music_Commands(commands.Cog):
             self.severs_variables[interaction.guild_id].song_queue.appendleft((track, interaction, None, None))
 
             index += 1
-
 
         await interaction.response.send_message(f'**Added** :musical_note: Playlist with {index} tracks to the queue')
         await self.play_if_not(interaction.guild_id)
