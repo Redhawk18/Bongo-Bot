@@ -111,7 +111,7 @@ class Music_Commands(commands.Cog):
         return voice
 
 
-    async def stop_voice_functions(self, voice: discord.VoiceClient): #FIXME 
+    async def stop_voice_functions(self, voice: discord.VoiceClient):
         self.severs_variables[voice.guild.id].song_queue.clear() #wipe all future songs
         self.severs_variables[voice.guild.id].is_playing = False
 
@@ -140,7 +140,7 @@ class Music_Commands(commands.Cog):
             await interaction.response.send_message("Already disconnected")
 
 
-    @tasks.loop(seconds=10)
+    @tasks.loop(minutes=10)
     async def disconnect_timer(self):
         #When a task is started is runs for the first time, which is too fast
         if self.disconnect_timer.current_loop == 0:
@@ -148,7 +148,6 @@ class Music_Commands(commands.Cog):
 
         for voice in self.bot.voice_clients:
             if len(voice.channel.members) < 2: #no one in voice
-                print("disconnect")
                 await self.stop_voice_functions(voice)
 
 
