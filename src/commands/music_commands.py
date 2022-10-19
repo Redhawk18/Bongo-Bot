@@ -9,6 +9,8 @@ import wavelink
 
 from custom_player import Custom_Player
 import server_infomation
+from playing_view import Playing_View
+
 
 class Music_Commands(commands.Cog):
     """Music cog to hold Wavelink related commands and listeners."""
@@ -150,28 +152,6 @@ class Music_Commands(commands.Cog):
         for voice in self.bot.voice_clients:
             if len(voice.channel.members) < 2: #no one in voice
                 await self.stop_voice_functions(voice)
-
-
-    async def get_milliseconds_from_string(self, time_string: str, interaction: discord.Interaction):
-        "takes a time string and returns the time in milliseconds `1:34` -> `94000`, errors return `-1`"
-        TIME_RE = re.compile("^[0-5]?\d:[0-5]?\d:[0-5]\d|[0-5]?\d:[0-5]\d|\d+$")
-        if not TIME_RE.match(time_string):
-            await interaction.response.send_message("Invalid time stamp")
-            return -1
-
-        list_of_units = [int(x) for x in time_string.split(":")]
-
-        list_of_units.reverse() #makes time more predictable to deal with
-        total_seconds = 0
-        if len(list_of_units) == 3: #hours
-            total_seconds += (list_of_units[2] * 3600) #seconds in an hour
-
-        if len(list_of_units) == 2: #minutes
-            total_seconds += (list_of_units[1] * 60)
-
-        total_seconds += list_of_units[0] #total seconds
-
-        return (total_seconds * 1000) #turn into milliseconds
 
 
     @app_commands.command(name="play", description="plays a Youtube track, start time need to formated with colons")
@@ -420,14 +400,6 @@ class Music_Commands(commands.Cog):
         await interaction.edit_original_response(content="", embed=embed)
 
 
-    async def add_zero(self, number):
-        """turns 2 seconds to 02"""
-        if number < 10:
-            return "0" + str(number)
-
-        return str(number)
-
-
     @app_commands.command(name="queue-clear", description="Clears everything in the queue")
     async def queueclear(self, interaction: discord.Interaction):
         self.severs_variables[interaction.guild_id].song_queue.clear()
@@ -500,33 +472,3 @@ async def setup(bot):
     await bot.add_cog(Music_Commands(bot))
 
 
-class Playing_View(discord.ui.View):
-    """The view for the playing output"""
-    def __init__(self, bot):
-        super().__init__(timeout=None)
-        self.bot = bot
-
-
-    @discord.ui.button(label="Pause", style=discord.ButtonStyle.gray, emoji="⏸")
-    async def pause_callback(self, interaction, button):
-        await self.bot.get_cog("Music_Commands").pause_helper(interaction)
-
-
-    @discord.ui.button(label="Resume", style=discord.ButtonStyle.gray, emoji="▶️")
-    async def resume_callback(self, interaction, button):
-        await self.bot.get_cog("Music_Commands").resume_helper(interaction)
-
-
-    @discord.ui.button(label="Skip", style=discord.ButtonStyle.gray, emoji="⏭")
-    async def skip_callback(self, interaction, button):
-        await self.bot.get_cog("Music_Commands").skip_helper(interaction)
-
-
-    @discord.ui.button(label="Now Playing", style=discord.ButtonStyle.gray, emoji="🎶")
-    async def now_playing_callback(self, interaction, button):
-        await self.bot.get_cog("Music_Commands").nowplaying_helper(interaction)
-
-
-    @discord.ui.button(label="Loop", style=discord.ButtonStyle.gray, emoji="🔁")
-    async def loop_callback(self, interaction, button):
-        await self.bot.get_cog("Music_Commands").loop_helper(interaction)
