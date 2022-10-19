@@ -452,26 +452,19 @@ class Music_Commands(commands.Cog):
 
     @app_commands.command(name="volume", description="Sets the volume of the player")
     @app_commands.describe(percent="Volume of the player")
-    async def volume(self, interaction: discord.Interaction, percent: app_commands.Range[float, 0, 150]):
-        #turn percent into a float between 0-1.5
-        volume = percent/100
-
+    async def volume(self, interaction: discord.Interaction, percent: app_commands.Range[float, 0, 100]):
         voice = await self.get_voice(interaction)
         if voice is None or not await self.able_to_use_commands(interaction):
             return
 
         if voice.is_connected():
-            await voice.set_volume(volume, seek=True)
+            await voice.set_volume(percent)
             await interaction.response.send_message(f'**Volume** :loud_sound: changed to {percent}%')
 
         else:
             await interaction.response.send_message("Not connected to voice chat")
 
-    
-
 
 
 async def setup(bot):
     await bot.add_cog(Music_Commands(bot))
-
-
