@@ -3,18 +3,26 @@ import random
 
 import discord
 from discord import app_commands
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 class Util_Commands(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.set_status.start()
+        
 
     
     @commands.Cog.listener()
     async def on_ready(self):
         print("util commands lister online")
-        
+
+
+    @tasks.loop(hours=24)
+    async def set_status(self):
+        await self.bot.wait_until_ready()
+        await self.bot.change_presence(activity=discord.Game(name=f'Music in {len(self.bot.guilds)} Servers'))
+
 
     @app_commands.command(name="ping", description="Pong!")
     async def ping(self, interaction: discord.Interaction):
