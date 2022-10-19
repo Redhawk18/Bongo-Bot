@@ -185,7 +185,7 @@ class Music_Commands(commands.Cog):
         await self.search_track(interaction, query, play_next, start_time)
 
 
-    async def search_track(self, interaction: discord.Interaction, query, play_next, start, end=None):
+    async def search_track(self, interaction: discord.Interaction, query, play_next, start):
         if not await self.able_to_use_commands(interaction): #user is not in voice chat
             return
 
@@ -196,19 +196,19 @@ class Music_Commands(commands.Cog):
 
         else: #normal track
             track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
-            await self.add_song(track, interaction, play_next, start, end=end)
+            await self.add_song(track, interaction, play_next, start)
 
 
-    async def add_song(self, track: wavelink.YouTubeTrack, interaction: discord.Interaction, play_next, start, end=None):
+    async def add_song(self, track: wavelink.YouTubeTrack, interaction: discord.Interaction, play_next, start):
         """Takes a track and adds it to the queue, and if nothing is playing this sends it to play"""
 
         #add to queue
         if play_next:
-            self.severs_variables[interaction.guild_id].song_queue.append((track, interaction, start, end))
+            self.severs_variables[interaction.guild_id].song_queue.append((track, interaction, start))
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue")
 
         else: #add to top
-            self.severs_variables[interaction.guild_id].song_queue.appendleft((track, interaction, start, end))
+            self.severs_variables[interaction.guild_id].song_queue.appendleft((track, interaction, start))
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to queue")
 
         #if not playing we start playing
@@ -235,11 +235,11 @@ class Music_Commands(commands.Cog):
     async def play_song(self, guild_id):
         """plays the first song in the queue"""
         self.severs_variables[guild_id].user_who_want_to_skip.clear() #reset list
-        track, interaction, start, end = self.severs_variables[guild_id].song_queue.pop() #FIXME remove end
+        track, interaction, start = self.severs_variables[guild_id].song_queue.pop()
 
         if self.severs_variables[guild_id].loop_enabled:
             #add the track back into the front
-            self.severs_variables[guild_id].song_queue.append((track, interaction, start, end))
+            self.severs_variables[guild_id].song_queue.append((track, interaction, start))
 
         #connect bot to voice chat
         voice = await self.connect(interaction)
@@ -388,7 +388,7 @@ class Music_Commands(commands.Cog):
         total_seconds = 0
         while tempq:
             #get the url of the video
-            track, player_interaction, start, end = tempq.pop() #FIXME
+            track, player_interaction, start = tempq.pop()
 
             minutes, seconds = divmod(track.length, 60)
             if minutes >= 60:
@@ -402,12 +402,12 @@ class Music_Commands(commands.Cog):
             if index > 50: #giant queues have trouble loading
                 break
 
-
-        embed = discord.Embed( #5000 character limit
+        embed = discord.Embed(
             title = "**Queue** :books:",
             description = output,
             color = discord.Color.red(),
         )
+
         #figure the length of the queue
         queue_minutes, queue_seconds = divmod(total_seconds, 60)
         if queue_minutes >= 60:
@@ -464,14 +464,14 @@ class Music_Commands(commands.Cog):
             return
 
         if self.severs_variables[interaction.guild_id].loop_enabled: #disable loop
-            track, player_interaction, start, end = self.severs_variables[interaction.guild_id].song_queue.pop()
+            track, player_interaction, start = self.severs_variables[interaction.guild_id].song_queue.pop()
             self.severs_variables[interaction.guild_id].loop_enabled = False
             await interaction.response.send_message("**Loop Disabled** :repeat:")
 
         else: #enable loop
             #add current song to the top of the queue once
             track = self.severs_variables[interaction.guild_id].now_playing_track
-            self.severs_variables[interaction.guild_id].song_queue.append((track, interaction, None, None))
+            self.severs_variables[interaction.guild_id].song_queue.append((track, interaction, None))
             self.severs_variables[interaction.guild_id].loop_enabled = True
             await interaction.response.send_message("**Loop Enabled** :repeat:")
 
