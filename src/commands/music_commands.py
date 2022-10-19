@@ -8,8 +8,9 @@ from discord.ext import commands, tasks
 import wavelink
 
 from custom_player import Custom_Player
-import server_infomation
 from playing_view import Playing_View
+from utilities import add_zero, get_milliseconds_from_string
+import server_infomation
 
 
 class Music_Commands(commands.Cog):
@@ -159,7 +160,7 @@ class Music_Commands(commands.Cog):
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def play(self, interaction: discord.Interaction, *, query: str, play_next: bool=False, start_time: str=None):
         if start_time is not None: #parser
-            start_time = await self.get_milliseconds_from_string(start_time, interaction)
+            start_time = await get_milliseconds_from_string(start_time, interaction)
             if start_time == -1: #time code was invalid
                 return
 
@@ -345,9 +346,9 @@ class Music_Commands(commands.Cog):
         minutes, seconds = divmod(total_seconds, 60)
         hours, minutes = divmod(minutes, 60)
         if hours > 0:
-            embed.add_field(name="Duration", value=f'{floor(hours)}:{await self.add_zero(floor(minutes))}:{await self.add_zero(floor(seconds))}')
+            embed.add_field(name="Duration", value=f'{floor(hours)}:{await add_zero(floor(minutes))}:{await add_zero(floor(seconds))}')
         else:
-            embed.add_field(name="Duration", value=f'{floor(minutes)}:{await self.add_zero(floor(seconds))}')
+            embed.add_field(name="Duration", value=f'{floor(minutes)}:{await add_zero(floor(seconds))}')
 
         await interaction.response.send_message(embed=embed)
 
@@ -374,9 +375,9 @@ class Music_Commands(commands.Cog):
             minutes, seconds = divmod(track.length, 60)
             if minutes >= 60:
                 hours, minutes = divmod(minutes, 60)
-                output += (f"{index +1}. `{track.title}` - `{floor(hours)}:{await self.add_zero(floor(minutes))}:{await self.add_zero(floor(seconds))}`\n")
+                output += (f"{index +1}. `{track.title}` - `{floor(hours)}:{await add_zero(floor(minutes))}:{await add_zero(floor(seconds))}`\n")
             else:
-                output += (f"{index +1}. `{track.title}` - `{floor(minutes)}:{await self.add_zero(floor(seconds))}`\n")
+                output += (f"{index +1}. `{track.title}` - `{floor(minutes)}:{await add_zero(floor(seconds))}`\n")
 
             total_seconds += track.length
             index += 1
@@ -393,9 +394,9 @@ class Music_Commands(commands.Cog):
         queue_minutes, queue_seconds = divmod(total_seconds, 60)
         if queue_minutes >= 60:
             queue_hours, queue_minutes = divmod(queue_minutes, 60)
-            embed.set_footer(text=f'Total length {floor(queue_hours)}:{await self.add_zero(floor(queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
+            embed.set_footer(text=f'Total length {floor(queue_hours)}:{await add_zero(floor(queue_minutes))}:{await add_zero(floor(queue_seconds))}')
         else:
-            embed.set_footer(text=f'Total length {floor((queue_minutes))}:{await self.add_zero(floor(queue_seconds))}')
+            embed.set_footer(text=f'Total length {floor((queue_minutes))}:{await add_zero(floor(queue_seconds))}')
 
         await interaction.edit_original_response(content="", embed=embed)
 
@@ -465,6 +466,8 @@ class Music_Commands(commands.Cog):
 
         else:
             await interaction.response.send_message("Not connected to voice chat")
+
+    
 
 
 
