@@ -20,5 +20,5 @@ class Server_Infomation():
         playing view channel id, {self.playing_view_channel_id}
         playing view message id, {self.playing_view_message_id}
         user who want to skip, {self.user_who_want_to_skip}
-        now playing, {self.now_playing_dict}
+        now playing, {self.now_playing_track}
         looping, {self.loop_enabled}"""
