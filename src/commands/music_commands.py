@@ -20,6 +20,8 @@ class Music_Commands(commands.Cog):
         self.bot = bot
         self.severs_variables = defaultdict(server_infomation.Server_Infomation) 
 
+        self.disconnect_timer.start()
+
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -73,10 +75,6 @@ class Music_Commands(commands.Cog):
         else: #already connected
             voice: Custom_Player = interaction.guild.voice_client
 
-        #start disconnect timer
-        if not self.disconnect_timer.is_running():
-            self.disconnect_timer.start()
-
         return voice
 
 
@@ -121,7 +119,6 @@ class Music_Commands(commands.Cog):
 
         await voice.stop()
         await voice.disconnect()
-        self.disconnect_timer.stop()
 
 
     async def delete_view(self, guild_id):
@@ -146,10 +143,6 @@ class Music_Commands(commands.Cog):
 
     @tasks.loop(minutes=10)
     async def disconnect_timer(self):
-        #When a task is started is runs for the first time, which is too fast
-        if self.disconnect_timer.current_loop == 0:
-            return
-
         for voice in self.bot.voice_clients:
             if len(voice.channel.members) < 2: #no one in voice
                 await self.stop_voice_functions(voice)
