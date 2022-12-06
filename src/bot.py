@@ -1,10 +1,13 @@
 import asyncio
+from collections import defaultdict
 import logging
 import os
 
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+
+import server_infomation
 
 #.env
 if not os.path.isfile('.env'):
@@ -21,6 +24,7 @@ bot_intents.message_content = True
 bot_intents.voice_states = True
 
 bot = commands.Bot(command_prefix='!', intents=bot_intents)
+
 
 
 @bot.event
@@ -40,6 +44,9 @@ async def on_error(interaction: discord.Interaction, error: discord.app_commands
 
 async def main():
     async with bot:
+        #add dynamic attribute
+        bot.variables_for_guilds = defaultdict(server_infomation.Server_Infomation) 
+
         #load cogs
         for filename in os.listdir('./src/commands'):
             if filename.endswith('.py'):
