@@ -18,28 +18,37 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 #intents
-bot_intents = discord.Intents.default()
-bot_intents.members = True
-bot_intents.message_content = True
-bot_intents.voice_states = True
-
-bot = commands.Bot(command_prefix='!', intents=bot_intents)
 
 
 
-@bot.event
-async def on_ready():
-    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
-    print('------')
-
-    #sync new commands
-    await bot.tree.sync()
 
 
-@bot.tree.error
-async def on_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
-    if isinstance(error, discord.app_commands.CommandOnCooldown):
-        await interaction.response.send_message(str(error), ephemeral=True)
+class Bongo_Bot(commands.Bot):
+    """Handles intents and prefixs automatically"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(command_prefix = "!", intents = self.get_intents(), *args, **kwargs)
+        self.tree.on_error = self.on_tree_error
+
+    async def on_ready(self):
+        print(f'Logged in as {bot.user} (ID: {bot.user.id})')
+        print('------')
+
+        #sync new commands
+        await bot.tree.sync()
+
+    async def on_tree_error(self, interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
+        if isinstance(error, discord.app_commands.CommandOnCooldown):
+            await interaction.response.send_message(str(error), ephemeral=True)
+
+    def get_intents(self):
+        intents = discord.Intents.default()
+        intents.members = True
+        intents.message_content = True
+        intents.voice_states = True
+
+        return intents
+
+bot = Bongo_Bot()
 
 
 async def main():
