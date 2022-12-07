@@ -16,9 +16,6 @@ class Force_Skip(commands.Cog):
     @app_commands.command(name="force-skip", description="Skips the track")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     async def force_skip(self, interaction: discord.Interaction):
-        await self.helper(interaction)
-
-    async def helper(self, interaction: discord.Interaction):
         voice = await get_voice(interaction)
         if voice is None or not await able_to_use_commands(interaction, self.bot.variables_for_guilds[interaction.guild_id].is_playing):
             return

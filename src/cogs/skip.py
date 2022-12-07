@@ -19,7 +19,7 @@ class Skip(commands.Cog):
     async def skip(self, interaction: discord.Interaction):
         await self.skip_helper(interaction)
 
-    async def skip_helper(self, interaction: discord.Interaction):
+    async def helper(self, interaction: discord.Interaction):
         voice = await get_voice(interaction)
         if voice is None or not await able_to_use_commands(interaction, self.bot.variables_for_guilds[interaction.guild_id].is_playing):
             return
