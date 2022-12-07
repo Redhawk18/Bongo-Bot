@@ -40,6 +40,7 @@ class Skip(commands.Cog):
 
             if len(self.bot.variables_for_guilds[interaction.guild_id].user_who_want_to_skip) >= threshold: #enough people
                 await self.forceskip_helper(interaction)
+                await self.bot.get_cog("Force_Skip").helper(interaction)
 
             else: #not enough people
                 await interaction.response.send_message(f'**Skipping? ({len(self.user_who_want_to_skip)}/{threshold} votes needed) or use `forceskip`**')
