@@ -26,7 +26,7 @@ class Loop(commands.Cog):
             return
 
         if self.bot.variables_for_guilds[interaction.guild_id].loop_enabled: #disable loop
-            track, _, _ = self.bot.variables_for_guilds[interaction.guild_id].song_queue.pop() #FIXME change to _
+            track, _, _ = self.bot.variables_for_guilds[interaction.guild_id].song_queue.pop()
             self.bot.variables_for_guilds[interaction.guild_id].loop_enabled = False
             await interaction.response.send_message("**Loop Disabled** :repeat:")
 

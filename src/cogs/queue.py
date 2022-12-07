@@ -53,7 +53,7 @@ class Queue(commands.Cog):
         )
 
         #figure the length of the queue
-        queue_minutes, queue_seconds = divmod(total_seconds, 60) #TODO add forever if loop
+        queue_minutes, queue_seconds = divmod(total_seconds, 60)
         if queue_minutes >= 60:
             queue_hours, queue_minutes = divmod(queue_minutes, 60)
             embed.set_footer(text=f'Total length: {floor(queue_hours)}:{add_zero(floor(queue_minutes))}:{add_zero(floor(queue_seconds))}')
