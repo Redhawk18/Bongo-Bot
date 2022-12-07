@@ -22,7 +22,7 @@ class Frank(commands.Cog):
         
     @app_commands.command(name="ping", description="Pong!")
     async def ping(self, interaction: discord.Interaction):
-        await interaction.response.send_message(f'**Pong!** :ping_pong: {ceil(self.client.latency*1000)}ms')
+        await interaction.response.send_message(f'**Pong!** :ping_pong: {ceil(self.bot.latency*1000)}ms')
 
     # @commands.Cog.listener()
     # async def on_message(self, message):
