@@ -32,7 +32,7 @@ class Queue(commands.Cog):
         total_seconds = 0
         while tempq:
             #get the url of the video
-            track, player_interaction, start = tempq.pop() #TODO change to _
+            track, _, _ = tempq.pop() #TODO change to _
 
             minutes, seconds = divmod(track.length, 60)
             if minutes >= 60:

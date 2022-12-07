@@ -5,7 +5,7 @@ from math import ceil
 import discord
 from discord import app_commands
 from discord.ext import commands
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 class Frank(commands.Cog):
 
