@@ -32,7 +32,7 @@ class Queue(commands.Cog):
         total_seconds = 0
         while tempq:
             #get the url of the video
-            track, _, _ = tempq.pop() #TODO change to _
+            track, _, _ = tempq.pop()
 
             minutes, seconds = divmod(track.length, 60)
             if minutes >= 60:
@@ -56,9 +56,12 @@ class Queue(commands.Cog):
         queue_minutes, queue_seconds = divmod(total_seconds, 60) #TODO add forever if loop
         if queue_minutes >= 60:
             queue_hours, queue_minutes = divmod(queue_minutes, 60)
-            embed.set_footer(text=f'Total length {floor(queue_hours)}:{add_zero(floor(queue_minutes))}:{add_zero(floor(queue_seconds))}')
+            embed.set_footer(text=f'Total length: {floor(queue_hours)}:{add_zero(floor(queue_minutes))}:{add_zero(floor(queue_seconds))}')
         else:
-            embed.set_footer(text=f'Total length {floor((queue_minutes))}:{add_zero(floor(queue_seconds))}')
+            embed.set_footer(text=f'Total length: {floor((queue_minutes))}:{add_zero(floor(queue_seconds))}')
+
+        if self.bot.variables_for_guilds[interaction.guild_id].loop_enabled:
+            embed.set_footer(text="Total length: Forever")
 
         await interaction.edit_original_response(content="", embed=embed)
 
