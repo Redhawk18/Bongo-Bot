@@ -39,7 +39,6 @@ class Skip(commands.Cog):
             threshold = ceil((len(voice_channel.members)-1)/2) #-1 for the bot
 
             if len(self.bot.variables_for_guilds[interaction.guild_id].user_who_want_to_skip) >= threshold: #enough people
-                await self.forceskip_helper(interaction)
                 await self.bot.get_cog("Force_Skip").helper(interaction)
 
             else: #not enough people
