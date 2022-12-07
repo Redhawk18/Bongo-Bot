@@ -38,9 +38,9 @@ class Now_Playing(commands.Cog):
         minutes, seconds = divmod(total_seconds, 60)
         hours, minutes = divmod(minutes, 60)
         if hours > 0:
-            embed.add_field(name="Duration", value=f'{floor(hours)}:{await add_zero(floor(minutes))}:{await add_zero(floor(seconds))}')
+            embed.add_field(name="Duration", value=f'{floor(hours)}:{add_zero(floor(minutes))}:{add_zero(floor(seconds))}')
         else:
-            embed.add_field(name="Duration", value=f'{floor(minutes)}:{await add_zero(floor(seconds))}')
+            embed.add_field(name="Duration", value=f'{floor(minutes)}:{add_zero(floor(seconds))}')
 
         await interaction.response.send_message(embed=embed)
 

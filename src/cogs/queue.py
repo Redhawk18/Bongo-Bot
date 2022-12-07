@@ -37,9 +37,9 @@ class Queue(commands.Cog):
             minutes, seconds = divmod(track.length, 60)
             if minutes >= 60:
                 hours, minutes = divmod(minutes, 60)
-                output += (f"{index +1}. `{track.title}` - `{floor(hours)}:{await add_zero(floor(minutes))}:{await add_zero(floor(seconds))}`\n")
+                output += (f"{index +1}. `{track.title}` - `{floor(hours)}:{add_zero(floor(minutes))}:{add_zero(floor(seconds))}`\n")
             else:
-                output += (f"{index +1}. `{track.title}` - `{floor(minutes)}:{await add_zero(floor(seconds))}`\n")
+                output += (f"{index +1}. `{track.title}` - `{floor(minutes)}:{add_zero(floor(seconds))}`\n")
 
             total_seconds += track.length
             index += 1
@@ -56,9 +56,9 @@ class Queue(commands.Cog):
         queue_minutes, queue_seconds = divmod(total_seconds, 60) #TODO add forever if loop
         if queue_minutes >= 60:
             queue_hours, queue_minutes = divmod(queue_minutes, 60)
-            embed.set_footer(text=f'Total length {floor(queue_hours)}:{await add_zero(floor(queue_minutes))}:{await add_zero(floor(queue_seconds))}')
+            embed.set_footer(text=f'Total length {floor(queue_hours)}:{add_zero(floor(queue_minutes))}:{add_zero(floor(queue_seconds))}')
         else:
-            embed.set_footer(text=f'Total length {floor((queue_minutes))}:{await add_zero(floor(queue_seconds))}')
+            embed.set_footer(text=f'Total length {floor((queue_minutes))}:{add_zero(floor(queue_seconds))}')
 
         await interaction.edit_original_response(content="", embed=embed)
 

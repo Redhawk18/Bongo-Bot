@@ -27,7 +27,7 @@ async def able_to_use_commands(interaction: discord.Interaction, is_playing: boo
 
     return True
 
-async def add_zero(number) -> str:
+def add_zero(number) -> str:
     """turns 2 seconds to 02"""
     if number < 10:
         return "0" + str(number)
