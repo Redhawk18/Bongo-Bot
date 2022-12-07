@@ -17,17 +17,13 @@ if not os.path.isfile('.env'):
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-#intents
-
-
-
-
-
 class Bongo_Bot(commands.Bot):
     """Handles intents and prefixs automatically"""
     def __init__(self, *args, **kwargs):
         super().__init__(command_prefix = "!", intents = self.get_intents(), *args, **kwargs)
         self.tree.on_error = self.on_tree_error
+
+        self.variables_for_guilds = defaultdict(server_infomation.Server_Infomation) 
 
     async def on_ready(self):
         print(f'Logged in as {bot.user} (ID: {bot.user.id})')
@@ -50,12 +46,8 @@ class Bongo_Bot(commands.Bot):
 
 bot = Bongo_Bot()
 
-
 async def main():
     async with bot:
-        #add dynamic attribute
-        bot.variables_for_guilds = defaultdict(server_infomation.Server_Infomation) 
-
         #load cogs
         for filename in os.listdir('./src/commands'):
             if filename.endswith('.py'):
@@ -64,6 +56,5 @@ async def main():
         #start bot
         discord.utils.setup_logging(level=logging.INFO)
         await bot.start(TOKEN)
-
 
 asyncio.run(main())
