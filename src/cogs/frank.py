@@ -7,7 +7,7 @@ from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
-class Skip(commands.Cog):
+class Frank(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -35,4 +35,4 @@ class Skip(commands.Cog):
     #             await message.add_reaction("🐧")
 
 async def setup(bot):
-    await bot.add_cog(Skip(bot))
+    await bot.add_cog(Frank(bot))
