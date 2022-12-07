@@ -107,10 +107,10 @@ class Play(commands.Cog):
         await self.play_if_not(interaction.guild_id)
 
     async def add_playlist(self, playlist: wavelink.YouTubePlaylist, interaction):
-        "Adds each video individually to the queue"
+        """Adds each video individually to the queue"""
         index = 0
         for track in playlist.tracks:
-            self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction, None, None))
+            self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction, None))
 
             index += 1
 
