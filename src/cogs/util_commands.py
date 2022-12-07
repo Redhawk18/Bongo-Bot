@@ -9,19 +9,10 @@ class Util_Commands(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.set_status.start()
-        
-
     
     @commands.Cog.listener()
     async def on_ready(self):
         print("util commands lister online")
-
-
-    @tasks.loop(hours=24)
-    async def set_status(self):
-        await self.bot.wait_until_ready()
-        await self.bot.change_presence(activity=discord.Game(name=f'Music in {len(self.bot.guilds)} Servers'))
 
 
     @app_commands.command(name="ping", description="Pong!")
@@ -34,7 +25,7 @@ class Util_Commands(commands.Cog):
     async def roll(self, interaction: discord.Interaction, die_sides: app_commands.Range[int, 2], rolls: app_commands.Range[int, 1, 24]=1):
         sum = 0
         output = f'A {die_sides}-sided die was rolled {rolls} times\n'
-        for i in range(rolls):
+        for _ in range(rolls):
             current_roll = random.randint(1, die_sides)
             sum += current_roll
             output += f'Rolled {current_roll} :game_die:\n'
@@ -100,7 +91,7 @@ class Util_Commands(commands.Cog):
         for index in range(len(options)):
             await message.add_reaction(num_to_word[index])
 
-        
 
-async def setup(client):
-    await client.add_cog(Util_Commands(client))
+
+async def setup(bot):
+    await bot.add_cog(Util_Commands(bot))

@@ -2,7 +2,39 @@ import re
 
 import discord
 
-async def get_milliseconds_from_string(time_string: str, interaction: discord.Interaction):
+from custom_player import Custom_Player
+
+async def able_to_use_commands(interaction: discord.Interaction, is_playing: bool) -> bool: #TODO remove async
+    """returns True if the user is mets all conditions to use playing commands"""
+    if interaction.user.voice is None: #not in any voice chat
+        await interaction.response.send_message("Not in any voice chat")
+        return False
+
+    if interaction.user.voice.deaf or interaction.user.voice.self_deaf: #deafen
+        await interaction.response.send_message("Deafed users can not use playing commands")
+        return False
+
+    voice = interaction.guild.voice_client
+    if voice is not None:
+        if voice.channel.id != interaction.user.voice.channel.id: #bot is in a different voice chat than user
+            if is_playing: #bot is busy
+                await interaction.response.send_message("Not in the same voice channel")
+                return False
+
+            elif not is_playing: #bot is idling
+                await voice.disconnect()
+                return True
+
+    return True
+
+async def add_zero(number) -> str:
+    """turns 2 seconds to 02"""
+    if number < 10:
+        return "0" + str(number)
+
+    return str(number)
+
+async def get_milliseconds_from_string(time_string: str, interaction: discord.Interaction) -> int:
     "takes a time string and returns the time in milliseconds `1:34` -> `94000`, errors return `-1`"
     TIME_RE = re.compile("^[0-5]?\d:[0-5]?\d:[0-5]\d|[0-5]?\d:[0-5]\d|\d+$")
     if not TIME_RE.match(time_string):
@@ -23,10 +55,11 @@ async def get_milliseconds_from_string(time_string: str, interaction: discord.In
 
     return (total_seconds * 1000) #turn into milliseconds
 
+async def get_voice(interaction) -> Custom_Player:
+    voice: Custom_Player = interaction.guild.voice_client
 
-async def add_zero(number):
-    """turns 2 seconds to 02"""
-    if number < 10:
-        return "0" + str(number)
+    if voice is None: #not connected to voice
+        await interaction.response.send_message("Nothing is playing")
+        return None
 
-    return str(number)
+    return voice

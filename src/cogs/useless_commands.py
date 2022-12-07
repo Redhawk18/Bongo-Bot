@@ -34,5 +34,5 @@ class Useless_Commands(commands.Cog):
 
 
 
-async def setup(client):
-    await client.add_cog(Useless_Commands(client))
+async def setup(bot):
+    await bot.add_cog(Useless_Commands(bot))

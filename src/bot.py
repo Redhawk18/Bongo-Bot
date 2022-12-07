@@ -30,7 +30,7 @@ class Bongo_Bot(commands.Bot):
         print('------')
 
         #sync new commands
-        await bot.tree.sync()
+        #await bot.tree.sync()
 
     async def on_tree_error(self, interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
         if isinstance(error, discord.app_commands.CommandOnCooldown):
@@ -49,9 +49,9 @@ bot = Bongo_Bot()
 async def main():
     async with bot:
         #load cogs
-        for filename in os.listdir('./src/commands'):
+        for filename in os.listdir('./src/cogs'):
             if filename.endswith('.py'):
-                await bot.load_extension(f'commands.{filename[:-3]}')
+                await bot.load_extension(f'cogs.{filename[:-3]}')
         
         #start bot
         discord.utils.setup_logging(level=logging.INFO)
