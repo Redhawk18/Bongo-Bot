@@ -85,11 +85,21 @@ class Play(commands.Cog):
 
         URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
         if URL_RE.match(query) and "list=" in query: #playlist
-            playlist = await wavelink.YouTubePlaylist.search(query=query)
+            try:
+                playlist = await wavelink.YouTubePlaylist.search(query=query)
+            except wavelink.LoadTrackError: #playlist not found
+                await interaction.response.send_message("playlist does not exist")
+                return
+            
             await self.add_playlist(playlist, interaction)
 
         else: #normal track
-            track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
+            try:
+                track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
+            except IndexError: #video not found
+                await interaction.response.send_message("video does not exist")
+                return
+                
             await self.add_song(track, interaction, play_next, start)
 
     async def add_song(self, track: wavelink.YouTubeTrack, interaction: discord.Interaction, play_next, start):
