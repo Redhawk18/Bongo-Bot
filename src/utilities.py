@@ -4,8 +4,13 @@ import discord
 
 from custom_player import Custom_Player
 
-async def able_to_use_commands(interaction: discord.Interaction, is_playing: bool) -> bool:
-    """returns True if the user is mets all conditions to use playing commands"""
+async def able_to_use_commands(interaction: discord.Interaction, is_playing: bool, music_channel_id: int) -> bool:
+    """returns True if the user mets all conditions to use playing commands"""
+    print(interaction.channel_id, music_channel_id)
+    if interaction.channel_id != music_channel_id:
+        await interaction.response.send_message(f'Wrong channel for music')
+        return False
+
     if interaction.user.voice is None: #not in any voice chat
         await interaction.response.send_message("Not in any voice chat")
         return False

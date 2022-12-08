@@ -18,7 +18,7 @@ class Loop(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        if not await able_to_use_commands(interaction, self.bot.variables_for_guilds[interaction.guild_id].is_playing):
+        if not await able_to_use_commands(interaction, self.bot.variables_for_guilds[interaction.guild_id].is_playing, self.bot.variables_for_guilds[interaction.guild_id].music_channel_id):
             return
 
         if not self.bot.variables_for_guilds[interaction.guild_id].is_playing:
