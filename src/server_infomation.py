@@ -13,6 +13,9 @@ class Server_Infomation():
         self.now_playing_track = None
         self.loop_enabled = False
 
+        #database variables
+        self.volume:int = 25
+
     def __str__(self):
         return f"""
         song queue, {self.song_queue}

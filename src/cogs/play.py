@@ -146,7 +146,7 @@ class Play(commands.Cog):
         self.bot.variables_for_guilds[guild_id].now_playing_track = track
         #play track
         
-        await voice.play(track, start=start)
+        await voice.play(track, start=start, volume=self.bot.variables_for_guilds[interaction.guild_id].volume)
         playing_message = await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!", wait=True)
         view = await playing_message.channel.send(view=Playing_View(self.bot))
 

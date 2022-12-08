@@ -15,12 +15,13 @@ class Volume(commands.Cog):
 
     @app_commands.command(name="volume", description="Sets the volume of the player")
     @app_commands.describe(percent="Volume of the player")
-    async def volume(self, interaction: discord.Interaction, percent: app_commands.Range[float, 0, 100]):
+    async def volume(self, interaction: discord.Interaction, percent: app_commands.Range[int, 0, 100]):
         voice = await get_voice(interaction)
         if voice is None or not await able_to_use_commands(interaction, self.bot.variables_for_guilds[interaction.guild_id].is_playing):
             return
 
         if voice.is_connected():
+            self.bot.variables_for_guilds[interaction.guild_id].volume = percent
             await voice.set_volume(percent)
             await interaction.response.send_message(f'**Volume** :loud_sound: changed to {percent}%')
 
