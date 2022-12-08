@@ -80,9 +80,9 @@ class Play(commands.Cog):
         await self.search_track(interaction, query, play_next, start_time)
 
     async def search_track(self, interaction: discord.Interaction, query, play_next, start):
-        if not await able_to_use_commands(interaction, self.bot.variables_for_guilds[interaction.guild_id].is_playing, self.bot.variables_for_guilds[interaction.guild_id].music_channel_id): #user is not in voice chat
+        if not await able_to_use_commands(interaction, self.bot.variables_for_guilds[interaction.guild_id].is_playing, self.bot.variables_for_guilds[interaction.guild_id].music_channel_id, self.bot.variables_for_guilds[interaction.guild_id].music_role_id): #user is not in voice chat
             return
-
+            
         URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
         if URL_RE.match(query) and "list=" in query: #playlist
             try:

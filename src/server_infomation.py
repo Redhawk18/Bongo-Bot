@@ -14,7 +14,8 @@ class Server_Infomation():
         self.loop_enabled = False
 
         #database variables
-        self.music_channel_id = 975548251942035477 #FIXME hook this upto a database
+        self.music_channel_id = None #975548251942035477 #FIXME hook this upto a database
+        self.music_role_id = None
         self.volume:int = 25
 
     def __str__(self):
