@@ -34,6 +34,8 @@ class Settings(commands.GroupCog, group_name='settings'):
 
         else:
             embed.add_field(name="Music Roll", value="None")
+
+        embed.add_field(name="Volume :loud_sound:", value=self.bot.variables_for_guilds[interaction.guild_id].volume)
         
         await interaction.response.send_message(embed=embed)
 
