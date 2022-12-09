@@ -43,13 +43,10 @@ class Bongo_Bot(commands.Bot):
             await interaction.response.send_message(str(error), ephemeral=True)
 
     async def close(self):
-        #my code
         print("Database Shuting Down")
         await self.database.close()
 
         await super().close()
-
-
 
     def get_intents(self) -> discord.Intents:
         intents = discord.Intents.default()
