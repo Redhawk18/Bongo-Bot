@@ -19,7 +19,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 class Bongo_Bot(commands.Bot):
-    """Handles intents and prefixs automatically"""
+    """Handles intents, prefixs, and database init automatically"""
     def __init__(self, *args, **kwargs):
         super().__init__(command_prefix = "!", intents = self.get_intents(), *args, **kwargs)
         self.tree.on_error = self.on_tree_error
@@ -27,7 +27,7 @@ class Bongo_Bot(commands.Bot):
         self.variables_for_guilds = defaultdict(server_infomation.Server_Infomation) 
 
     async def on_ready(self):
-        print(f'Logged in as {bot.user} (ID: {bot.user.id})')
+        print(f'Logged in as {self.user} (ID: {self.user.id})')
         print('------')
 
     async def setup_hook(self):
@@ -68,7 +68,11 @@ class Bongo_Bot(commands.Bot):
 
     async def load_data(self) -> None:
         """Loads the entire table entry by entry into variables_for_guilds"""
-        
+        records = await self.database.fetch('SELECT * FROM guilds')
+
+        for record in records:
+            self.variables_for_guilds[record['guild_id']].music_channel_id = record['music_channel_id']
+            self.variables_for_guilds[record['guild_id']].music_role_id = record['music_role_id']
 
         print("Database loaded into cache")
 
