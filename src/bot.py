@@ -73,6 +73,7 @@ class Bongo_Bot(commands.Bot):
         for record in records:
             self.variables_for_guilds[record['guild_id']].music_channel_id = record['music_channel_id']
             self.variables_for_guilds[record['guild_id']].music_role_id = record['music_role_id']
+            self.variables_for_guilds[record['guild_id']].volume = record['volume']
 
         print("Database loaded into cache")
 
