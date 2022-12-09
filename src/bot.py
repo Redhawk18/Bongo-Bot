@@ -3,6 +3,7 @@ from collections import defaultdict
 import logging
 import os
 
+import asyncpg
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -29,20 +30,50 @@ class Bongo_Bot(commands.Bot):
         print(f'Logged in as {bot.user} (ID: {bot.user.id})')
         print('------')
 
+    async def setup_hook(self):
         #sync new commands
         #await bot.tree.sync()
+
+        #create and setup database
+        await self.create_database_pool()
+        await self.load_data()
 
     async def on_tree_error(self, interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
         if isinstance(error, discord.app_commands.CommandOnCooldown):
             await interaction.response.send_message(str(error), ephemeral=True)
 
-    def get_intents(self):
+    async def close(self):
+        #my code
+        print("Database Shuting Down")
+        await self.database.close()
+
+        await super().close()
+
+
+
+    def get_intents(self) -> discord.Intents:
         intents = discord.Intents.default()
         intents.members = True
         intents.message_content = True
         intents.voice_states = True
 
         return intents
+
+    async def create_database_pool(self) -> None:
+        self.database: asyncpg.Pool = await asyncpg.create_pool(
+        database="Bongo", 
+        user="postgres", 
+        host="127.0.0.1", 
+        port="5432", 
+        password=os.getenv('DATABASE_PASSWORD')
+        )
+        print("Database connected")
+
+    async def load_data(self) -> None:
+        """Loads the entire table entry by entry into variables_for_guilds"""
+        
+
+        print("Database loaded into cache")
 
 bot = Bongo_Bot()
 
