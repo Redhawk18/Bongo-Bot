@@ -41,24 +41,31 @@ class Settings(commands.GroupCog, group_name='settings'):
         self.bot.variables_for_guilds[interaction.guild_id].music_channel_id = interaction.channel_id
 
         await interaction.response.send_message(f'Set music channel to {interaction.channel.mention}')
+        self.update_database_value()
 
     @app_commands.command(name="reset-music-channel", description="Resets the music channel, so any channel can use music commands")
     async def settings_reset_music_channel(self, interaction: discord.Interaction):
         self.bot.variables_for_guilds[interaction.guild_id].music_channel_id = None
 
         await interaction.response.send_message(f'Music channel reset')
+        self.update_database_value()
 
     @app_commands.command(name="set-music-roleee", description="Sets a role users are required to have to use music commands")
     async def settings_set_music_role(self, interaction: discord.Interaction, role: discord.Role):
         self.bot.variables_for_guilds[interaction.guild_id].music_roll_id = role.id
 
         await interaction.response.send_message(f'Set music role to {self.bot.get_guild(interaction.guild_id).get_role(role.id).mention}')
+        self.update_database_value()
 
     @app_commands.command(name="reset-music-role", description="Reset the roll required to play music commands")
     async def settings_reset_music_role(self, interaction: discord.Interaction):
         self.bot.variables_for_guilds[interaction.guild_id].music_roll_id = None
 
         await interaction.response.send_message(f'Music role reset')
+        self.update_database_value()
+
+    async def update_database_value():
+        print("TODO update_database_value")
 
 async def setup(bot):
     await bot.add_cog(Settings(bot))
