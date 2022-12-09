@@ -63,11 +63,12 @@ async def get_milliseconds_from_string(time_string: str, interaction: discord.In
 
     return (total_seconds * 1000) #turn into milliseconds
 
-async def get_voice(interaction) -> Custom_Player:
+async def get_voice(interaction: discord.Interaction, print: bool = True) -> Custom_Player:
     voice: Custom_Player = interaction.guild.voice_client
 
     if voice is None: #not connected to voice
-        await interaction.response.send_message("Nothing is playing")
+        if print:
+            await interaction.response.send_message("Nothing is playing")
         return None
 
     return voice
