@@ -4,8 +4,17 @@ import discord
 
 from custom_player import Custom_Player
 
-async def able_to_use_commands(interaction: discord.Interaction, is_playing: bool) -> bool:
-    """returns True if the user is mets all conditions to use playing commands"""
+async def able_to_use_commands(interaction: discord.Interaction, is_playing: bool, music_channel_id, music_role_id) -> bool: #
+    """returns True if the user mets all conditions to use playing commands"""
+    if music_role_id is not None:
+        if interaction.user.get_role(music_role_id) is None: #true if user has correct role
+            await interaction.response.send_message(f'User does not have music role')
+            return False
+
+    if interaction.channel_id != music_channel_id and music_channel_id is not None:
+        await interaction.response.send_message(f'Wrong channel for music')
+        return False
+
     if interaction.user.voice is None: #not in any voice chat
         await interaction.response.send_message("Not in any voice chat")
         return False
@@ -55,11 +64,12 @@ async def get_milliseconds_from_string(time_string: str, interaction: discord.In
 
     return (total_seconds * 1000) #turn into milliseconds
 
-async def get_voice(interaction) -> Custom_Player:
+async def get_voice(interaction: discord.Interaction, print: bool = True) -> Custom_Player:
     voice: Custom_Player = interaction.guild.voice_client
 
     if voice is None: #not connected to voice
-        await interaction.response.send_message("Nothing is playing")
+        if print:
+            await interaction.response.send_message("Nothing is playing")
         return None
 
     return voice

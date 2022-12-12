@@ -13,6 +13,11 @@ class Server_Infomation():
         self.now_playing_track = None
         self.loop_enabled = False
 
+        #database variables
+        self.music_channel_id = None
+        self.music_role_id = None
+        self.volume:int = None
+
     def __str__(self):
         return f"""
         song queue, {self.song_queue}
@@ -21,4 +26,9 @@ class Server_Infomation():
         playing view message id, {self.playing_view_message_id}
         user who want to skip, {self.user_who_want_to_skip}
         now playing, {self.now_playing_track}
-        looping, {self.loop_enabled}"""
+        looping, {self.loop_enabled}
+        
+        music_channel_id, {self.music_channel_id}
+        music_role_id, {self.music_role_id}
+        volume, {self.volume}
+        """
