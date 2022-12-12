@@ -47,14 +47,14 @@ class Settings(commands.GroupCog, group_name='settings'):
         self.bot.variables_for_guilds[interaction.guild_id].music_channel_id = interaction.channel_id
 
         await interaction.response.send_message(f'Set music channel to {interaction.channel.mention}')
-        await self.update_database_value()
+        await self.update_database_value("music_channel_id", interaction.channel_id, interaction.guild_id)
 
     @app_commands.command(name="reset-music-channel", description="Resets the music channel, so any channel can use music commands")
     async def settings_reset_music_channel(self, interaction: discord.Interaction):
         self.bot.variables_for_guilds[interaction.guild_id].music_channel_id = None
 
         await interaction.response.send_message(f'Music channel reset')
-        await self.update_database_value()
+        await self.update_database_value("music_channel_id", None, interaction.guild_id)
 
     @app_commands.command(name="set-music-roleee", description="Sets a role users are required to have to use music commands")
     @app_commands.describe(role="The only role that can use music commands")
@@ -62,28 +62,29 @@ class Settings(commands.GroupCog, group_name='settings'):
         self.bot.variables_for_guilds[interaction.guild_id].music_role_id = role.id
 
         await interaction.response.send_message(f'Set music role to {self.bot.get_guild(interaction.guild_id).get_role(role.id).mention}')
-        await self.update_database_value()
+        await self.update_database_value("music_role_id", role.id, interaction.guild_id)
 
     @app_commands.command(name="reset-music-role", description="Reset the role required to play music commands")
     async def settings_reset_music_role(self, interaction: discord.Interaction):
         self.bot.variables_for_guilds[interaction.guild_id].music_role_id = None
 
         await interaction.response.send_message(f'Music role reset')
-        await self.update_database_value()
+        await self.update_database_value("music_role_id", None, interaction.guild_id)
 
     @app_commands.command(name="volume", description="Sets the volume of the player")
     @app_commands.describe(volume="Volume of the player")
     async def volume(self, interaction: discord.Interaction, volume: app_commands.Range[int, 0, 100]):
         voice = await get_voice(interaction, False)
-        if voice is None:
+        if voice is not None:
             await voice.set_volume(volume)
 
         self.bot.variables_for_guilds[interaction.guild_id].volume = volume
         await interaction.response.send_message(f'**Volume** :loud_sound: changed to {volume}%')
-        await self.update_database_value()
+        await self.update_database_value("volume", volume, interaction.guild_id)
 
-    async def update_database_value():
-        print("TODO update_database_value")
+    async def update_database_value(self, column_name:str, value, guild_id:int):
+        await self.bot.database.execute(f'UPDATE guilds SET {column_name} = {value} WHERE guild_id = {guild_id};')
+        
 
 async def setup(bot):
     await bot.add_cog(Settings(bot))
