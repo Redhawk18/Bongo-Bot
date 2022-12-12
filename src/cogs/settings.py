@@ -41,8 +41,8 @@ class Settings(commands.GroupCog, group_name='settings'):
 
         await interaction.response.send_message(embed=embed)
 
-    #TODO add cooldowns to all set and reset commands, because they will have to contact a database
     @app_commands.command(name="set-music-channel", description="Sets the current text channel as the only one music commands can be run from")
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
     async def settings_set_music_channel(self, interaction: discord.Interaction):
         self.bot.variables_for_guilds[interaction.guild_id].music_channel_id = interaction.channel_id
 
@@ -50,6 +50,7 @@ class Settings(commands.GroupCog, group_name='settings'):
         await self.update_database_value("music_channel_id", interaction.channel_id, interaction.guild_id)
 
     @app_commands.command(name="reset-music-channel", description="Resets the music channel, so any channel can use music commands")
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
     async def settings_reset_music_channel(self, interaction: discord.Interaction):
         self.bot.variables_for_guilds[interaction.guild_id].music_channel_id = None
 
@@ -58,6 +59,7 @@ class Settings(commands.GroupCog, group_name='settings'):
 
     @app_commands.command(name="set-music-roleee", description="Sets a role users are required to have to use music commands")
     @app_commands.describe(role="The only role that can use music commands")
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
     async def settings_set_music_role(self, interaction: discord.Interaction, role: discord.Role):
         self.bot.variables_for_guilds[interaction.guild_id].music_role_id = role.id
 
@@ -65,6 +67,7 @@ class Settings(commands.GroupCog, group_name='settings'):
         await self.update_database_value("music_role_id", role.id, interaction.guild_id)
 
     @app_commands.command(name="reset-music-role", description="Reset the role required to play music commands")
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
     async def settings_reset_music_role(self, interaction: discord.Interaction):
         self.bot.variables_for_guilds[interaction.guild_id].music_role_id = None
 
@@ -73,6 +76,7 @@ class Settings(commands.GroupCog, group_name='settings'):
 
     @app_commands.command(name="volume", description="Sets the volume of the player")
     @app_commands.describe(volume="Volume of the player")
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
     async def volume(self, interaction: discord.Interaction, volume: app_commands.Range[int, 0, 100]):
         voice = await get_voice(interaction, False)
         if voice is not None:
