@@ -106,11 +106,11 @@ class Play(commands.Cog):
         """Takes a track and adds it to the queue, and if nothing is playing this sends it to play"""
         #add to queue
         if play_next:
-            self.bot.variables_for_guilds[interaction.guild_id].song_queue.append((track, interaction, start))
+            self.bot.variables_for_guilds[interaction.guild_id].song_queue.append((track, interaction, interaction.channel, start))
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue")
 
         else: #add to top
-            self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction, start))
+            self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction, interaction.channel, start))
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to queue")
 
         #if not playing we start playing
@@ -120,7 +120,7 @@ class Play(commands.Cog):
         """Adds each video individually to the queue"""
         index = 0
         for track in playlist.tracks:
-            self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction, None))
+            self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction, interaction.channel, None))
 
             index += 1
 
@@ -134,24 +134,26 @@ class Play(commands.Cog):
     async def play_song(self, guild_id):
         """plays the first song in the queue"""
         self.bot.variables_for_guilds[guild_id].user_who_want_to_skip.clear() #reset list
-        track, interaction, start = self.bot.variables_for_guilds[guild_id].song_queue.pop()
+        track, interaction, channel, start = self.bot.variables_for_guilds[guild_id].song_queue.pop()
 
-        if self.bot.variables_for_guilds[guild_id].loop_enabled:
-            #add the track back into the front
-            self.bot.variables_for_guilds[guild_id].song_queue.append((track, interaction, start))
+        # if self.bot.variables_for_guilds[guild_id].loop_enabled: #FIXME this will have problems with interactions expireing
+        #     #add the track back into the front
+        #     self.bot.variables_for_guilds[guild_id].song_queue.append((track, interaction, start))
 
         #connect bot to voice chat
-        voice = await self.connect(interaction)
+        if not interaction.is_expired(): #FIXME move up
+            voice = await self.connect(interaction)
 
         self.bot.variables_for_guilds[guild_id].now_playing_track = track
         #play track
         
-        await voice.play(track, start=start, volume=self.bot.variables_for_guilds[interaction.guild_id].volume)
-        playing_message = await interaction.followup.send(f"**Playing** :notes: `{track.title}` by `{track.author}` - Now!", wait=True)
-        view = await playing_message.channel.send(view=Playing_View(self.bot))
+        await voice.play(track, start=start, volume=self.bot.variables_for_guilds[guild_id].volume)
+        #playing_message = await interaction.followup.send(f'**Playing** :notes: `{track.title}` by `{track.author}` - Now!', wait=True)
+        await channel.send(f'**Playing** :notes: `{track.title}` by `{track.author}` - Now!') #TODO have these be the same message
+        playing_view_msg: discord.Message = await channel.send(view=Playing_View(self.bot))
 
-        self.bot.variables_for_guilds[guild_id].playing_view_channel_id = playing_message.channel.id
-        self.bot.variables_for_guilds[guild_id].playing_view_message_id = view.id
+        self.bot.variables_for_guilds[guild_id].playing_view_channel_id = channel.id
+        self.bot.variables_for_guilds[guild_id].playing_view_message_id = playing_view_msg.id
 
 async def setup(bot):
     await bot.add_cog(Play(bot))
