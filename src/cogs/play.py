@@ -64,9 +64,14 @@ class Play(commands.Cog):
 
         return voice
 
+    async def get_voice_from_id(self, guild_id:int) -> discord.VoiceProtocol:
+        voice: Custom_Player = self.bot.get_guild(guild_id).voice_client
+
+        return voice
+
     async def delete_view(self, guild_id):
         playing_view = self.bot.get_channel(self.bot.variables_for_guilds[guild_id].playing_view_channel_id).get_partial_message(self.bot.variables_for_guilds[guild_id].playing_view_message_id)
-        await playing_view.delete()
+        await playing_view.edit(view=None)
 
     @app_commands.command(name="play", description="plays a Youtube track, start time need to formated with colons")
     @app_commands.describe(query="What to search youtube for", play_next="If this track should be put at the front of the queue", start_time="time stamp to start the video at, for example 1:34 or 1:21:19")
@@ -110,47 +115,45 @@ class Play(commands.Cog):
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue")
 
         else: #add to top
-            self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction, interaction.channel, start))
+            self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction.channel, start))
             await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to queue")
 
         #if not playing we start playing
-        await self.play_if_not(interaction.guild_id)
+        await self.play_if_not(interaction, interaction.guild_id)
 
     async def add_playlist(self, playlist: wavelink.YouTubePlaylist, interaction):
         """Adds each video individually to the queue"""
         index = 0
         for track in playlist.tracks:
-            self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction, interaction.channel, None))
+            self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction.channel, None))
 
             index += 1
 
         await interaction.response.send_message(f'**Added** :musical_note: Playlist with {index} tracks to the queue')
-        await self.play_if_not(interaction.guild_id)
+        await self.play_if_not(interaction, interaction.guild_id)
 
-    async def play_if_not(self, guild_id):
+    async def play_if_not(self, interaction, guild_id):
+        await self.connect(interaction)
         if not self.bot.variables_for_guilds[guild_id].is_playing:
             await self.play_song(guild_id)
 
     async def play_song(self, guild_id):
         """plays the first song in the queue"""
         self.bot.variables_for_guilds[guild_id].user_who_want_to_skip.clear() #reset list
-        track, interaction, channel, start = self.bot.variables_for_guilds[guild_id].song_queue.pop()
+        track, channel, start = self.bot.variables_for_guilds[guild_id].song_queue.pop()
 
         # if self.bot.variables_for_guilds[guild_id].loop_enabled: #FIXME this will have problems with interactions expireing
         #     #add the track back into the front
         #     self.bot.variables_for_guilds[guild_id].song_queue.append((track, interaction, start))
 
-        #connect bot to voice chat
-        if not interaction.is_expired(): #FIXME move up
-            voice = await self.connect(interaction)
-
         self.bot.variables_for_guilds[guild_id].now_playing_track = track
+
+        #connect bot to voice chat
+        voice = await self.get_voice_from_id(channel.guild.id)
+
         #play track
-        
         await voice.play(track, start=start, volume=self.bot.variables_for_guilds[guild_id].volume)
-        #playing_message = await interaction.followup.send(f'**Playing** :notes: `{track.title}` by `{track.author}` - Now!', wait=True)
-        await channel.send(f'**Playing** :notes: `{track.title}` by `{track.author}` - Now!') #TODO have these be the same message
-        playing_view_msg: discord.Message = await channel.send(view=Playing_View(self.bot))
+        playing_view_msg: discord.Message = await channel.send(f'**Playing** :notes: `{track.title}` by `{track.author}` - Now!', view=Playing_View(self.bot))
 
         self.bot.variables_for_guilds[guild_id].playing_view_channel_id = channel.id
         self.bot.variables_for_guilds[guild_id].playing_view_message_id = playing_view_msg.id
