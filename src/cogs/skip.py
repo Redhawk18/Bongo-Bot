@@ -17,7 +17,7 @@ class Skip(commands.Cog):
 
     @app_commands.command(name="skip", description="Calls a vote to skip the track")
     async def skip(self, interaction: discord.Interaction):
-        await self.skip_helper(interaction)
+        await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
         voice = await get_voice(interaction)
