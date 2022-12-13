@@ -26,19 +26,18 @@ class Queue(commands.Cog):
 
         #store every element in a string
         index = 0
-        output = ""
+        output = "Shows every song until the character limit is reached\n\n"
         total_seconds = 0
         while tempq:
             #get the url of the video
             track, _, _ = tempq.pop()
 
-            output += (f'{index +1}. `{track.title}` - `{seconds_to_timedate(track.length)}`\n')
+            if len(output) < 4050: #limit 4096
+                output += (f'{index +1}. `{track.title}` - `{seconds_to_timedate(track.length)}`\n')
 
             total_seconds += track.length
             index += 1
-            if index > 50: #giant queues have trouble loading
-                break
-
+        
         embed = discord.Embed(
             title = "**Queue** :books:",
             description = output,
