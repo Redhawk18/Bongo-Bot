@@ -26,14 +26,14 @@ class Loop(commands.Cog):
             return
 
         if self.bot.variables_for_guilds[interaction.guild_id].loop_enabled: #disable loop
-            track, _, _ = self.bot.variables_for_guilds[interaction.guild_id].song_queue.pop()
+            _, _, _ = self.bot.variables_for_guilds[interaction.guild_id].song_queue.pop()
             self.bot.variables_for_guilds[interaction.guild_id].loop_enabled = False
             await interaction.response.send_message("**Loop Disabled** :repeat:")
 
         else: #enable loop
             #add current song to the top of the queue once
             track = self.bot.variables_for_guilds[interaction.guild_id].now_playing_track
-            self.bot.variables_for_guilds[interaction.guild_id].song_queue.append((track, interaction, None))
+            self.bot.variables_for_guilds[interaction.guild_id].song_queue.append((track, interaction.channel, None))
             self.bot.variables_for_guilds[interaction.guild_id].loop_enabled = True
             await interaction.response.send_message("**Loop Enabled** :repeat:")
 

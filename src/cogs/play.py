@@ -142,9 +142,9 @@ class Play(commands.Cog):
         self.bot.variables_for_guilds[guild_id].user_who_want_to_skip.clear() #reset list
         track, channel, start = self.bot.variables_for_guilds[guild_id].song_queue.pop()
 
-        # if self.bot.variables_for_guilds[guild_id].loop_enabled: #FIXME this will have problems with interactions expireing
-        #     #add the track back into the front
-        #     self.bot.variables_for_guilds[guild_id].song_queue.append((track, interaction, start))
+        if self.bot.variables_for_guilds[guild_id].loop_enabled: #FIXME this will have problems with interactions expireing
+            #add the track back into the front
+            self.bot.variables_for_guilds[guild_id].song_queue.append((track, channel, start))
 
         self.bot.variables_for_guilds[guild_id].now_playing_track = track
 
