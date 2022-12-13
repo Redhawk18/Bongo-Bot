@@ -37,13 +37,6 @@ async def able_to_use_commands(interaction: discord.Interaction, is_playing: boo
 
     return True
 
-def add_zero(number) -> str:
-    """turns 2 seconds to 02"""
-    if number < 10:
-        return "0" + str(number)
-
-    return str(number)
-
 async def get_milliseconds_from_string(time_string: str, interaction: discord.Interaction) -> int:
     "takes a time string and returns the time in milliseconds `1:34` -> `94000`, errors return `-1`"
     TIME_RE = re.compile("^[0-5]?\d:[0-5]?\d:[0-5]\d|[0-5]?\d:[0-5]\d|\d+$")
@@ -81,6 +74,6 @@ def seconds_to_timedate(total_seconds: int) -> str:
     hours, minutes = divmod(minutes, 60)
 
     if hours > 0:
-        return f'{add_zero(floor(hours))}:{add_zero(floor(minutes))}:{add_zero(floor(seconds))}'
+        return f'{(floor(hours)):02}:{(floor(minutes)):02}:{(floor(seconds)):02}'
 
-    return f'{add_zero(floor(minutes))}:{add_zero(floor(seconds))}'
+    return f'{(floor(minutes)):02}:{(floor(seconds)):02}'

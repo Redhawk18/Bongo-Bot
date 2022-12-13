@@ -1,12 +1,10 @@
-from math import floor
-
 import discord
 from discord import app_commands
 from discord.ext import commands
 
 from utilities import get_voice, seconds_to_timedate
 
-class Now_Playing(commands.Cog): #TODO add position https://wavelink.readthedocs.io/en/latest/wavelink.html#wavelink.Player.position to Duration
+class Now_Playing(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
