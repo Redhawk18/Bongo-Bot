@@ -61,8 +61,7 @@ class Bongo_Bot(commands.Bot):
         database="Bongo", 
         user="postgres", 
         host="127.0.0.1", 
-        port="5432", 
-        password=os.getenv('DATABASE_PASSWORD')
+        port="5432"
         )
         print("Database connected")
 
