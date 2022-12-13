@@ -5,6 +5,7 @@ from discord.ext import commands
 from utilities import get_voice
 
 @app_commands.default_permissions(administrator=True)
+@app_commands.guild_only()
 class Settings(commands.GroupCog, group_name='settings'):
 
     def __init__(self, bot: commands.Bot):

@@ -14,6 +14,7 @@ class Resume(commands.Cog):
         pass
 
     @app_commands.command(name="resume", description="Resumes track")
+    @app_commands.guild_only()
     async def resume(self, interaction: discord.Interaction):
         await self.helper(interaction)
 

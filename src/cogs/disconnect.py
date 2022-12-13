@@ -14,6 +14,7 @@ class Disconnect(commands.Cog):
         pass
 
     @app_commands.command(name="disconnect", description="disconnect from voice chat")
+    @app_commands.guild_only()
     async def disconnect(self, interaction: discord.Interaction):
         voice = await get_voice(interaction)
         if voice is None or not await able_to_use_commands(interaction, self.bot.variables_for_guilds[interaction.guild_id].is_playing, self.bot.variables_for_guilds[interaction.guild_id].music_channel_id, self.bot.variables_for_guilds[interaction.guild_id].music_role_id):

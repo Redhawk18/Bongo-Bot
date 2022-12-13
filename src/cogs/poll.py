@@ -13,6 +13,7 @@ class Poll(commands.Cog):
 
     @app_commands.command(name="poll", description="creates a poll with emotes to vote by")
     @app_commands.describe(title="the title of the poll")
+    @app_commands.guild_only()
     async def poll(self, interaction: discord.Interaction, title: str, option1: str, option2: str, option3: str=None, option4: str=None, option5: str=None, option6: str=None ,option7: str=None, option8: str=None, option9: str=None, option10: str=None):
         #take every option and put it in a list to loop through
         options = []

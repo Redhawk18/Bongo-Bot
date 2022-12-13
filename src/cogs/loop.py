@@ -14,6 +14,7 @@ class Loop(commands.Cog):
         pass
 
     @app_commands.command(name="loop", description="Loops the current song until disabled")
+    @app_commands.guild_only()
     async def loop(self, interaction: discord.Interaction):
         await self.helper(interaction)
 

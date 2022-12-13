@@ -76,6 +76,7 @@ class Play(commands.Cog):
     @app_commands.command(name="play", description="plays a Youtube track, start time need to formated with colons")
     @app_commands.describe(query="What to search youtube for", play_next="If this track should be put at the front of the queue", start_time="time stamp to start the video at, for example 1:34 or 1:21:19")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.guild_only()
     async def play(self, interaction: discord.Interaction, *, query: str, play_next: bool=False, start_time: str=None):
         if start_time is not None: #parser
             start_time = await get_milliseconds_from_string(start_time, interaction)

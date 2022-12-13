@@ -14,6 +14,7 @@ class Now_Playing(commands.Cog):
         pass
 
     @app_commands.command(name="now-playing", description="Show the playing song")
+    @app_commands.guild_only()
     async def now_playing(self, interaction: discord.Interaction):
         await self.helper(interaction)
 
