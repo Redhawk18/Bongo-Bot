@@ -34,7 +34,7 @@ class Queue(commands.Cog):
             #get the url of the video
             track, _, _ = tempq.pop()
 
-            output += (f"{index +1}. `{track.title}` - `{seconds_to_timedate(track.length)}`\n")
+            output += (f'{index +1}. `{track.title}` - `{seconds_to_timedate(track.length)}`\n')
 
             total_seconds += track.length
             index += 1
@@ -53,7 +53,7 @@ class Queue(commands.Cog):
         if self.bot.variables_for_guilds[interaction.guild_id].loop_enabled:
             embed.set_footer(text="Total length: Forever")
 
-        await interaction.edit_original_response(content="", embed=embed)
+        await interaction.edit_original_response(content=None, embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Queue(bot))

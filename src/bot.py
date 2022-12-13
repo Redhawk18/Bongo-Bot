@@ -30,10 +30,10 @@ class Bongo_Bot(commands.Bot):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
         print('------')
 
-    async def setup_hook(self):
         #sync new commands
         #await bot.tree.sync()
 
+    async def setup_hook(self):
         #create and setup database
         await self.create_database_pool()
         await self.load_data()
