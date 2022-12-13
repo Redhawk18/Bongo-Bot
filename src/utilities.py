@@ -1,4 +1,5 @@
 import re
+from math import floor
 
 import discord
 
@@ -73,3 +74,13 @@ async def get_voice(interaction: discord.Interaction, print: bool = True) -> Cus
         return None
 
     return voice
+
+def seconds_to_timedate(total_seconds: int) -> str:
+    """Takes the total amount of seconds and returns a time like `1:35:54` or `1:23`"""
+    minutes, seconds = divmod(total_seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+
+    if hours > 0:
+        return f'{add_zero(floor(hours))}:{add_zero(floor(minutes))}:{add_zero(floor(seconds))}'
+
+    return f'{add_zero(floor(minutes))}:{add_zero(floor(seconds))}'

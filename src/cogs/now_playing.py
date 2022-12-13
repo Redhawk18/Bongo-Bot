@@ -4,9 +4,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utilities import add_zero
+from utilities import get_voice, seconds_to_timedate
 
-class Now_Playing(commands.Cog):
+class Now_Playing(commands.Cog): #TODO add position https://wavelink.readthedocs.io/en/latest/wavelink.html#wavelink.Player.position to Duration
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -24,6 +24,8 @@ class Now_Playing(commands.Cog):
             await interaction.response.send_message("Nothing is playing")
             return
 
+        voice_position = (await get_voice(interaction)).position
+
         embed = discord.Embed(
             title = "**Now Playing** :notes:",
             url = self.bot.variables_for_guilds[interaction.guild_id].now_playing_track.uri,
@@ -35,12 +37,7 @@ class Now_Playing(commands.Cog):
         embed.add_field(name="Uploader", value=self.bot.variables_for_guilds[interaction.guild_id].now_playing_track.author)
 
         total_seconds = self.bot.variables_for_guilds[interaction.guild_id].now_playing_track.length
-        minutes, seconds = divmod(total_seconds, 60)
-        hours, minutes = divmod(minutes, 60)
-        if hours > 0:
-            embed.add_field(name="Duration", value=f'{floor(hours)}:{add_zero(floor(minutes))}:{add_zero(floor(seconds))}')
-        else:
-            embed.add_field(name="Duration", value=f'{floor(minutes)}:{add_zero(floor(seconds))}')
+        embed.add_field(name="Duration", value=f'/{seconds_to_timedate(total_seconds)}')
 
         await interaction.response.send_message(embed=embed)
 
