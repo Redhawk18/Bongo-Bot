@@ -31,7 +31,7 @@ class Bongo_Bot(commands.Bot):
         print('------')
 
         #sync new commands
-        #await bot.tree.sync()
+        await bot.tree.sync()
 
     async def setup_hook(self):
         #create and setup database
