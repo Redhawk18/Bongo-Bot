@@ -37,7 +37,7 @@ class Now_Playing(commands.Cog): #TODO add position https://wavelink.readthedocs
         embed.add_field(name="Uploader", value=self.bot.variables_for_guilds[interaction.guild_id].now_playing_track.author)
 
         total_seconds = self.bot.variables_for_guilds[interaction.guild_id].now_playing_track.length
-        embed.add_field(name="Duration", value=f'/{seconds_to_timedate(total_seconds)}')
+        embed.add_field(name="Duration", value=f'{seconds_to_timedate(voice_position)}/{seconds_to_timedate(total_seconds)}')
 
         await interaction.response.send_message(embed=embed)
 
