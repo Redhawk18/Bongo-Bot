@@ -70,8 +70,8 @@ class Play(commands.Cog):
         return voice
 
     async def delete_view(self, guild_id):
-        playing_view = self.bot.get_channel(self.bot.variables_for_guilds[guild_id].playing_view_channel_id).get_partial_message(self.bot.variables_for_guilds[guild_id].playing_view_message_id)
-        await playing_view.edit(view=None)
+        playing_view_message = self.bot.get_channel(self.bot.variables_for_guilds[guild_id].playing_view_channel_id).get_partial_message(self.bot.variables_for_guilds[guild_id].playing_view_message_id)
+        await playing_view_message.edit(view=None)
 
     @app_commands.command(name="play", description="plays a Youtube track, start time need to formated with colons")
     @app_commands.describe(query="What to search youtube for", play_next="If this track should be put at the front of the queue", start_time="time stamp to start the video at, for example 1:34 or 1:21:19")
@@ -142,7 +142,7 @@ class Play(commands.Cog):
         self.bot.variables_for_guilds[guild_id].user_who_want_to_skip.clear() #reset list
         track, channel, start = self.bot.variables_for_guilds[guild_id].song_queue.pop()
 
-        if self.bot.variables_for_guilds[guild_id].loop_enabled: #FIXME this will have problems with interactions expireing
+        if self.bot.variables_for_guilds[guild_id].loop_enabled:
             #add the track back into the front
             self.bot.variables_for_guilds[guild_id].song_queue.append((track, channel, start))
 
