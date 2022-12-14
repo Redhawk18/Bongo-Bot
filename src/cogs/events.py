@@ -9,9 +9,6 @@ class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-        #start tasks
-        self.disconnect_timer.start()
-        self.set_status.start()
 
     @commands.Cog.listener()
     async def on_ready(self):
