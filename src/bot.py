@@ -58,7 +58,7 @@ class Bongo_Bot(commands.Bot):
 
     async def create_database_pool(self) -> None:
         self.database: asyncpg.Pool = await asyncpg.create_pool(
-        database="Bongo", 
+        database="bongo", 
         user="postgres", 
         host="127.0.0.1", 
         port="5432"
