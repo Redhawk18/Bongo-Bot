@@ -58,7 +58,7 @@ class Settings(commands.GroupCog, group_name='settings'):
         await interaction.response.send_message(f'Music channel reset')
         await self.update_database_value("music_channel_id", None, interaction.guild_id)
 
-    @app_commands.command(name="set-music-roleee", description="Sets a role users are required to have to use music commands")
+    @app_commands.command(name="set-music-role", description="Sets a role users are required to have to use music commands")
     @app_commands.describe(role="The only role that can use music commands")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
     async def settings_set_music_role(self, interaction: discord.Interaction, role: discord.Role):
