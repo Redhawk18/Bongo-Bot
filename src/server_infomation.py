@@ -16,7 +16,7 @@ class Server_Infomation():
         #database variables
         self.music_channel_id = None
         self.music_role_id = None
-        self.volume:int = None
+        self.volume:int = 25
 
     def __str__(self):
         return f"""
