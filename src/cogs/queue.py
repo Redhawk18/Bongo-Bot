@@ -6,7 +6,7 @@ from discord.ext import commands
 
 from utilities import seconds_to_timedate
 
-@app_commands.default_permissions()
+#@app_commands.default_permissions()
 @app_commands.guild_only()
 class Queue(commands.GroupCog, group_name='queue'):
 
