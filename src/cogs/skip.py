@@ -43,11 +43,11 @@ class Skip(commands.Cog):
                 await self.bot.get_cog("Force_Skip").helper(interaction)
 
             else: #not enough people
+                print(self.bot.variables_for_guilds[interaction.guild_id].user_who_want_to_skip)
                 await interaction.response.send_message(f'**Skipping? ({len(self.bot.variables_for_guilds[interaction.guild_id].user_who_want_to_skip)}/{threshold} votes needed) or use `forceskip`**')
 
         else:
             await interaction.response.send_message("Nothing is playing")
-            return
 
 async def setup(bot):
     await bot.add_cog(Skip(bot))
