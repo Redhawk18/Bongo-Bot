@@ -22,7 +22,7 @@ class Roll(commands.Cog):
         for _ in range(rolls):
             current_roll = random.randint(1, die_sides)
             sum += current_roll
-            output += f'Rolled {current_roll} :game_die:\n'
+            output += f'Rolled {current_roll} 🎲\n'
 
         #sum print
         output += "\n"

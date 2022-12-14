@@ -25,7 +25,7 @@ class Pause(commands.Cog):
 
         if not voice.is_paused():
             await voice.pause()
-            await interaction.response.send_message("**Paused** :pause_button:")
+            await interaction.response.send_message("**Paused** ⏸")
 
         else:
             await interaction.response.send_message("Already paused")

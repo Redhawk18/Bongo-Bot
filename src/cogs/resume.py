@@ -25,7 +25,7 @@ class Resume(commands.Cog):
 
         if voice.is_paused():
             await voice.resume()
-            await interaction.response.send_message("**Resumed** :arrow_forward:")
+            await interaction.response.send_message("**Resumed** ▶")
 
         else:
             await interaction.response.send_message("Already resumed")

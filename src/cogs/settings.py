@@ -18,7 +18,7 @@ class Settings(commands.GroupCog, group_name='settings'):
     @app_commands.command(name="list", description="Lists all settings")
     async def settings_list(self, interaction: discord.Interaction):
         embed = discord.Embed(
-            title = "**Settings** :gear:",
+            title = "**Settings** ⚙",
             description = "Use the set commands to set values",
             color = discord.Color.red()
         )
@@ -38,7 +38,7 @@ class Settings(commands.GroupCog, group_name='settings'):
         else:
             embed.add_field(name="Music Role", value="None")
 
-        embed.add_field(name="Volume :loud_sound:", value=self.bot.variables_for_guilds[interaction.guild_id].volume)
+        embed.add_field(name="Volume 🔊", value=self.bot.variables_for_guilds[interaction.guild_id].volume)
 
         await interaction.response.send_message(embed=embed)
 

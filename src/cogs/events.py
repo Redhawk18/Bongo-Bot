@@ -9,7 +9,6 @@ class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-
     @commands.Cog.listener()
     async def on_ready(self):
         pass
@@ -21,9 +20,8 @@ class Events(commands.Cog):
         TROLLED_USER_ID = int(os.getenv('TROLLED_USER_ID'))
 
         if TROLLED_USER_ID == message.author.id:
-            if random.randint(1, 20) == 1: #1 in 15 messages
+            if random.randint(1, 20) == 1: #1 in 20 messages
                 await message.add_reaction("🐧")
-
     
     @commands.Cog.listener()
     async def on_guild_join(self, guild):

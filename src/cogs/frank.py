@@ -22,17 +22,7 @@ class Frank(commands.Cog):
         
     @app_commands.command(name="ping", description="Pong!")
     async def ping(self, interaction: discord.Interaction):
-        await interaction.response.send_message(f'**Pong!** :ping_pong: {ceil(self.bot.latency*1000)}ms')
-
-    # @commands.Cog.listener()
-    # async def on_message(self, message):
-    #     #get trolled user from env
-    #     load_dotenv() #this should not be here
-    #     TROLLED_USER_ID = int(os.getenv('TROLLED_USER_ID'))
-
-    #     if TROLLED_USER_ID == message.author.id:
-    #         if random.randint(1, 15) == 1: #1 in 15 messages
-    #             await message.add_reaction("🐧")
+        await interaction.response.send_message(f'**Pong!** 🏓 {ceil(self.bot.latency*1000)}ms')
 
 async def setup(bot):
     await bot.add_cog(Frank(bot))

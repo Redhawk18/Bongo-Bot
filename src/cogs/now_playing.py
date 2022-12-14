@@ -26,7 +26,7 @@ class Now_Playing(commands.Cog):
         voice_position = (await get_voice(interaction)).position
 
         embed = discord.Embed(
-            title = "**Now Playing** :notes:",
+            title = "**Now Playing** 🎶",
             url = self.bot.variables_for_guilds[interaction.guild_id].now_playing_track.uri,
             color = discord.Color.red(),
             description=""

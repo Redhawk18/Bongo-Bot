@@ -42,7 +42,7 @@ class Queue(commands.GroupCog, group_name='queue'):
             index += 1
         
         embed = discord.Embed(
-            title = "**Queue** :books:",
+            title = "**Queue** 📚",
             description = output,
             color = discord.Color.red(),
         )
@@ -58,7 +58,7 @@ class Queue(commands.GroupCog, group_name='queue'):
     @app_commands.command(name="clear", description="Clears everything in the queue")
     async def queue_clear(self, interaction: discord.Interaction):
         self.bot.variables_for_guilds[interaction.guild_id].song_queue.clear()
-        await interaction.response.send_message("**Cleared queue** :books:")
+        await interaction.response.send_message("**Cleared queue** 📚")
 
     @app_commands.command(name="remove", description="Removes a song from the queue based on its track number")
     @app_commands.describe(queue_position="The position of the track to be removed")
@@ -75,13 +75,13 @@ class Queue(commands.GroupCog, group_name='queue'):
 
         #we should have the url of the track we want to remove
         self.bot.variables_for_guilds[interaction.guild_id].song_queue.remove(tempq.pop())
-        await interaction.response.send_message("**Removed from queue** :books:")
+        await interaction.response.send_message("**Removed from queue** 📚")
 
     @app_commands.command(name="shuffle", description="shuffles the queue")
     async def queue_shuffle(self, interaction: discord.Interaction):
         if len(self.bot.variables_for_guilds[interaction.guild_id].song_queue) > 1:
             random.shuffle(self.bot.variables_for_guilds[interaction.guild_id].song_queue)
-            await interaction.response.send_message("**Shuffled queue** :books:")
+            await interaction.response.send_message("**Shuffled queue** 📚")
 
         else:
             await interaction.response.send_message("Nothing to shuffle")

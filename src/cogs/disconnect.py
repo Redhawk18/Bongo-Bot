@@ -23,7 +23,7 @@ class Disconnect(commands.Cog):
         if voice.is_connected():
             await self.stop_voice_functions(voice)
             if not interaction.response.is_done():
-                await interaction.response.send_message("**Disconnected** :guitar:")
+                await interaction.response.send_message("**Disconnected** 🎸")
 
         else:
             await interaction.response.send_message("Already disconnected")
