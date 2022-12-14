@@ -2,11 +2,9 @@ from dotenv import load_dotenv
 import os
 import random
 
-import discord
-from discord import app_commands
 from discord.ext import commands
 
-class Tasks(commands.Cog):
+class Events(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -41,4 +39,4 @@ class Tasks(commands.Cog):
         await self.bot.database.execute(f'DELETE FROM guilds WHERE guild_id = {guild.id};')
 
 async def setup(bot):
-    await bot.add_cog(Tasks(bot))
+    await bot.add_cog(Events(bot))
