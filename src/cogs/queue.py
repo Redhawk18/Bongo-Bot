@@ -6,7 +6,6 @@ from discord.ext import commands
 
 from utilities import seconds_to_timedate
 
-#@app_commands.default_permissions()
 @app_commands.guild_only()
 class Queue(commands.GroupCog, group_name='queue'):
 
@@ -19,7 +18,6 @@ class Queue(commands.GroupCog, group_name='queue'):
     
     @app_commands.command(name="list", description="Lists the queue")
     @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
-    @app_commands.guild_only()
     async def queue_list(self, interaction: discord.Interaction):
         if len(self.bot.variables_for_guilds[interaction.guild_id].song_queue) == 0: #incase the queue was empty from the start
             await interaction.response.send_message("The queue is empty")
