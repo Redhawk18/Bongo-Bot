@@ -58,10 +58,10 @@ class Bongo_Bot(commands.Bot):
 
     async def create_database_pool(self) -> None:
         self.database: asyncpg.Pool = await asyncpg.create_pool(
-        database="Bongo", 
-        user="postgres", 
-        host="127.0.0.1", 
-        port="5432", 
+        database=os.getenv('DATABASE_DATABASE'),
+        user=os.getenv('DATABASE_USER'),
+        host=os.getenv('DATABASE_HOST'),
+        port=os.getenv('DATABASE_PORT'),
         password=os.getenv('DATABASE_PASSWORD')
         )
         print("Database connected")
