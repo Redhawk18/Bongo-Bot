@@ -11,13 +11,12 @@ from dotenv import load_dotenv
 
 import server_infomation
 
-dotenv_path = Path(__file__).parent.resolve().parent.resolve().joinpath(".env")
 root = Path(__file__).parent.resolve().parent.resolve()
-if not Path.is_file(dotenv_path):
+if not Path.is_file(root.joinpath(".env")):
     print("you forgot the .env file")
     exit()
 
-load_dotenv(dotenv_path)
+load_dotenv(root.joinpath(".env"))
 TOKEN = getenv('DISCORD_TOKEN')
 
 class Bongo_Bot(commands.Bot):
@@ -26,7 +25,7 @@ class Bongo_Bot(commands.Bot):
         super().__init__(command_prefix = "!", intents = self.get_intents(), *args, **kwargs)
         self.tree.on_error = self.on_tree_error
 
-        self.dotenv_path = dotenv_path
+        self.dotenv_path = root.joinpath(".env")
         self.variables_for_guilds = defaultdict(server_infomation.Server_Infomation) 
 
     async def on_ready(self):
@@ -83,7 +82,6 @@ class Bongo_Bot(commands.Bot):
 bot = Bongo_Bot()
 
 async def main():
-    root = Path(__file__).parent.resolve().parent.resolve()
     async with bot:
         #load cogs
         for file in root.glob('./src/cogs/*.py'):
