@@ -1,7 +1,8 @@
 import asyncio
 from collections import defaultdict
 import logging
-import os
+from os import getenv
+from pathlib import Path
 
 import asyncpg
 import discord
@@ -10,13 +11,14 @@ from dotenv import load_dotenv
 
 import server_infomation
 
-#.env
-if not os.path.isfile('.env'):
+dotenv_path = Path(__file__).parent.resolve().parent.resolve().joinpath(".env")
+root = Path(__file__).parent.resolve().parent.resolve()
+if not Path.is_file(dotenv_path):
     print("you forgot the .env file")
     exit()
 
-load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
+load_dotenv(dotenv_path)
+TOKEN = getenv('DISCORD_TOKEN')
 
 class Bongo_Bot(commands.Bot):
     """Handles intents, prefixs, and database init automatically"""
@@ -24,6 +26,7 @@ class Bongo_Bot(commands.Bot):
         super().__init__(command_prefix = "!", intents = self.get_intents(), *args, **kwargs)
         self.tree.on_error = self.on_tree_error
 
+        self.dotenv_path = dotenv_path
         self.variables_for_guilds = defaultdict(server_infomation.Server_Infomation) 
 
     async def on_ready(self):
@@ -58,11 +61,11 @@ class Bongo_Bot(commands.Bot):
 
     async def create_database_pool(self) -> None:
         self.database: asyncpg.Pool = await asyncpg.create_pool(
-        database=os.getenv('DATABASE_DATABASE'),
-        user=os.getenv('DATABASE_USER'),
-        host=os.getenv('DATABASE_HOST'),
-        port=os.getenv('DATABASE_PORT'),
-        password=os.getenv('DATABASE_PASSWORD')
+        database=getenv('DATABASE_DATABASE'),
+        user=getenv('DATABASE_USER'),
+        host=getenv('DATABASE_HOST'),
+        port=getenv('DATABASE_PORT'),
+        password=getenv('DATABASE_PASSWORD')
         )
         print("Database connected")
 
@@ -80,11 +83,11 @@ class Bongo_Bot(commands.Bot):
 bot = Bongo_Bot()
 
 async def main():
+    root = Path(__file__).parent.resolve().parent.resolve()
     async with bot:
         #load cogs
-        for filename in os.listdir('./src/cogs'):
-            if filename.endswith('.py'):
-                await bot.load_extension(f'cogs.{filename[:-3]}')
+        for file in root.glob('./src/cogs/*.py'):
+            await bot.load_extension(f'cogs.{file.name[:-3]}')
         
         #start bot
         discord.utils.setup_logging(level=logging.INFO)

@@ -5,7 +5,7 @@ import discord
 
 from custom_player import Custom_Player
 
-async def able_to_use_commands(interaction: discord.Interaction, is_playing: bool, music_channel_id, music_role_id) -> bool: #
+async def able_to_use_commands(interaction: discord.Interaction, is_playing: bool, music_channel_id, music_role_id) -> bool:
     """returns True if the user mets all conditions to use playing commands"""
     if music_role_id is not None:
         if interaction.user.get_role(music_role_id) is None: #true if user has correct role

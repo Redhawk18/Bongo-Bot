@@ -26,8 +26,7 @@ class Frank(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        #get trolled user from env
-        load_dotenv() #this should not be here
+        load_dotenv(self.bot.dotenv_path)
         TROLLED_USER_ID = int(os.getenv('TROLLED_USER_ID'))
 
         if TROLLED_USER_ID == message.author.id:
