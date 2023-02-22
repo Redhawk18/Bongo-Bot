@@ -5,7 +5,6 @@ import random
 import discord
 from discord import app_commands
 from discord.ext import commands
-from dotenv import load_dotenv
 
 class Frank(commands.Cog):
 
@@ -26,7 +25,6 @@ class Frank(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        load_dotenv(self.bot.dotenv_path)
         TROLLED_USER_ID = int(os.getenv('TROLLED_USER_ID'))
 
         if TROLLED_USER_ID == message.author.id:

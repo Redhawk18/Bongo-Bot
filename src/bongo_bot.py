@@ -5,17 +5,14 @@ import asyncpg
 import discord
 from discord.ext import commands
 
-from dotenv import load_dotenv
-
 import server_infomation
 
 class Bongo_Bot(commands.Bot):
     """Handles intents, prefixs, and database init automatically"""
-    def __init__(self, env_path, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(command_prefix = "!", intents = self.get_intents(), *args, **kwargs)
         self.tree.on_error = self.on_tree_error
 
-        self.dotenv_path = env_path
         self.variables_for_guilds = defaultdict(server_infomation.Server_Infomation) 
 
     async def on_ready(self):

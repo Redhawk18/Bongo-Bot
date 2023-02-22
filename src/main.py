@@ -9,16 +9,15 @@ from dotenv import load_dotenv
 from bongo_bot import Bongo_Bot
 
 root_path = Path(__file__).parent.resolve().parent.resolve()
-env_path = root_path.joinpath(".env")
 
-if not Path.is_file(env_path):
+if not Path.is_file(root_path.joinpath(".env")):
     print("you forgot the .env file")
     exit()
 
-load_dotenv(env_path)
+load_dotenv(root_path.joinpath(".env"))
 TOKEN = getenv('DISCORD_TOKEN')
 
-bot = Bongo_Bot(env_path)
+bot = Bongo_Bot()
 
 async def main():
     async with bot:
