@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utilities import seconds_to_timedate
+from utilities import seconds_to_timestring
 
 @app_commands.guild_only()
 class Queue(commands.GroupCog, group_name='queue'):
@@ -35,11 +35,14 @@ class Queue(commands.GroupCog, group_name='queue'):
             #get the url of the video
             track, _, _ = tempq.pop()
 
-            if len(output) < 4050: #limit 4096
-                output += (f'{index +1}. `{track.title}` - `{seconds_to_timedate(track.length)}`\n')
+            if len(output) < 4000: #limit for embed description is 4096 characters
+                output += (f'{index +1}. `{track.title}` - `{seconds_to_timestring(track.length)}`\n') #FIXME
+                index += 1
 
             total_seconds += track.length
-            index += 1
+            
+        output += "\n"
+        output += f'*{len(self.bot.variables_for_guilds[interaction.guild_id].song_queue) - index} remaining songs not listed...*'
         
         embed = discord.Embed(
             title = "**Queue** 📚",
@@ -48,7 +51,7 @@ class Queue(commands.GroupCog, group_name='queue'):
         )
 
         #figure the length of the queue
-        embed.set_footer(text=f'Total length: {seconds_to_timedate(total_seconds)}')
+        embed.set_footer(text=f'Total length: {seconds_to_timestring(total_seconds)}')
 
         if self.bot.variables_for_guilds[interaction.guild_id].loop_enabled:
             embed.set_footer(text="Total length: Forever")

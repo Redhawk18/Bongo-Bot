@@ -112,8 +112,8 @@ class Play(commands.Cog):
         """Takes a track and adds it to the queue, and if nothing is playing this sends it to play"""
         #add to queue
         if play_next:
-            self.bot.variables_for_guilds[interaction.guild_id].song_queue.append((track, interaction, interaction.channel, start))
-            await interaction.response.send_message(f"**Added** 🎵 `{track.uri}` to the top of the queue")
+            self.bot.variables_for_guilds[interaction.guild_id].song_queue.append((track, interaction.channel, start))
+            await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue")
 
         else: #add to top
             self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction.channel, start))

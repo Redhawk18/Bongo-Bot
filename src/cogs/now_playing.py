@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utilities import get_voice, seconds_to_timedate
+from utilities import get_voice, seconds_to_timestring
 
 class Now_Playing(commands.Cog):
 
@@ -36,7 +36,7 @@ class Now_Playing(commands.Cog):
         embed.add_field(name="Uploader", value=self.bot.variables_for_guilds[interaction.guild_id].now_playing_track.author)
 
         total_seconds = self.bot.variables_for_guilds[interaction.guild_id].now_playing_track.length
-        embed.add_field(name="Duration", value=f'{seconds_to_timedate(voice_position)}/{seconds_to_timedate(total_seconds)}')
+        embed.add_field(name="Duration", value=f'{seconds_to_timestring(voice_position)}/{seconds_to_timestring(total_seconds)}')
 
         await interaction.response.send_message(embed=embed)
 

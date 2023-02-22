@@ -1,22 +1,11 @@
-import asyncio
 from collections import defaultdict
-import logging
-import os
+from os import getenv
 
 import asyncpg
 import discord
 from discord.ext import commands
-from dotenv import load_dotenv
 
 import server_infomation
-
-#.env
-if not os.path.isfile('.env'):
-    print("you forgot the .env file")
-    exit()
-
-load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
 
 class Bongo_Bot(commands.Bot):
     """Handles intents, prefixs, and database init automatically"""
@@ -31,7 +20,7 @@ class Bongo_Bot(commands.Bot):
         print('------')
 
         #sync new commands
-        await bot.tree.sync()
+        await self.tree.sync()
 
     async def setup_hook(self):
         #create and setup database
@@ -58,10 +47,11 @@ class Bongo_Bot(commands.Bot):
 
     async def create_database_pool(self) -> None:
         self.database: asyncpg.Pool = await asyncpg.create_pool(
-        database="bongo", 
-        user="postgres", 
-        host="127.0.0.1", 
-        port="5432"
+        database=getenv('DATABASE_DATABASE'),
+        user=getenv('DATABASE_USER'),
+        host=getenv('DATABASE_HOST'),
+        port=getenv('DATABASE_PORT'),
+        password=getenv('DATABASE_PASSWORD')
         )
         print("Database connected")
 
@@ -75,18 +65,3 @@ class Bongo_Bot(commands.Bot):
             self.variables_for_guilds[record['guild_id']].volume = record['volume']
 
         print("Database loaded into cache")
-
-bot = Bongo_Bot()
-
-async def main():
-    async with bot:
-        #load cogs
-        for filename in os.listdir('./src/cogs'):
-            if filename.endswith('.py'):
-                await bot.load_extension(f'cogs.{filename[:-3]}')
-        
-        #start bot
-        discord.utils.setup_logging(level=logging.INFO)
-        await bot.start(TOKEN)
-
-asyncio.run(main())
