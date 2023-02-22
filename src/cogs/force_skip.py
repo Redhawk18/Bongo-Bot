@@ -26,7 +26,7 @@ class Force_Skip(commands.Cog):
 
         if voice.is_playing():
             await voice.stop()
-            await interaction.response.send_message("**Skipped** :track_next:")
+            await interaction.response.send_message("**Skipped** ⏭")
 
         else:
             await interaction.response.send_message("Nothing is playing")

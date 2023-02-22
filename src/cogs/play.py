@@ -57,7 +57,7 @@ class Play(commands.Cog):
     async def connect(self, interaction):
         if not interaction.guild.voice_client:
             voice: Custom_Player = await interaction.user.voice.channel.connect(cls=Custom_Player)
-            await interaction.followup.send(f'**Connected** :drum: to `{interaction.user.voice.channel.name}`')
+            await interaction.followup.send(f'**Connected** 🥁 to `{interaction.user.voice.channel.name}`')
 
         else: #already connected
             voice: Custom_Player = interaction.guild.voice_client
@@ -117,7 +117,7 @@ class Play(commands.Cog):
 
         else: #add to top
             self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction.channel, start))
-            await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to queue")
+            await interaction.response.send_message(f"**Added** 🎵 `{track.uri}` to queue")
 
         #if not playing we start playing
         await self.play_if_not(interaction, interaction.guild_id)
@@ -130,7 +130,7 @@ class Play(commands.Cog):
 
             index += 1
 
-        await interaction.response.send_message(f'**Added** :musical_note: Playlist with {index} tracks to the queue')
+        await interaction.response.send_message(f'**Added** 🎵 Playlist with {index} tracks to the queue')
         await self.play_if_not(interaction, interaction.guild_id)
 
     async def play_if_not(self, interaction, guild_id):
@@ -154,7 +154,7 @@ class Play(commands.Cog):
 
         #play track
         await voice.play(track, start=start, volume=self.bot.variables_for_guilds[guild_id].volume)
-        playing_view_msg: discord.Message = await channel.send(f'**Playing** :notes: `{track.title}` by `{track.author}` - Now!', view=Playing_View(self.bot))
+        playing_view_msg: discord.Message = await channel.send(f'**Playing** 🎶 `{track.title}` by `{track.author}` - Now!', view=Playing_View(self.bot))
 
         self.bot.variables_for_guilds[guild_id].playing_view_channel_id = channel.id
         self.bot.variables_for_guilds[guild_id].playing_view_message_id = playing_view_msg.id
