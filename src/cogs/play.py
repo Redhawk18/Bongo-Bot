@@ -1,3 +1,5 @@
+import logging
+from os import getenv
 import re
 
 import discord
@@ -26,9 +28,9 @@ class Play(commands.Cog):
         await self.bot.wait_until_ready()
         await wavelink.NodePool.create_node(
             bot=self.bot,
-            host="127.0.0.1",
-            port=2333,
-            password="password"
+            host=getenv('LAVALINK_HOST'),
+            port=getenv('LAVALINK_PORT'),
+            password=getenv('LAVALINK_PASSWORD')
         )
 
     @commands.Cog.listener()
