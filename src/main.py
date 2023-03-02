@@ -8,10 +8,13 @@ from dotenv import load_dotenv
 
 from bongo_bot import Bongo_Bot
 
-root_path = Path(__file__).parent.resolve().parent.resolve()
+#logging
+discord.utils.setup_logging(level=logging.INFO)
+log = logging.getLogger(__name__)
 
+root_path = Path(__file__).parent.resolve().parent.resolve()
 if not Path.is_file(root_path.joinpath(".env")):
-    print("you forgot the .env file")
+    log.critical("you forgot the .env file")
     exit()
 
 load_dotenv(root_path.joinpath(".env"))
@@ -26,7 +29,6 @@ async def main():
             await bot.load_extension(f'cogs.{file.name[:-3]}')
         
         #start bot
-        discord.utils.setup_logging(level=logging.INFO)
         await bot.start(TOKEN)
 
 asyncio.run(main())

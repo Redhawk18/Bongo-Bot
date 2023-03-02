@@ -1,4 +1,5 @@
 from collections import defaultdict
+import logging
 from os import getenv
 
 import asyncpg
@@ -6,6 +7,8 @@ import discord
 from discord.ext import commands
 
 import server_infomation
+
+log = logging.getLogger(__name__)
 
 class Bongo_Bot(commands.Bot):
     """Handles intents, prefixs, and database init automatically"""
@@ -17,8 +20,7 @@ class Bongo_Bot(commands.Bot):
         
 
     async def on_ready(self):
-        print(f'Logged in as {self.user} (ID: {self.user.id})')
-        print('------')
+        log.info(f'Logged in as {self.user} (ID: {self.user.id})')
 
         #sync new commands
         await self.tree.sync()
@@ -35,7 +37,7 @@ class Bongo_Bot(commands.Bot):
     async def close(self):
         if self.database is not None:
             await self.database.close()
-            print("Database shutdown")
+            log.info("Database shutdown")
 
         
         await super().close()
@@ -59,11 +61,11 @@ class Bongo_Bot(commands.Bot):
             )
 
         except: 
-            print("Database not connected")
+            log.critical("Database not connected")
             self.database = None #since it failed
             exit()
 
-        print("Database connected")
+        log.info("Database connected")
 
     async def load_data(self) -> None:
         """Loads the entire table entry by entry into variables_for_guilds"""
@@ -74,4 +76,4 @@ class Bongo_Bot(commands.Bot):
             self.variables_for_guilds[record['guild_id']].music_role_id = record['music_role_id']
             self.variables_for_guilds[record['guild_id']].volume = record['volume']
 
-        print("Database loaded into cache")
+        log.info("Database loaded into cache")

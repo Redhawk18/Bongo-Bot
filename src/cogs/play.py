@@ -11,6 +11,8 @@ from custom_player import Custom_Player
 from playing_view import Playing_View
 from utilities import able_to_use_commands, get_milliseconds_from_string
 
+log = logging.getLogger(__name__)
+
 class Play(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
@@ -36,16 +38,16 @@ class Play(commands.Cog):
     @commands.Cog.listener()
     async def on_wavelink_node_ready(self, node: wavelink.Node):
         """Event fired when a node has finished connecting."""
-        print(f'Node: <{node.identifier}> is ready!')
+        log.info(f'Lavalink Connected')
 
     @commands.Cog.listener()
     async def on_wavelink_track_start(self, player: Custom_Player, track: wavelink.Track):
-        print(f'Now playing "{track.title}" in "{player.guild.name}" {player.guild.id}')
+        log.info(f'Now playing "{track.title}" name: {player.guild.name}, id: {player.guild.id}')
         self.bot.variables_for_guilds[player.guild.id].is_playing = True
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: Custom_Player, track: wavelink.Track, reason):
-        print(f'Finished playing "{track.title}" in "{player.guild.name}" {player.guild.id}')
+        log.info(f'Finished playing "{track.title}" name: {player.guild.name}, id: {player.guild.id}')
         #old view can cause problems
         await self.delete_view(player.guild.id)
 
