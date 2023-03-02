@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
 #install dependencies
+sudo apt update
 sudo apt install openjdk-17-jdk -y
 
 #make lavalink dir
