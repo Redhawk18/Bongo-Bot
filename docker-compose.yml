@@ -1,0 +1,56 @@
+
+version: '3.5'
+
+services:
+  # discord-bot:
+  #   image: discord-bot
+  #   networks:
+  #     - lavalink
+  #     - postgres
+  #   restart: unless-stopped
+
+  # lavalink:
+  #   image: lavalink
+  #   networks:
+  #     - lavalink
+  #   ports:
+  #     - "2333:2333"
+  #   restart: unless-stopped
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      PGDATA: /data/postgres
+    volumes:
+       - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-crange76@gmail.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-password}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+       - pgadmin:/var/lib/pgadmin
+    logging:
+      driver: "none"
+    ports:
+      - "${PGADMIN_PORT:-8083}:80"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+networks:
+  lavalink:
+  postgres:
+  
+volumes:
+  pgadmin:
+  postgres:

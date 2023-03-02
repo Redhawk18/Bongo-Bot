@@ -33,12 +33,10 @@ class Bongo_Bot(commands.Bot):
             await interaction.response.send_message(str(error), ephemeral=True)
 
     async def close(self):
-        try:
+        if self.database is not None:
             await self.database.close()
             print("Database shutdown")
 
-        except: 
-            print("Database failed to shutdown")
         
         await super().close()
 
@@ -59,9 +57,10 @@ class Bongo_Bot(commands.Bot):
             port=getenv('DATABASE_PORT'),
             password=getenv('DATABASE_PASSWORD')
             )
-            
+
         except: 
             print("Database not connected")
+            self.database = None #since it failed
             exit()
 
         print("Database connected")
