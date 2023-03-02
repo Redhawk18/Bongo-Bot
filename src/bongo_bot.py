@@ -14,6 +14,7 @@ class Bongo_Bot(commands.Bot):
         self.tree.on_error = self.on_tree_error
 
         self.variables_for_guilds = defaultdict(server_infomation.Server_Infomation) 
+        
 
     async def on_ready(self):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
@@ -32,9 +33,13 @@ class Bongo_Bot(commands.Bot):
             await interaction.response.send_message(str(error), ephemeral=True)
 
     async def close(self):
-        print("Database Shuting Down")
-        await self.database.close()
+        try:
+            await self.database.close()
+            print("Database shutdown")
 
+        except: 
+            print("Database failed to shutdown")
+        
         await super().close()
 
     def get_intents(self) -> discord.Intents:
@@ -46,13 +51,19 @@ class Bongo_Bot(commands.Bot):
         return intents
 
     async def create_database_pool(self) -> None:
-        self.database: asyncpg.Pool = await asyncpg.create_pool(
-        database=getenv('DATABASE_DATABASE'),
-        user=getenv('DATABASE_USER'),
-        host=getenv('DATABASE_HOST'),
-        port=getenv('DATABASE_PORT'),
-        password=getenv('DATABASE_PASSWORD')
-        )
+        try:
+            self.database: asyncpg.Pool = await asyncpg.create_pool(
+            database=getenv('DATABASE_DATABASE'),
+            user=getenv('DATABASE_USER'),
+            host=getenv('DATABASE_HOST'),
+            port=getenv('DATABASE_PORT'),
+            password=getenv('DATABASE_PASSWORD')
+            )
+            
+        except: 
+            print("Database not connected")
+            exit()
+
         print("Database connected")
 
     async def load_data(self) -> None:
