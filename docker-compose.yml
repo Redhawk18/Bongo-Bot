@@ -4,6 +4,19 @@ version: '3.5'
 services:
   discord-bot:
     image: discord-bot
+    env_file:
+      - .env
+    environment:
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      DATABASE_DATABASE: ${DATABASE_DATABASE}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      LAVALINK_HOST: lavalink
+      LAVALINK_PORT: ${LAVALINK_PORT}
+      LAVALINK_PASSWORD: ${LAVALINK_PASSWORD}
+      TROLLED_USER_ID: ${TROLLED_USER_ID}
     networks:
       - lavalink
       - postgres
@@ -19,33 +32,37 @@ services:
 
   postgres:
     image: postgres
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGDATA: /data/postgres
-    volumes:
-       - postgres:/data/postgres
-    ports:
-      - "5432:5432"
     networks:
       - postgres
+    ports:
+      - "5432:5432"
     restart: unless-stopped
+    volumes:
+       - postgres:/data/postgres
 
   pgadmin:
     image: dpage/pgadmin4
+    env_file:
+      - .env
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-crange76@gmail.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-password}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
-    volumes:
-       - pgadmin:/var/lib/pgadmin
     logging:
       driver: "none"
-    ports:
-      - "${PGADMIN_PORT:-8083}:80"
     networks:
       - postgres
+    ports:
+      - "${PGADMIN_PORT}:80"
     restart: unless-stopped
+    volumes:
+       - pgadmin:/var/lib/pgadmin
 
 networks:
   lavalink:
