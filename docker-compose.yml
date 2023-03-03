@@ -5,8 +5,10 @@ services:
   discord-bot:
     image: redhawk76/discord-bot:latest
     depends_on:
-      - lavalink
-      - postgres
+      lavalink:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
     env_file:
       - .env
     environment:
@@ -27,6 +29,12 @@ services:
 
   lavalink:
     image: redhawk76/lavalink:latest
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:2333/version"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+      start_period: 20s
     networks:
       - lavalink
     ports:
@@ -35,6 +43,12 @@ services:
 
   postgres:
     image: postgres
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+      start_period: 5s
     env_file:
       - .env
     environment:
