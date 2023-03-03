@@ -26,7 +26,7 @@ services:
     restart: unless-stopped
 
   lavalink:
-    image: lavalink
+    image: redhawk76/lavalink:latest
     networks:
       - lavalink
     ports:
