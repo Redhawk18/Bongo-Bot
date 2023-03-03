@@ -1,4 +1,4 @@
-name: Docker-push-build
+name: discord-bot build push
 
 on: [push]
 
