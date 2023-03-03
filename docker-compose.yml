@@ -2,20 +2,20 @@
 version: '3.5'
 
 services:
-  # discord-bot:
-  #   image: discord-bot
-  #   networks:
-  #     - lavalink
-  #     - postgres
-  #   restart: unless-stopped
+  discord-bot:
+    image: discord-bot
+    networks:
+      - lavalink
+      - postgres
+    restart: unless-stopped
 
-  # lavalink:
-  #   image: lavalink
-  #   networks:
-  #     - lavalink
-  #   ports:
-  #     - "2333:2333"
-  #   restart: unless-stopped
+  lavalink:
+    image: lavalink
+    networks:
+      - lavalink
+    ports:
+      - "2333:2333"
+    restart: unless-stopped
 
   postgres:
     image: postgres
