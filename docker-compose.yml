@@ -4,6 +4,9 @@ version: '3.5'
 services:
   discord-bot:
     image: redhawk76/discord-bot:latest
+    depends_on:
+      - lavalink
+      - postgres
     env_file:
       - .env
     environment:
