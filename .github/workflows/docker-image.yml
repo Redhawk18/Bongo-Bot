@@ -26,11 +26,11 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/discord-bot:latest
-      -
-        name: Build and push lavalink
-        uses: docker/build-push-action@v2
-        with:
-          context: ./lavalink
-          file: ./Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/lavalink:latest
+      # -
+      #   name: Build and push lavalink
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: ./lavalink
+      #     file: ./Dockerfile
+      #     push: true
+      #     tags: ${{ secrets.DOCKER_USERNAME }}/lavalink:latest

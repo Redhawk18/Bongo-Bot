@@ -3,7 +3,7 @@ version: '3.5'
 
 services:
   discord-bot:
-    image: discord-bot
+    image: redhawk76/discord-bot:latest
     env_file:
       - .env
     environment:
