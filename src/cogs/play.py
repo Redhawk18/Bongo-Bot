@@ -14,22 +14,12 @@ class Play(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
-
-    async def cog_load(self):
-        self.bot.loop.create_task(self.connect_nodes())
-
-    async def connect_nodes(self):
-        """Connect to our Lavalink nodes."""
-        await self.bot.wait_until_ready()
-        await wavelink.NodePool.create_node(
-            bot=self.bot,
-            host="127.0.0.1",
-            port=2333,
-            password="password"
-        )
+    async def setup_hook(self) -> None:
+        node: wavelink.Node = wavelink.Node(
+            uri='http://localhost:2333', 
+            password='password')
+        
+        await wavelink.NodePool.connect(client=self.bot, nodes=[node])
 
     @commands.Cog.listener()
     async def on_wavelink_node_ready(self, node: wavelink.Node):
@@ -37,12 +27,12 @@ class Play(commands.Cog):
         print(f'Node: <{node.identifier}> is ready!')
 
     @commands.Cog.listener()
-    async def on_wavelink_track_start(self, player: Custom_Player, track: wavelink.Track):
+    async def on_wavelink_track_start(self, player: Custom_Player, track: wavelink.YouTubeTrack):
         print(f'Now playing "{track.title}" in "{player.guild.name}" {player.guild.id}')
         self.bot.variables_for_guilds[player.guild.id].is_playing = True
 
     @commands.Cog.listener()
-    async def on_wavelink_track_end(self, player: Custom_Player, track: wavelink.Track, reason):
+    async def on_wavelink_track_end(self, player: Custom_Player, track: wavelink.YouTubeTrack, reason):
         print(f'Finished playing "{track.title}" in "{player.guild.name}" {player.guild.id}')
         #old view can cause problems
         await self.delete_view(player.guild.id)

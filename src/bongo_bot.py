@@ -33,7 +33,7 @@ class Bongo_Bot(commands.Bot):
 
     async def close(self):
         print("Database Shuting Down")
-        await self.database.close()
+        #await self.database.close()
 
         await super().close()
 
