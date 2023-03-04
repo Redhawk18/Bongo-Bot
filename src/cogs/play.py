@@ -113,7 +113,7 @@ class Play(commands.Cog):
         #add to queue
         if play_next:
             self.bot.variables_for_guilds[interaction.guild_id].song_queue.append((track, interaction.channel, start))
-            await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue")
+            await interaction.response.send_message(f"**Added** 🎵 `{track.uri}` to the top of the queue")
 
         else: #add to top
             self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction.channel, start))
@@ -130,7 +130,7 @@ class Play(commands.Cog):
 
             index += 1
 
-        await interaction.response.send_message(f'**Added** 🎵 Playlist with {index} tracks to the queue')
+        await interaction.response.send_message(f'**Added** 🎵 playlist with {index} tracks to the queue')
         await self.play_if_not(interaction, interaction.guild_id)
 
     async def play_if_not(self, interaction, guild_id):

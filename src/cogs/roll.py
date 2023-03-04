@@ -29,9 +29,9 @@ class Roll(commands.Cog):
         output += f'The sum is **{sum} of {rolls * die_sides}**'
 
         embed = discord.Embed(
-            title = "**Roll** :game_die:",
+            title = "**Roll** 🎲",
             description = output,
-            color = discord.Color.blue(),
+            color = discord.Color.red(),
         )
         await interaction.response.send_message(embed=embed)
 

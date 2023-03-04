@@ -65,7 +65,7 @@ class Queue(commands.GroupCog, group_name='queue'):
 
     @app_commands.command(name="remove", description="Removes a song from the queue based on its track number")
     @app_commands.describe(queue_position="The position of the track to be removed")
-    async def queue_remove(self, interaction: discord.Interaction, queue_position : int):
+    async def queue_remove(self, interaction: discord.Interaction, queue_position: int):
         if queue_position > len(self.bot.variables_for_guilds[interaction.guild_id].song_queue) or queue_position < 0:
             await interaction.response.send_message("Input invalid")
             return

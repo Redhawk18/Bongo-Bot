@@ -52,7 +52,7 @@ class Poll(commands.Cog):
         embed = discord.Embed(
             title = title,
             description = description,
-            color = discord.Color.blue(),
+            color = discord.Color.red(),
         )
         await interaction.response.send_message(embed=embed)
 
