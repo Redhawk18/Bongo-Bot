@@ -16,10 +16,6 @@ class Bongo_Bot(commands.Bot):
         self.tree.on_error = self.on_tree_error
 
         self.variables_for_guilds = defaultdict(server_infomation.Server_Infomation) 
-        self.node = wavelink.Node = wavelink.Node(
-            uri='http://localhost:2333', 
-            password='password'
-        )
 
     async def on_ready(self):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
@@ -29,20 +25,21 @@ class Bongo_Bot(commands.Bot):
         await self.tree.sync()
 
     async def setup_hook(self):
-        #create and setup database
-        #await self.create_database_pool()
-        #await self.load_data()
-
-        #load cogs
+        #cogs setup
         root_path = Path(__file__).parent.resolve().parent.resolve()
         for file in root_path.glob('./src/cogs/*.py'):
             await self.load_extension(f'cogs.{file.name[:-3]}')
 
-        # node: wavelink.Node = wavelink.Node(
-        #     uri='http://localhost:2333', 
-        #     password='password')
+        #database setup
+        #await self.create_database_pool()
+        #await self.load_data()
+
+        #wavelink setup
+        node: wavelink.Node = wavelink.Node(
+            uri='http://localhost:2333', 
+            password='password')
         
-        await wavelink.NodePool.connect(client=self, nodes=[self.node])
+        await wavelink.NodePool.connect(client=self, nodes=[node])
 
     async def on_tree_error(self, interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
         if isinstance(error, discord.app_commands.CommandOnCooldown):
