@@ -68,9 +68,10 @@ async def get_voice(interaction: discord.Interaction, print: bool = True) -> Cus
 
     return voice
 
-def seconds_to_timestring(total_seconds: int) -> str:
+def seconds_to_timestring(total_milliseconds: int) -> str:
     """Takes the total amount of seconds and returns a time like `1:35:54` or `1:23`"""
-    minutes, seconds = divmod(total_seconds, 60)
+    seconds = total_milliseconds/1000
+    minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
 
     if hours > 0:
