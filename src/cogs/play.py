@@ -87,7 +87,9 @@ class Play(commands.Cog):
             await interaction.response.send_message("Locked voice channel is at max capacity")
             return
         
-        #TODO no protection for private channels
+        if not interaction.user.voice.channel.permissions_for(interaction.guild.me).connect is True:
+            await interaction.response.send_message("Does not have permission to connect")
+            return
 
         if start_time is not None: #parser
             start_time = await get_milliseconds_from_string(start_time, interaction)
