@@ -78,6 +78,13 @@ class Play(commands.Cog):
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.guild_only()
     async def play(self, interaction: discord.Interaction, *, query: str, play_next: bool=False, start_time: str=None):
+        #locked channel is full
+        if len(interaction.user.voice.channel.members) == interaction.user.voice.channel.user_limit: #== because admin can drag bot into channel
+            await interaction.response.send_message("Locked voice channel is at max capacity")
+            return
+        
+        #TODO no protection for private channels
+
         if start_time is not None: #parser
             start_time = await get_milliseconds_from_string(start_time, interaction)
             if start_time == -1: #time code was invalid
