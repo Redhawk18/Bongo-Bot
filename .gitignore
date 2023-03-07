@@ -11,3 +11,6 @@ __pycache__
 lavalink/Lavalink.jar
 lavalink/logs/
 lavalink/plugins
+
+#docker volumes
+volumes

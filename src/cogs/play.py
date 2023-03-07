@@ -1,3 +1,5 @@
+import logging
+from os import getenv
 import re
 
 import discord
@@ -8,6 +10,8 @@ import wavelink
 from custom_player import Custom_Player
 from playing_view import Playing_View
 from utilities import able_to_use_commands, get_milliseconds_from_string
+
+log = logging.getLogger(__name__)
 
 class Play(commands.Cog):
 
@@ -26,24 +30,24 @@ class Play(commands.Cog):
         await self.bot.wait_until_ready()
         await wavelink.NodePool.create_node(
             bot=self.bot,
-            host="127.0.0.1",
-            port=2333,
-            password="password"
+            host=getenv('LAVALINK_HOST'),
+            port=getenv('LAVALINK_PORT'),
+            password=getenv('LAVALINK_PASSWORD')
         )
 
     @commands.Cog.listener()
     async def on_wavelink_node_ready(self, node: wavelink.Node):
         """Event fired when a node has finished connecting."""
-        print(f'Node: <{node.identifier}> is ready!')
+        log.info(f'Lavalink Connected')
 
     @commands.Cog.listener()
     async def on_wavelink_track_start(self, player: Custom_Player, track: wavelink.Track):
-        print(f'Now playing "{track.title}" in "{player.guild.name}" {player.guild.id}')
+        log.info(f'Now playing "{track.title}" name: {player.guild.name}, id: {player.guild.id}')
         self.bot.variables_for_guilds[player.guild.id].is_playing = True
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: Custom_Player, track: wavelink.Track, reason):
-        print(f'Finished playing "{track.title}" in "{player.guild.name}" {player.guild.id}')
+        log.info(f'Finished playing "{track.title}" name: {player.guild.name}, id: {player.guild.id}')
         #old view can cause problems
         await self.delete_view(player.guild.id)
 
@@ -78,6 +82,15 @@ class Play(commands.Cog):
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.guild_only()
     async def play(self, interaction: discord.Interaction, *, query: str, play_next: bool=False, start_time: str=None):
+        #locked channel is full
+        if len(interaction.user.voice.channel.members) == interaction.user.voice.channel.user_limit: #== because admin can drag bot into channel
+            await interaction.response.send_message("Locked voice channel is at max capacity")
+            return
+        
+        if not interaction.user.voice.channel.permissions_for(interaction.guild.me).connect is True:
+            await interaction.response.send_message("Does not have permission to connect")
+            return
+
         if start_time is not None: #parser
             start_time = await get_milliseconds_from_string(start_time, interaction)
             if start_time == -1: #time code was invalid
@@ -113,7 +126,7 @@ class Play(commands.Cog):
         #add to queue
         if play_next:
             self.bot.variables_for_guilds[interaction.guild_id].song_queue.append((track, interaction.channel, start))
-            await interaction.response.send_message(f"**Added** :musical_note: `{track.uri}` to the top of the queue")
+            await interaction.response.send_message(f"**Added** 🎵 `{track.uri}` to the top of the queue")
 
         else: #add to top
             self.bot.variables_for_guilds[interaction.guild_id].song_queue.appendleft((track, interaction.channel, start))
@@ -130,7 +143,7 @@ class Play(commands.Cog):
 
             index += 1
 
-        await interaction.response.send_message(f'**Added** 🎵 Playlist with {index} tracks to the queue')
+        await interaction.response.send_message(f'**Added** 🎵 playlist with {index} tracks to the queue')
         await self.play_if_not(interaction, interaction.guild_id)
 
     async def play_if_not(self, interaction, guild_id):

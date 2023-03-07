@@ -84,7 +84,7 @@ class Settings(commands.GroupCog, group_name='settings'):
             await voice.set_volume(volume)
 
         self.bot.variables_for_guilds[interaction.guild_id].volume = volume
-        await interaction.response.send_message(f'**Volume** :loud_sound: changed to {volume}%')
+        await interaction.response.send_message(f'**Volume** 🔊 changed to {volume}%')
         await self.update_database_value("volume", volume, interaction.guild_id)
 
     async def update_database_value(self, column_name:str, value, guild_id:int):
