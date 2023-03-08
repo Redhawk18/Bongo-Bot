@@ -5,15 +5,15 @@ class Playing_View(discord.ui.View):
     def __init__(self, bot):
         super().__init__(timeout=None)
         self.bot = bot
-        
+
         self.add_items(True)
 
     def add_items(self, is_pause):
-        self.clear_items() 
+        self.clear_items()
 
         if is_pause:
             self.add_item(self.pause)
-        else: 
+        else:
             self.add_item(self.resume)
 
         self.add_item(self.skip)
@@ -31,12 +31,12 @@ class Playing_View(discord.ui.View):
     @discord.ui.button(label="Pause", style=discord.ButtonStyle.gray, emoji="⏸")
     async def pause(self, interaction: discord.Interaction, button):
         await self.bot.get_cog("Pause").helper(interaction)
-        await self.edit_view(interaction, False)
+        #await self.edit_view(interaction, False)
 
     @discord.ui.button(label="Resume", style=discord.ButtonStyle.gray, emoji="▶️")
     async def resume(self, interaction: discord.Interaction, button):
         await self.bot.get_cog("Resume").helper(interaction)
-        await self.edit_view(interaction, True)
+        #await self.edit_view(interaction, True)
 
     @discord.ui.button(label="Skip", style=discord.ButtonStyle.gray, emoji="⏭")
     async def skip(self, interaction, button):

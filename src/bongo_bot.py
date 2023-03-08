@@ -16,8 +16,8 @@ class Bongo_Bot(commands.Bot):
         super().__init__(command_prefix = "!", intents = self.get_intents(), *args, **kwargs)
         self.tree.on_error = self.on_tree_error
 
-        self.variables_for_guilds = defaultdict(server_infomation.Server_Infomation) 
-        
+        self.variables_for_guilds = defaultdict(server_infomation.Server_Infomation)
+
 
     async def on_ready(self):
         log.info(f'Logged in as {self.user} (ID: {self.user.id})')
@@ -27,8 +27,9 @@ class Bongo_Bot(commands.Bot):
 
     async def setup_hook(self):
         #create and setup database
-        await self.create_database_pool()
-        await self.load_data()
+        #await self.create_database_pool()
+        #await self.load_data()
+        pass
 
     async def on_tree_error(self, interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
         if isinstance(error, discord.app_commands.CommandOnCooldown):
@@ -39,7 +40,7 @@ class Bongo_Bot(commands.Bot):
             await self.database.close()
             log.info("Database shutdown")
 
-        
+
         await super().close()
 
     def get_intents(self) -> discord.Intents:
@@ -60,7 +61,7 @@ class Bongo_Bot(commands.Bot):
             password=getenv('DATABASE_PASSWORD')
             )
 
-        except: 
+        except:
             log.critical("Database not connected")
             self.database = None #since it failed
             exit()

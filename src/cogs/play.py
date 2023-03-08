@@ -86,7 +86,7 @@ class Play(commands.Cog):
         if len(interaction.user.voice.channel.members) == interaction.user.voice.channel.user_limit: #== because admin can drag bot into channel
             await interaction.response.send_message("Locked voice channel is at max capacity")
             return
-        
+
         if not interaction.user.voice.channel.permissions_for(interaction.guild.me).connect is True:
             await interaction.response.send_message("Does not have permission to connect")
             return
@@ -101,7 +101,7 @@ class Play(commands.Cog):
     async def search_track(self, interaction: discord.Interaction, query, play_next, start):
         if not await able_to_use_commands(interaction, self.bot.variables_for_guilds[interaction.guild_id].is_playing, self.bot.variables_for_guilds[interaction.guild_id].music_channel_id, self.bot.variables_for_guilds[interaction.guild_id].music_role_id): #user is not in voice chat
             return
-            
+
         URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
         if URL_RE.match(query) and "list=" in query: #playlist
             try:
@@ -109,7 +109,7 @@ class Play(commands.Cog):
             except wavelink.LoadTrackError: #playlist not found
                 await interaction.response.send_message("playlist does not exist")
                 return
-            
+
             await self.add_playlist(playlist, interaction)
 
         else: #normal track
@@ -118,7 +118,7 @@ class Play(commands.Cog):
             except IndexError: #video not found
                 await interaction.response.send_message("video does not exist")
                 return
-                
+
             await self.add_song(track, interaction, play_next, start)
 
     async def add_song(self, track: wavelink.YouTubeTrack, interaction: discord.Interaction, play_next, start):
@@ -167,8 +167,10 @@ class Play(commands.Cog):
 
         #play track
         await voice.play(track, start=start, volume=self.bot.variables_for_guilds[guild_id].volume)
-        playing_view_msg: discord.Message = await channel.send(f'**Playing** 🎶 `{track.title}` by `{track.author}` - Now!', view=Playing_View(self.bot))
+        playing_view = Playing_View(self.bot)
+        playing_view_msg: discord.Message = await channel.send(f'**Playing** 🎶 `{track.title}` by `{track.author}` - Now!', view=playing_view)
 
+        self.bot.variables_for_guilds[guild_id].playing_view = playing_view
         self.bot.variables_for_guilds[guild_id].playing_view_channel_id = channel.id
         self.bot.variables_for_guilds[guild_id].playing_view_message_id = playing_view_msg.id
 
