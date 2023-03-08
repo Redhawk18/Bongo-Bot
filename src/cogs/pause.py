@@ -16,7 +16,6 @@ class Pause(commands.Cog):
     @app_commands.command(name="pause", description="Pauses track")
     @app_commands.guild_only()
     async def pause(self, interaction: discord.Interaction):
-        print(interaction.message,id)
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
