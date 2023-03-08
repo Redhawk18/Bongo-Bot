@@ -28,8 +28,7 @@ services:
     restart: unless-stopped
 
   lavalink:
-    image: lavalink
-    #image: redhawk76/lavalink:latest
+    image: redhawk76/lavalink:latest
     healthcheck:
       test: ["CMD", "curl", "http://localhost:2333/version"]
       interval: 5s

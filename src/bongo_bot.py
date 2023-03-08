@@ -27,8 +27,8 @@ class Bongo_Bot(commands.Bot):
 
     async def setup_hook(self):
         #create and setup database
-        #await self.create_database_pool()
-        #await self.load_data()
+        await self.create_database_pool()
+        await self.load_data()
         pass
 
     async def on_tree_error(self, interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
