@@ -9,7 +9,7 @@ import wavelink
 
 from custom_player import Custom_Player
 from playing_view import Playing_View
-from utilities import able_to_use_commands, get_milliseconds_from_string
+from utilities import able_to_use_commands, edit_view_message,get_milliseconds_from_string
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class Play(commands.Cog):
     async def on_wavelink_track_end(self, player: Custom_Player, track: wavelink.Track, reason):
         log.info(f'Finished playing "{track.title}" name: {player.guild.name}, id: {player.guild.id}')
         #old view can cause problems
-        await self.delete_view(player.guild.id)
+        await edit_view_message(self.bot, player.guild.id, None)
 
         if len(self.bot.variables_for_guilds[player.guild.id].song_queue) == 0: #queue is empty
             self.bot.variables_for_guilds[player.guild.id].is_playing = False
@@ -73,10 +73,6 @@ class Play(commands.Cog):
 
         return voice
 
-    async def delete_view(self, guild_id):
-        playing_view_message = self.bot.get_channel(self.bot.variables_for_guilds[guild_id].playing_view_channel_id).get_partial_message(self.bot.variables_for_guilds[guild_id].playing_view_message_id)
-        await playing_view_message.edit(view=None)
-
     @app_commands.command(name="play", description="plays a Youtube track, start time need to formated with colons")
     @app_commands.describe(query="What to search youtube for", play_next="If this track should be put at the front of the queue", start_time="time stamp to start the video at, for example 1:34 or 1:21:19")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
@@ -86,7 +82,7 @@ class Play(commands.Cog):
         if len(interaction.user.voice.channel.members) == interaction.user.voice.channel.user_limit: #== because admin can drag bot into channel
             await interaction.response.send_message("Locked voice channel is at max capacity")
             return
-        
+
         if not interaction.user.voice.channel.permissions_for(interaction.guild.me).connect is True:
             await interaction.response.send_message("Does not have permission to connect")
             return
@@ -101,7 +97,7 @@ class Play(commands.Cog):
     async def search_track(self, interaction: discord.Interaction, query, play_next, start):
         if not await able_to_use_commands(interaction, self.bot.variables_for_guilds[interaction.guild_id].is_playing, self.bot.variables_for_guilds[interaction.guild_id].music_channel_id, self.bot.variables_for_guilds[interaction.guild_id].music_role_id): #user is not in voice chat
             return
-            
+
         URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
         if URL_RE.match(query) and "list=" in query: #playlist
             try:
@@ -109,7 +105,7 @@ class Play(commands.Cog):
             except wavelink.LoadTrackError: #playlist not found
                 await interaction.response.send_message("playlist does not exist")
                 return
-            
+
             await self.add_playlist(playlist, interaction)
 
         else: #normal track
@@ -118,7 +114,7 @@ class Play(commands.Cog):
             except IndexError: #video not found
                 await interaction.response.send_message("video does not exist")
                 return
-                
+
             await self.add_song(track, interaction, play_next, start)
 
     async def add_song(self, track: wavelink.YouTubeTrack, interaction: discord.Interaction, play_next, start):
@@ -167,8 +163,10 @@ class Play(commands.Cog):
 
         #play track
         await voice.play(track, start=start, volume=self.bot.variables_for_guilds[guild_id].volume)
-        playing_view_msg: discord.Message = await channel.send(f'**Playing** 🎶 `{track.title}` by `{track.author}` - Now!', view=Playing_View(self.bot))
+        playing_view = Playing_View(self.bot)
+        playing_view_msg: discord.Message = await channel.send(f'**Playing** 🎶 `{track.title}` by `{track.author}` - Now!', view=playing_view)
 
+        self.bot.variables_for_guilds[guild_id].playing_view = playing_view
         self.bot.variables_for_guilds[guild_id].playing_view_channel_id = channel.id
         self.bot.variables_for_guilds[guild_id].playing_view_message_id = playing_view_msg.id
 
