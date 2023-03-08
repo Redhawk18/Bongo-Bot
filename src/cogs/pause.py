@@ -16,6 +16,7 @@ class Pause(commands.Cog):
     @app_commands.command(name="pause", description="Pauses track")
     @app_commands.guild_only()
     async def pause(self, interaction: discord.Interaction):
+        print(interaction.message,id)
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
@@ -26,6 +27,8 @@ class Pause(commands.Cog):
         if not voice.is_paused():
             await voice.pause()
             await interaction.response.send_message("**Paused** ⏸")
+            playing_view = self.bot.variables_for_guilds[interaction.guild_id].playing_view
+            await playing_view.edit_view(interaction, False)
 
         else:
             await interaction.response.send_message("Already paused")

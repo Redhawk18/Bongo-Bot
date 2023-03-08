@@ -9,7 +9,7 @@ import wavelink
 
 from custom_player import Custom_Player
 from playing_view import Playing_View
-from utilities import able_to_use_commands, get_milliseconds_from_string
+from utilities import able_to_use_commands, edit_view_message,get_milliseconds_from_string
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class Play(commands.Cog):
     async def on_wavelink_track_end(self, player: Custom_Player, track: wavelink.Track, reason):
         log.info(f'Finished playing "{track.title}" name: {player.guild.name}, id: {player.guild.id}')
         #old view can cause problems
-        await self.delete_view(player.guild.id)
+        await edit_view_message(self.bot, player.guild.id, None)
 
         if len(self.bot.variables_for_guilds[player.guild.id].song_queue) == 0: #queue is empty
             self.bot.variables_for_guilds[player.guild.id].is_playing = False
@@ -72,10 +72,6 @@ class Play(commands.Cog):
         voice: Custom_Player = self.bot.get_guild(guild_id).voice_client
 
         return voice
-
-    async def delete_view(self, guild_id):
-        playing_view_message = self.bot.get_channel(self.bot.variables_for_guilds[guild_id].playing_view_channel_id).get_partial_message(self.bot.variables_for_guilds[guild_id].playing_view_message_id)
-        await playing_view_message.edit(view=None)
 
     @app_commands.command(name="play", description="plays a Youtube track, start time need to formated with colons")
     @app_commands.describe(query="What to search youtube for", play_next="If this track should be put at the front of the queue", start_time="time stamp to start the video at, for example 1:34 or 1:21:19")
