@@ -21,9 +21,6 @@ class Bongo_Bot(commands.Bot):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
         print('------')
 
-        #sync new commands
-        await self.tree.sync()
-
     async def setup_hook(self):
         #cogs setup
         root_path = Path(__file__).parent.resolve().parent.resolve()
@@ -40,6 +37,9 @@ class Bongo_Bot(commands.Bot):
             password='password')
         
         await wavelink.NodePool.connect(client=self, nodes=[node])
+
+        #sync new commands
+        await self.tree.sync()
 
     async def on_tree_error(self, interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
         if isinstance(error, discord.app_commands.CommandOnCooldown):
