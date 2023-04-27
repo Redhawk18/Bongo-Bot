@@ -7,7 +7,6 @@ class Server_Infomation():
         #internal variables
         self.song_queue = deque()
         self.is_playing = False
-        self.playing_view = None
         self.playing_view_channel_id = None
         self.playing_view_message_id = None
         self.user_who_want_to_skip = []
@@ -23,13 +22,12 @@ class Server_Infomation():
         return f"""
         song queue, {self.song_queue}
         is playing, {self.is_playing}
-        playing_view, {self.playing_view}
         playing view channel id, {self.playing_view_channel_id}
         playing view message id, {self.playing_view_message_id}
         user who want to skip, {self.user_who_want_to_skip}
         now playing, {self.now_playing_track}
         looping, {self.loop_enabled}
-
+        
         music_channel_id, {self.music_channel_id}
         music_role_id, {self.music_role_id}
         volume, {self.volume}
