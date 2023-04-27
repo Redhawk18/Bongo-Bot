@@ -19,44 +19,27 @@ class Play(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_ready(self):
-        pass
-
-    async def cog_load(self):
-        self.bot.loop.create_task(self.connect_nodes())
-
-    async def connect_nodes(self):
-        """Connect to our Lavalink nodes."""
-        await self.bot.wait_until_ready()
-        await wavelink.NodePool.create_node(
-            bot=self.bot,
-            host=getenv('LAVALINK_HOST'),
-            port=getenv('LAVALINK_PORT'),
-            password=getenv('LAVALINK_PASSWORD')
-        )
-
-    @commands.Cog.listener()
     async def on_wavelink_node_ready(self, node: wavelink.Node):
         """Event fired when a node has finished connecting."""
-        log.info(f'Lavalink Connected')
+        print(f'Node: <{node}> is ready!')
 
     @commands.Cog.listener()
-    async def on_wavelink_track_start(self, player: Custom_Player, track: wavelink.Track):
-        log.info(f'Now playing "{track.title}" name: {player.guild.name}, id: {player.guild.id}')
-        self.bot.variables_for_guilds[player.guild.id].is_playing = True
+    async def on_wavelink_track_start(self, payload: wavelink.TrackEventPayload):
+        print(f'Now playing "{payload.track.title}" in "{payload.player.guild.name}" {payload.player.guild.id}')
+        self.bot.variables_for_guilds[payload.player.guild.id].is_playing = True
 
     @commands.Cog.listener()
-    async def on_wavelink_track_end(self, player: Custom_Player, track: wavelink.Track, reason):
-        log.info(f'Finished playing "{track.title}" name: {player.guild.name}, id: {player.guild.id}')
+    async def on_wavelink_track_end(self, payload: wavelink.TrackEventPayload):
+        print(f'Finished playing "{payload.track.title}" in "{payload.player.guild.name}" {payload.player.guild.id}')
         #old view can cause problems
-        await edit_view_message(self.bot, player.guild.id, None)
+        await self.delete_view(payload.player.guild.id)
 
-        if len(self.bot.variables_for_guilds[player.guild.id].song_queue) == 0: #queue is empty
-            self.bot.variables_for_guilds[player.guild.id].is_playing = False
+        if len(self.bot.variables_for_guilds[payload.player.guild.id].song_queue) == 0: #queue is empty
+            self.bot.variables_for_guilds[payload.player.guild.id].is_playing = False
             return
 
         #else we want to keep playing
-        await self.play_song(player.guild.id)
+        await self.play_song(payload.player.guild.id)
 
     async def connect(self, interaction):
         if not interaction.guild.voice_client:
@@ -102,7 +85,8 @@ class Play(commands.Cog):
         if URL_RE.match(query) and "list=" in query: #playlist
             try:
                 playlist = await wavelink.YouTubePlaylist.search(query=query)
-            except wavelink.LoadTrackError: #playlist not found
+            #except wavelink.LoadTrackError: #playlist not found
+            except: #playlist not found
                 await interaction.response.send_message("playlist does not exist")
                 return
 
@@ -110,7 +94,7 @@ class Play(commands.Cog):
 
         else: #normal track
             try:
-                track = await wavelink.YouTubeTrack.search(query=query, return_first=True)
+                track = await wavelink.YouTubeTrack.search(query, return_first=True)
             except IndexError: #video not found
                 await interaction.response.send_message("video does not exist")
                 return

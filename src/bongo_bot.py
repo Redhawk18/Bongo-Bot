@@ -1,10 +1,12 @@
 from collections import defaultdict
 import logging
 from os import getenv
+from pathlib import Path
 
 import asyncpg
 import discord
 from discord.ext import commands
+import wavelink
 
 import server_infomation
 
@@ -21,6 +23,23 @@ class Bongo_Bot(commands.Bot):
 
     async def on_ready(self):
         log.info(f'Logged in as {self.user} (ID: {self.user.id})')
+
+    async def setup_hook(self):
+        #cogs setup
+        root_path = Path(__file__).parent.resolve().parent.resolve()
+        for file in root_path.glob('./src/cogs/*.py'):
+            await self.load_extension(f'cogs.{file.name[:-3]}')
+
+        #database setup
+        #await self.create_database_pool()
+        #await self.load_data()
+
+        #wavelink setup
+        node: wavelink.Node = wavelink.Node(
+            uri='http://localhost:2333', 
+            password='password')
+        
+        await wavelink.NodePool.connect(client=self, nodes=[node])
 
         #sync new commands
         await self.tree.sync()

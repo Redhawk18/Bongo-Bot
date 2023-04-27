@@ -1,28 +1,27 @@
-from typing import Optional
-
 import wavelink
-from wavelink import abc
-from wavelink import PartialTrack
+
+from typing import TYPE_CHECKING, Any, Union
+from wavelink.enums import *
+from wavelink.ext import spotify
+from wavelink.tracks import *
 
 class Custom_Player(wavelink.player.Player):
     """Exact wavelink player with lavalink plugin support for sponserblock"""
-    async def play(
-        self,
-        source: abc.Playable,
-        replace: bool = True,
-        start: Optional[int] = None,
-        end: Optional[int] = None,
-        volume: Optional[int] = None,
-        pause: Optional[bool] = None,
-    ):
+    async def play(self,
+                   track: Playable,
+                   replace: bool = True,
+                   start: int | None = None,
+                   end: int | None = None,
+                   volume: int | None = None,
+                   *,
+                   populate: bool = False
+                   ) -> Playable:
         """|coro|
-
         Play a WaveLink Track.
-
         Parameters
         ----------
-        source: :class:`abc.Playable`
-            The :class:`abc.Playable` track to start playing.
+        track: :class:`tracks.Playable`
+            The :class:`tracks.Playable` track to start playing.
         replace: bool
             Whether this track should replace the current track. Defaults to ``True``.
         start: Optional[int]
@@ -34,46 +33,37 @@ class Custom_Player(wavelink.player.Player):
         volume: Optional[int]
             Sets the volume of the player. Must be between ``0`` and ``1000``.
             Defaults to ``None`` which will not change the volume.
-        pause: bool
-            Changes the players pause state. Defaults to ``None`` which will not change the pause state.
-
+        populate: bool
+            Whether to populate the AutoPlay queue. This is done automatically when AutoPlay is on.
+            Defaults to False.
         Returns
         -------
-        :class:`wavelink.abc.Playable`
+        :class:`tracks.Playable`
             The track that is now playing.
         """
+        assert self._guild is not None
 
-        if not replace and self.is_playing():
-            return
+        if isinstance(track, spotify.SpotifyTrack):
+            track = await track.fulfill(player=self, cls=YouTubeTrack, populate=populate)
 
-        await self.update_state({"state": {}})
-
-        if isinstance(source, PartialTrack):
-            source = await source._search()
-
-        self._source = source
-
-        payload = {
-            "op": "play",
-            "guildId": str(self.guild.id),
-            "track": source.id,
-            "noReplace": not replace,
-            "skipSegments": [
-                "interaction", "music_offtopic", "preview", "selfpromo", "sponsor"
-            ]
+        data = {
+            'encodedTrack': track.encoded,
+            'position': start or 0,
+            'volume': volume or self._volume,
+            'skipSegments': ["interaction", "music_offtopic", "preview", "selfpromo", "sponsor"]
         }
-        if start is not None and start > 0:
-            payload["startTime"] = str(start)
-        if end is not None and end > 0:
-            payload["endTime"] = str(end)
-        if volume is not None:
-            self._volume = volume
-            payload["volume"] = str(volume)
-        if pause is not None:
-            self._paused = pause
-            payload["pause"] = pause
 
-        await self.node._websocket.send(**payload)
+        if end:
+            data['endTime'] = end
 
-        #logger.debug(f"Started playing track:: {str(source)} ({self.channel.id})")
-        return source
+        resp: dict[str, Any] = await self.current_node._send(method='PATCH',
+                                                             path=f'sessions/{self.current_node._session_id}/players',
+                                                             guild_id=self._guild.id,
+                                                             data=data,
+                                                             query=f'noReplace={not replace}')
+
+        self._player_state['track'] = resp['track']['encoded']
+        self._current = track
+
+        return track
+
