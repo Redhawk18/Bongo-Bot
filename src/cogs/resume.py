@@ -26,10 +26,12 @@ class Resume(commands.Cog):
         if voice.is_paused():
             await voice.resume()
             await interaction.response.send_message("**Resumed** ▶")
+            playing_view = self.bot.variables_for_guilds[interaction.guild_id].playing_view
+            await playing_view.edit_view(interaction, True)
+
 
         else:
             await interaction.response.send_message("Already resumed")
 
 async def setup(bot):
     await bot.add_cog(Resume(bot))
-    

@@ -5,7 +5,7 @@ import discord
 
 from custom_player import Custom_Player
 
-async def able_to_use_commands(interaction: discord.Interaction, is_playing: bool, music_channel_id, music_role_id) -> bool: 
+async def able_to_use_commands(interaction: discord.Interaction, is_playing: bool, music_channel_id, music_role_id) -> bool:
     """returns True if the user mets all conditions to use playing commands"""
     if music_role_id is not None:
         if interaction.user.get_role(music_role_id) is None: #true if user has correct role
@@ -36,6 +36,10 @@ async def able_to_use_commands(interaction: discord.Interaction, is_playing: boo
                 return True
 
     return True
+
+async def edit_view_message(bot, guild_id: int, change_to):
+    playing_view_message = bot.get_channel(bot.variables_for_guilds[guild_id].playing_view_channel_id).get_partial_message(bot.variables_for_guilds[guild_id].playing_view_message_id)
+    await playing_view_message.edit(view=change_to)
 
 async def get_milliseconds_from_string(time_string: str, interaction: discord.Interaction) -> int:
     "takes a time string and returns the time in milliseconds `1:34` -> `94000`, errors return `-1`"
