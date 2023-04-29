@@ -42,8 +42,9 @@ class Bongo_Bot(commands.Bot):
 
         #wavelink setup
         node: wavelink.Node = wavelink.Node(
-            uri='http://localhost:2333', 
-            password='password')
+            uri='http://' + getenv('LAVALINK_HOST') + ':' + getenv('LAVALINK_PORT'), 
+            password=getenv('LAVALINK_PASSWORD')
+            )
         
         await wavelink.NodePool.connect(client=self, nodes=[node])
 
