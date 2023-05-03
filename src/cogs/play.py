@@ -1,5 +1,4 @@
 import logging
-from os import getenv
 import re
 
 import discord
@@ -17,24 +16,6 @@ class Play(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
-
-    async def cog_load(self):
-        pass
-        # self.bot.loop.create_task(self.connect_nodes())
-
-    # async def connect_nodes(self):
-    #     """Connect to our Lavalink nodes."""
-    #     await self.bot.wait_until_ready()
-    #     await wavelink.NodePool.connect(
-    #         client=self.bot,
-    #         host=getenv('LAVALINK_HOST'),
-    #         port=getenv('LAVALINK_PORT'),
-    #         password=getenv('LAVALINK_PASSWORD')
-    #     )
 
     @commands.Cog.listener()
     async def on_wavelink_node_ready(self, node: wavelink.Node):

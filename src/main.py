@@ -28,11 +28,6 @@ bot = Bongo_Bot()
 
 async def main():
     async with bot:
-        #load cogs
-        # for file in root_path.glob('./src/cogs/*.py'):
-        #     await bot.load_extension(f'cogs.{file.name[:-3]}')
-        
-        #start bot
         await bot.start(TOKEN)
 
 asyncio.run(main())
