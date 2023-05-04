@@ -8,7 +8,7 @@ import wavelink
 
 from custom_player import Custom_Player
 from playing_view import Playing_View
-from utilities import able_to_use_commands, edit_view_message,get_milliseconds_from_string
+from utilities import able_to_use_commands, edit_view_message, get_milliseconds_from_string
 
 log = logging.getLogger(__name__)
 
@@ -47,11 +47,6 @@ class Play(commands.Cog):
 
         else: #already connected
             voice: Custom_Player = interaction.guild.voice_client
-
-        return voice
-
-    async def get_voice_from_id(self, guild_id:int) -> discord.VoiceProtocol:
-        voice: Custom_Player = self.bot.get_guild(guild_id).voice_client
 
         return voice
 
@@ -141,7 +136,7 @@ class Play(commands.Cog):
         self.bot.cache[guild_id].now_playing_track = track
 
         #connect bot to voice chat
-        voice = await self.get_voice_from_id(channel.guild.id)
+        voice = await self.bot.get_voice(channel.guild.id)
 
         #play track
         await voice.play(track, start=start, volume=self.bot.cache[guild_id].volume)

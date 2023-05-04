@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utilities import get_voice, seconds_to_timestring
+from utilities import seconds_to_timestring
 
 class Now_Playing(commands.Cog):
 
@@ -23,7 +23,7 @@ class Now_Playing(commands.Cog):
             await interaction.response.send_message("Nothing is playing")
             return
 
-        voice_position = (await get_voice(interaction)).position
+        voice_position = (await self.bot.get_voice(interaction.guild_id, interaction)).position
 
         embed = discord.Embed(
             title = "**Now Playing** 🎶",

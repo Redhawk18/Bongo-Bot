@@ -1,8 +1,10 @@
+import logging
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utilities import get_voice
+log = logging.getLogger(__name__)
 
 @app_commands.default_permissions(administrator=True)
 @app_commands.guild_only()
@@ -79,7 +81,7 @@ class Settings(commands.GroupCog, group_name='settings'):
     @app_commands.describe(volume="Volume of the player")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
     async def volume(self, interaction: discord.Interaction, volume: app_commands.Range[int, 0, 100]):
-        voice = await get_voice(interaction, False)
+        voice = await self.bot.get_voice(interaction.guild_id, interaction)
         if voice is not None:
             await voice.set_volume(volume)
 
@@ -88,6 +90,7 @@ class Settings(commands.GroupCog, group_name='settings'):
         await self.update_database_value("volume", volume, interaction.guild_id)
 
     async def update_database_value(self, column_name:str, value, guild_id:int):
+        print("update database value", value)
         await self.bot.database.execute(f'UPDATE guilds SET {column_name} = {value} WHERE guild_id = {guild_id};')
         
 
