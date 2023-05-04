@@ -31,7 +31,7 @@ class Now_Playing(commands.Cog):
             color = discord.Color.red(),
             description=""
         )
-        embed.set_thumbnail(url="https://i.ytimg.com/vi_webp/" + self.bot.cache[interaction.guild_id].now_playing_track.identifier + "/maxresdefault.webp")
+        embed.set_thumbnail(url=self.bot.cache[interaction.guild_id].now_playing_track.thumbnail)
         embed.add_field(name="Title", value=self.bot.cache[interaction.guild_id].now_playing_track.title, inline=False)
         embed.add_field(name="Uploader", value=self.bot.cache[interaction.guild_id].now_playing_track.author)
 
