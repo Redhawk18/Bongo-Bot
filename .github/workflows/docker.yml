@@ -17,14 +17,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build image
-        run: docker build . --file Dockerfile --tag Bongo-Bot --label "runnumber=${GITHUB_RUN_ID}"
+        run: docker build . --file Dockerfile --tag bongo-bot --label "runnumber=${GITHUB_RUN_ID}"
 
       - name: Log in to registry
         run: echo "${{ secrets.TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
       - name: Push image
         run: |
-          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/Bongo
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/bongo-bot
 
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
@@ -36,5 +36,5 @@ jobs:
           [ "$VERSION" == "main" ] && VERSION=latest
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
-          docker tag Bongo-Bot $IMAGE_ID:$VERSION
+          docker tag bongo-bot $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
