@@ -3,7 +3,7 @@ name: docker-build-push
 on: 
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   docker-build-push:
