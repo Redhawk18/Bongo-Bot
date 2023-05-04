@@ -19,23 +19,23 @@ class Loop(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        if not await able_to_use_commands(interaction, self.bot.variables_for_guilds[interaction.guild_id].is_playing, self.bot.variables_for_guilds[interaction.guild_id].music_channel_id, self.bot.variables_for_guilds[interaction.guild_id].music_role_id):
+        if not await able_to_use_commands(interaction, self.bot.cache[interaction.guild_id].is_playing, self.bot.cache[interaction.guild_id].music_channel_id, self.bot.cache[interaction.guild_id].music_role_id):
             return
 
-        if not self.bot.variables_for_guilds[interaction.guild_id].is_playing:
+        if not self.bot.cache[interaction.guild_id].is_playing:
             await interaction.response.send_message("Nothing Playing")
             return
 
-        if self.bot.variables_for_guilds[interaction.guild_id].loop_enabled: #disable loop
-            _, _, _ = self.bot.variables_for_guilds[interaction.guild_id].song_queue.pop()
-            self.bot.variables_for_guilds[interaction.guild_id].loop_enabled = False
+        if self.bot.cache[interaction.guild_id].loop_enabled: #disable loop
+            _, _, _ = self.bot.cache[interaction.guild_id].song_queue.pop()
+            self.bot.cache[interaction.guild_id].loop_enabled = False
             await interaction.response.send_message("**Loop Disabled** 🔁")
 
         else: #enable loop
             #add current song to the top of the queue once
-            track = self.bot.variables_for_guilds[interaction.guild_id].now_playing_track
-            self.bot.variables_for_guilds[interaction.guild_id].song_queue.append((track, interaction.channel, None))
-            self.bot.variables_for_guilds[interaction.guild_id].loop_enabled = True
+            track = self.bot.cache[interaction.guild_id].now_playing_track
+            self.bot.cache[interaction.guild_id].song_queue.append((track, interaction.channel, None))
+            self.bot.cache[interaction.guild_id].loop_enabled = True
             await interaction.response.send_message("**Loop Enabled** 🔁")
 
 async def setup(bot):

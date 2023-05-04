@@ -17,7 +17,7 @@ class Disconnect(commands.Cog):
     @app_commands.guild_only()
     async def disconnect(self, interaction: discord.Interaction):
         voice = await get_voice(interaction)
-        if voice is None or not await able_to_use_commands(interaction, self.bot.variables_for_guilds[interaction.guild_id].is_playing, self.bot.variables_for_guilds[interaction.guild_id].music_channel_id, self.bot.variables_for_guilds[interaction.guild_id].music_role_id):
+        if voice is None or not await able_to_use_commands(interaction, self.bot.cache[interaction.guild_id].is_playing, self.bot.cache[interaction.guild_id].music_channel_id, self.bot.cache[interaction.guild_id].music_role_id):
             return
 
         if voice is not None: #TODO broken
@@ -29,9 +29,9 @@ class Disconnect(commands.Cog):
             await interaction.response.send_message("Already disconnected")
 
     async def stop_voice_functions(self, voice: discord.VoiceClient):
-        self.bot.variables_for_guilds[voice.guild.id].song_queue.clear() #wipe all future songs
-        self.bot.variables_for_guilds[voice.guild.id].is_playing = False
-        self.bot.variables_for_guilds[voice.guild.id].loop_enabled = False
+        self.bot.cache[voice.guild.id].song_queue.clear() #wipe all future songs
+        self.bot.cache[voice.guild.id].is_playing = False
+        self.bot.cache[voice.guild.id].loop_enabled = False
 
         await voice.stop()
         await voice.disconnect()
