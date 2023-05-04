@@ -64,6 +64,10 @@ class Settings(commands.GroupCog, group_name='settings'):
     @app_commands.describe(role="The only role that can use music commands")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
     async def settings_set_music_role(self, interaction: discord.Interaction, role: discord.Role):
+        if role.id == interaction.guild_id: #role is @everyone
+            await interaction.response.send_message(f'Role can not be set to {self.bot.get_guild(interaction.guild_id).get_role(role.id).mention}')
+            return
+
         self.bot.cache[interaction.guild_id].music_role_id = role.id
 
         await interaction.response.send_message(f'Set music role to {self.bot.get_guild(interaction.guild_id).get_role(role.id).mention}')
