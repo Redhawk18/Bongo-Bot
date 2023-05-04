@@ -84,7 +84,7 @@ class Settings(commands.GroupCog, group_name='settings'):
     @app_commands.command(name="volume", description="Sets the volume of the player")
     @app_commands.describe(volume="Volume of the player")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
-    async def volume(self, interaction: discord.Interaction, volume: app_commands.Range[int, 0, 100]):
+    async def volume(self, interaction: discord.Interaction, volume: app_commands.Range[int, 1, 100]):
         voice = await self.bot.get_voice(interaction.guild_id, interaction)
         if voice is not None:
             await voice.set_volume(volume)
