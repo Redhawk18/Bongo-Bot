@@ -39,7 +39,7 @@ class Queue(commands.GroupCog, group_name='queue'):
                 output += (f'{index +1}. `{track.title}` - `{seconds_to_timestring(track.length)}`\n') #FIXME
                 index += 1
 
-            total_seconds += track.length
+            total_seconds += track.length / 1000
             
         output += "\n"
         output += f'*{len(self.bot.cache[interaction.guild_id].song_queue) - index} remaining songs not listed...*'

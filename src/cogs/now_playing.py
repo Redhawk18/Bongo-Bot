@@ -23,7 +23,7 @@ class Now_Playing(commands.Cog):
             await interaction.response.send_message("Nothing is playing")
             return
 
-        voice_position = (await self.bot.get_voice(interaction.guild_id, interaction)).position
+        voice_position = (await self.bot.get_voice(interaction.guild_id, interaction)).position / 1000
 
         embed = discord.Embed(
             title = "**Now Playing** 🎶",
@@ -35,7 +35,7 @@ class Now_Playing(commands.Cog):
         embed.add_field(name="Title", value=self.bot.cache[interaction.guild_id].now_playing_track.title, inline=False)
         embed.add_field(name="Uploader", value=self.bot.cache[interaction.guild_id].now_playing_track.author)
 
-        total_seconds = self.bot.cache[interaction.guild_id].now_playing_track.length
+        total_seconds = self.bot.cache[interaction.guild_id].now_playing_track.length / 1000
         embed.add_field(name="Duration", value=f'{seconds_to_timestring(voice_position)}/{seconds_to_timestring(total_seconds)}')
 
         await interaction.response.send_message(embed=embed)
