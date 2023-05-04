@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   bongo-bot:
-    image: ghcr.io/redhawk18/bongo-bot
+    image: ghcr.io/redhawk18/bongo-bot:latest
     depends_on:
       lavalink:
         condition: service_healthy
@@ -24,7 +24,7 @@ services:
     networks:
       - lavalink
       - postgres
-    # pull_policy: always
+    pull_policy: always
     restart: unless-stopped
 
   lavalink:
