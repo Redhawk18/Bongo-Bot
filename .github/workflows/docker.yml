@@ -29,4 +29,3 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/redhawk18/bongo-bot:${{ github.sha }}
-

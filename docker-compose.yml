@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   discord-bot:
-    image: redhawk76/discord-bot:latest
+    image: ghcr.io/redhawk18/discord-bot:latest
     depends_on:
       lavalink:
         condition: service_healthy

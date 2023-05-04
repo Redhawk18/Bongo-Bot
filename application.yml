@@ -50,3 +50,4 @@ logging:
   level:
     root: INFO
     lavalink: INFO
+    
