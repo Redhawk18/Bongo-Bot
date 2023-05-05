@@ -36,10 +36,16 @@ class Queue(commands.GroupCog, group_name='queue'):
             track, _, _ = tempq.pop()
 
             if len(output) < 4000: #limit for embed description is 4096 characters
-                output += (f'{index +1}. `{track.title}` - `{seconds_to_timestring(track.length)}`\n') #FIXME
+                
+                if not track.is_stream:
+                    output += (f'{index +1}. `{track.title}` - `{seconds_to_timestring(track.length)}`\n')
+
+                else:
+                    output += (f'{index +1}. `{track.title}` - `Livestream`\n')
                 index += 1
 
-            total_seconds += track.length / 1000
+            if not track.is_stream:
+                total_seconds += track.length / 1000
             
         output += "\n"
         output += f'*{len(self.bot.cache[interaction.guild_id].song_queue) - index} remaining songs not listed...*'

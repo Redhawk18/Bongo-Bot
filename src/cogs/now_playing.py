@@ -36,7 +36,13 @@ class Now_Playing(commands.Cog):
         embed.add_field(name="Uploader", value=self.bot.cache[interaction.guild_id].now_playing_track.author)
 
         total_seconds = self.bot.cache[interaction.guild_id].now_playing_track.length / 1000
-        embed.add_field(name="Duration", value=f'{seconds_to_timestring(voice_position)}/{seconds_to_timestring(total_seconds)}')
+        print("total_seconds",total_seconds)
+
+        if self.bot.cache[interaction.guild_id].now_playing_track.is_stream:
+            embed.add_field(name="Duration", value="Livestream")
+
+        else:
+            embed.add_field(name="Duration", value=f'{seconds_to_timestring(voice_position)}/{seconds_to_timestring(total_seconds)}')
 
         await interaction.response.send_message(embed=embed)
 
