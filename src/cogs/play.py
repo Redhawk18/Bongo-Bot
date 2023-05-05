@@ -21,6 +21,7 @@ class Play(commands.Cog):
     async def on_wavelink_node_ready(self, node: wavelink.Node):
         """Event fired when a node has finished connecting."""
         log.info(f'Lavalink Connected')
+        self.current_node = node
 
     @commands.Cog.listener()
     async def on_wavelink_track_start(self, payload: wavelink.TrackEventPayload):
@@ -85,12 +86,15 @@ class Play(commands.Cog):
 
             await self.add_playlist(playlist, interaction)
 
-        else: #normal track
+        else: #not a playlist
             try:
-                track = await wavelink.YouTubeTrack.search(query, return_first=True)
-            except: #video not found
-                await interaction.response.send_message("video does not exist")
-                return
+                track = (await self.current_node.get_tracks(query=query, cls=wavelink.YouTubeTrack))[0]
+            except IndexError: #query is not a url
+                try: #search using query
+                    track = await wavelink.YouTubeTrack.search(query, return_first=True)
+                except wavelink.NoTracksError: #video does not exist
+                    log.warn(f'Search Query: {query} was not found in guild {interaction.guild.name}')
+                    await interaction.response.send_message("video does not exist")
 
             await self.add_song(track, interaction, play_next, start)
 
