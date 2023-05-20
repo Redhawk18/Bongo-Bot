@@ -20,16 +20,9 @@ class Bongo_Bot(commands.Bot):
         self.tree.on_error = self.on_tree_error
 
         self.cache = defaultdict(Server_Infomation)
-
+        
     async def on_ready(self):
         log.info(f'Logged in as {self.user} (ID: {self.user.id})')
-
-        #sync new commands
-        await self.tree.sync()
-
-    async def on_ready(self):
-        print(f'Logged in as {self.user} (ID: {self.user.id})')
-        print('------')
 
     async def setup_hook(self):
         #cogs setup
@@ -57,7 +50,7 @@ class Bongo_Bot(commands.Bot):
             await interaction.response.send_message(str(error), ephemeral=True)
 
     async def close(self):
-        log.info(f'{len(self.voice_clients)} Voice Client to shutdown')
+        log.info(f'{len(self.voice_clients)} Voice Clients to shutdown')
         for voice in self.voice_clients:
             self.get_cog("Disconnect").stop_voice_functions(voice)
 
