@@ -20,7 +20,7 @@ class Disconnect(commands.Cog):
         if voice is None or not await able_to_use_commands(interaction, self.bot.cache[interaction.guild_id].is_playing, self.bot.cache[interaction.guild_id].music_channel_id, self.bot.cache[interaction.guild_id].music_role_id):
             return
 
-        if voice is not None: #TODO broken
+        if voice.is_connected():
             await self.stop_voice_functions(voice)
             if not interaction.response.is_done():
                 await interaction.response.send_message("**Disconnected** 🎸")
