@@ -16,7 +16,7 @@ class Roll(commands.Cog):
     @app_commands.command(name="roll", description="Rolls a sided die, however many times")
     @app_commands.describe(die_sides="How many sides the die has", rolls="How many times the die is rolled")
     @app_commands.guild_only()
-    async def roll(self, interaction: discord.Interaction, die_sides: app_commands.Range[int, 2], rolls: app_commands.Range[int, 1, 24]=1):
+    async def roll(self, interaction: discord.Interaction, die_sides: app_commands.Range[int, 2], rolls: app_commands.Range[int, 1, 6]=1):
         sum = 0
         output = f'A {die_sides}-sided die was rolled {rolls} times\n'
         for _ in range(rolls):

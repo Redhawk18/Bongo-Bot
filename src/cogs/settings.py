@@ -96,6 +96,5 @@ class Settings(commands.GroupCog, group_name='settings'):
     async def update_database_value(self, column_name:str, value, guild_id:int):
         await self.bot.database.execute(f'UPDATE guilds SET {column_name} = {value} WHERE guild_id = {guild_id};')
         
-
 async def setup(bot):
     await bot.add_cog(Settings(bot))

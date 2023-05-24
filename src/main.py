@@ -15,7 +15,8 @@ discord.utils.setup_logging(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 root_path = Path(__file__).parent.resolve().parent.resolve()
-if len(sys.argv) < 2: #add everything to environ
+#local runs of the application need the .env file, docker runs have the values loaded already
+if len(sys.argv) < 2:
     if not Path.is_file(root_path.joinpath(".env")):
         log.critical("you forgot the .env file")
         exit()
