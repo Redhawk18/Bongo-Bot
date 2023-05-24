@@ -8,7 +8,7 @@ import discord
 from discord.ext import commands
 import wavelink
 
-from server_infomation import Server_Infomation
+from cache import Cache
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class Bongo_Bot(commands.Bot):
         super().__init__(command_prefix = "!", intents = self.get_intents(), *args, **kwargs)
         self.tree.on_error = self.on_tree_error
 
-        self.cache = defaultdict(Server_Infomation)
+        self.cache = defaultdict(Cache)
         
     async def on_ready(self):
         log.info(f'Logged in as {self.user} (ID: {self.user.id})')
