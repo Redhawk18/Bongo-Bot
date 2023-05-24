@@ -6,7 +6,6 @@ from discord import app_commands
 from discord.ext import commands
 import wavelink
 
-from custom_player import Custom_Player
 from playing_view import Playing_View
 from utilities import able_to_use_commands, edit_view_message, get_milliseconds_from_string
 
@@ -43,11 +42,11 @@ class Play(commands.Cog):
 
     async def connect(self, interaction):
         if not interaction.guild.voice_client:
-            voice: Custom_Player = await interaction.user.voice.channel.connect(cls=Custom_Player)
+            voice: wavelink.Player = await interaction.user.voice.channel.connect(cls=wavelink.Player)
             await interaction.followup.send(f'**Connected** 🥁 to `{interaction.user.voice.channel.name}`')
 
         else: #already connected
-            voice: Custom_Player = interaction.guild.voice_client
+            voice: wavelink.Player = interaction.guild.voice_client
 
         return voice
 

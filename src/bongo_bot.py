@@ -8,7 +8,6 @@ import discord
 from discord.ext import commands
 import wavelink
 
-from custom_player import Custom_Player
 from server_infomation import Server_Infomation
 
 log = logging.getLogger(__name__)
@@ -96,8 +95,8 @@ class Bongo_Bot(commands.Bot):
 
         log.info("Database loaded into cache")
 
-    async def get_voice(self, guild_id: int, interaction: discord.Interaction = None) -> Custom_Player:
-        voice: Custom_Player = self.get_guild(guild_id).voice_client
+    async def get_voice(self, guild_id: int, interaction: discord.Interaction = None) -> wavelink.Player:
+        voice: wavelink.Player = self.get_guild(guild_id).voice_client
 
         if voice is None: #not connected to voice
             await interaction.response.send_message("Nothing is playing")

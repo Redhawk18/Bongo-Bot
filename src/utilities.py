@@ -3,8 +3,6 @@ from math import floor
 
 import discord
 
-from custom_player import Custom_Player
-
 async def able_to_use_commands(interaction: discord.Interaction, is_playing: bool, music_channel_id, music_role_id) -> bool:
     """returns True if the user mets all conditions to use playing commands"""
     if music_role_id is not None:
