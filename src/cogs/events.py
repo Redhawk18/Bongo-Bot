@@ -12,16 +12,6 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         pass
-
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        #get trolled user from env
-        load_dotenv() #this should not be here
-        TROLLED_USER_ID = int(os.getenv('TROLLED_USER_ID'))
-
-        if TROLLED_USER_ID == message.author.id:
-            if random.randint(1, 20) == 1: #1 in 20 messages
-                await message.add_reaction("🐧")
     
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
