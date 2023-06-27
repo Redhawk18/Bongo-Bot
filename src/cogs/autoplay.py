@@ -14,7 +14,7 @@ class autoplay(commands.Cog):
         app_commands.Choice(name="True", value=True),
         app_commands.Choice(name="False", value=False),
     ])
-    async def frank(self, interaction: discord.Interaction, choice: app_commands.Choice[bool]):
+    async def autoplay(self, interaction: discord.Interaction, choice: app_commands.Choice[bool]):
         self.bot.cache[interaction.guild_id].autoplay = choice
         interaction.response.send_message(f'Autoplay is now {choice}')
 
