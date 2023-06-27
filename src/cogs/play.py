@@ -87,7 +87,7 @@ class Play(commands.Cog):
 
         else: #not a playlist
             try:
-                track = (await self.current_node.get_tracks(query=query, cls=wavelink.YouTubeTrack))[0]
+                track = (await self.current_node.get_tracks(query=query, cls=wavelink.YouTubeTrack))[0] #TODO wavelink broke this at 2.5.0, refactor all of it
             except IndexError: #query is not a url
                 try: #search using query
                     track = await wavelink.YouTubeTrack.search(query, return_first=True)

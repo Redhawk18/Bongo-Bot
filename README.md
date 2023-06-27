@@ -1,4 +1,18 @@
+<div align="center">
+<img src="logo.png" style="max-width:34%;">
+
 # Bongo Bot
+<br>
+
+[![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/Redhawk18/Bongo-Bot/.github%2Fworkflows%2Fdocker.yml)](https://github.com/Redhawk18/Bongo-Bot/pkgs/container/bongo-bot)
+[![License](https://img.shields.io/github/license/Redhawk18/Bongo-Bot)](https://github.com/Redhawk18/Bongo-Bot/blob/main/LICENSE)
+
+Designed to be a simple discord bot that play audios, inspiration is taken from the original [Rythm](https://rythm.fm/) bot.
+</div>
+
+## Usage
+All commands are slash commands and are self-documenting, regardless here are some examples. 
+`/play query: chainsaw man ending 4`
 
 ## Setup
 * First create a `.env` with all the the following variables
@@ -17,8 +31,6 @@ LAVALINK_HOST=lavalink #docker only
 #LAVALINK_HOST=localhost #local only
 LAVALINK_PORT=
 LAVALINK_PASSWORD=
-
-TROLLED_USER_ID=
 
 #postgres
 POSTGRES_USER=
