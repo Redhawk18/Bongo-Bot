@@ -9,10 +9,6 @@ class Resume(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
-
     @app_commands.command(name="resume", description="Resumes track")
     @app_commands.guild_only()
     async def resume(self, interaction: discord.Interaction):

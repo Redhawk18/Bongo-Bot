@@ -12,10 +12,6 @@ class Settings(commands.GroupCog, group_name='settings'):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
     
     @app_commands.command(name="list", description="Lists all settings")
     async def settings_list(self, interaction: discord.Interaction):

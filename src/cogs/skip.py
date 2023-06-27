@@ -11,10 +11,6 @@ class Skip(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
-
     @app_commands.command(name="skip", description="Calls a vote to skip the track")
     @app_commands.guild_only()
     async def skip(self, interaction: discord.Interaction):

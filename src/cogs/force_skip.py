@@ -9,10 +9,6 @@ class Force_Skip(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
-
     @app_commands.command(name="force-skip", description="Skips the track")
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.guild_only()

@@ -9,10 +9,6 @@ class Roll(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
-
     @app_commands.command(name="roll", description="Rolls a sided die, however many times")
     @app_commands.describe(die_sides="How many sides the die has", rolls="How many times the die is rolled")
     @app_commands.guild_only()

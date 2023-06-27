@@ -9,10 +9,6 @@ class autoplay(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
-
     @app_commands.command(name="autoplay", description="Enables/Disables autoplaying from Youtube")
     @app_commands.choices(choices=[
         app_commands.Choice(name="True", value=True),

@@ -11,10 +11,6 @@ class Queue(commands.GroupCog, group_name='queue'):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
     
     @app_commands.command(name="list", description="Lists the queue")
     @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))

@@ -10,14 +10,10 @@ class Tasks(commands.Cog):
         self.disconnect_timer.start()
         self.set_status.start()
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
-
     @tasks.loop(minutes=10)
     async def disconnect_timer(self):
         for voice in self.bot.voice_clients:
-            if len(voice.channel.members) < 2: #no one in voice
+            if len(voice.channel.members) < 2: #no one in voice besides the bot
                 await self.bot.get_cog("Disconnect").stop_voice_functions(voice)
 
     @tasks.loop(hours=24)

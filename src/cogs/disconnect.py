@@ -9,10 +9,6 @@ class Disconnect(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
-
     @app_commands.command(name="disconnect", description="disconnect from voice chat")
     @app_commands.guild_only()
     async def disconnect(self, interaction: discord.Interaction):

@@ -9,10 +9,6 @@ class Now_Playing(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
-
     @app_commands.command(name="now-playing", description="Show the playing song")
     @app_commands.guild_only()
     async def now_playing(self, interaction: discord.Interaction):

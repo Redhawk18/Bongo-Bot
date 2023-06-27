@@ -1,7 +1,3 @@
-from dotenv import load_dotenv
-import os
-import random
-
 from discord.ext import commands
 
 class Events(commands.Cog):
@@ -9,10 +5,6 @@ class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
-    
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         #add guild id to database
