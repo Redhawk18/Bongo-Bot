@@ -2,6 +2,7 @@ from collections import defaultdict
 import logging
 from os import getenv
 from pathlib import Path
+import sys
 
 import asyncpg
 import discord
@@ -46,6 +47,11 @@ class Bongo_Bot(commands.Bot):
 
     async def on_tree_error(self, interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
         if isinstance(error, discord.app_commands.CommandOnCooldown):
+            log.warn(error)
+            await interaction.response.send_message(str(error), ephemeral=True)
+
+        else:
+            log.critical('Ignoring exception in command {}:'.format(error))
             await interaction.response.send_message(str(error), ephemeral=True)
 
     async def close(self):
