@@ -10,13 +10,14 @@ class autoplay(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="autoplay", description="Enables/Disables autoplaying from Youtube")
-    @app_commands.choices(choices=[
-        app_commands.Choice(name="True", value=True),
-        app_commands.Choice(name="False", value=False),
-    ])
-    async def autoplay(self, interaction: discord.Interaction, choice: app_commands.Choice[bool]):
-        self.bot.cache[interaction.guild_id].autoplay = choice
-        interaction.response.send_message(f'Autoplay is now {choice}')
+    async def autoplay(self, interaction: discord.Interaction):
+        if autoplay := self.bot.cache[interaction.guild_id].autoplay:
+            autoplay = True
+            await interaction.response.send_message("**Autoplay** 😵‍💫 is enabled")
+
+        else:
+            autoplay = False
+            await interaction.response.send_message("**Autoplay** 😵‍💫 is disabled")
 
 async def setup(bot):
     await bot.add_cog(autoplay(bot))
