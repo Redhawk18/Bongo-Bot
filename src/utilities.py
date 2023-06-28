@@ -30,7 +30,7 @@ async def able_to_use_commands(interaction: discord.Interaction, is_playing: boo
                 return False
 
             elif not is_playing: #bot is idling
-                await voice.disconnect()
+                await voice.disconnect() #TODO use the `move_to` function
                 return True
 
     return True
@@ -44,7 +44,7 @@ async def get_milliseconds_from_string(time_string: str, interaction: discord.In
     TIME_RE = re.compile("^[0-5]?\d:[0-5]?\d:[0-5]\d|[0-5]?\d:[0-5]\d|\d+$")
     if not TIME_RE.match(time_string):
         await interaction.response.send_message("Invalid time stamp")
-        return -1
+        return -1 #TODO maybe turn this into a exception 
 
     list_of_units = [int(x) for x in time_string.split(":")]
 

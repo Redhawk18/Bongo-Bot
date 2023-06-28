@@ -77,7 +77,7 @@ class Bongo_Bot(commands.Bot):
             password=getenv('DATABASE_PASSWORD')
             )
 
-        except:
+        except: #TODO add a exeception here
             log.critical("Database not connected")
             self.database = None #since it failed
             exit()
