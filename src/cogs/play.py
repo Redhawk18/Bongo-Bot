@@ -30,13 +30,13 @@ class Play(commands.Cog):
 
     async def connect(self, interaction):
         if not interaction.guild.voice_client:
-            voice: wavelink.Player = await interaction.user.voice.channel.connect(cls=wavelink.Player)
+            player: wavelink.Player = await interaction.user.voice.channel.connect(cls=wavelink.Player)
             await interaction.followup.send(f'**Connected** 🥁 to `{interaction.user.voice.channel.name}`')
 
         else: #already connected
-            voice: wavelink.Player = interaction.guild.voice_client
+            player: wavelink.Player = interaction.guild.voice_client
 
-        return voice
+        return player
 
     @app_commands.command(name="play", description="plays a Youtube track, start time need to formated with colons")
     @app_commands.describe(query="What to search youtube for", 
@@ -59,22 +59,15 @@ class Play(commands.Cog):
             if start_time == -1: #time code was invalid
                 return
 
-        await self.search_for_track(interaction, query, next, start_time)
-
-    async def search_for_track(self, interaction: discord.Interaction, query: str, is_next: bool, start_time: int):
         tracks: wavelink.YouTubePlaylist | list[wavelink.YouTubeTrack] = await wavelink.YouTubeTrack.search(query)
         if not tracks:
             # Do something
             print(tracks)
             return
+        
+        await interaction.response.send_message(f'Added 🎵 {tracks[0].uri} to queue')
 
         player = await self.connect(interaction)
-        await interaction.response.send_message("message")
-
-        #print(tracks)
-        print(player.is_connected())
-        await self.connect(interaction)
-        print(player.is_connected())
 
         if isinstance(tracks, wavelink.YouTubePlaylist):
             for track in tracks.tracks:
@@ -83,7 +76,6 @@ class Play(commands.Cog):
             player.queue.put(tracks[0])
         
         await player.play(player.queue.get())
-
 
 async def setup(bot):
     await bot.add_cog(Play(bot))
