@@ -3,6 +3,7 @@ import logging
 from os import getenv
 from pathlib import Path
 import sys
+import traceback
 
 import asyncpg
 import discord
@@ -52,6 +53,7 @@ class Bongo_Bot(commands.Bot):
 
         else:
             log.critical('Ignoring exception in command {}:'.format(error))
+            traceback.print_exception(type(error), error, error.__traceback__)
             await interaction.response.send_message(str(error), ephemeral=True)
 
     async def close(self):
