@@ -24,12 +24,12 @@ class Loop(commands.Cog):
 
         player: wavelink.player = await self.bot.get_player(interaction)
 
-        if loop := player.queue.loop:
-            loop = False
+        if player.queue.loop:
+            player.queue.loop = False
             await interaction.response.send_message("**Loop Disabled** 🔁")
 
         else:
-            loop = True
+            player.queue.loop = True
             await interaction.response.send_message("**Loop Enabled** 🔁")
 
 
