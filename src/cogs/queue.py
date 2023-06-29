@@ -6,16 +6,18 @@ from discord.ext import commands
 
 from utilities import seconds_to_timestring
 
-@app_commands.guild_only()
-class Queue(commands.GroupCog, group_name='queue'):
 
+@app_commands.guild_only()
+class Queue(commands.GroupCog, group_name="queue"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-    
+
     @app_commands.command(name="list", description="Lists the queue")
     @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
     async def queue_list(self, interaction: discord.Interaction):
-        if len(self.bot.cache[interaction.guild_id].song_queue) == 0: #incase the queue was empty from the start
+        if (
+            len(self.bot.cache[interaction.guild_id].song_queue) == 0
+        ):  # incase the queue was empty from the start
             await interaction.response.send_message("The queue is empty")
             return
 
@@ -23,37 +25,36 @@ class Queue(commands.GroupCog, group_name='queue'):
 
         tempq = self.bot.cache[interaction.guild_id].song_queue.copy()
 
-        #store every element in a string
+        # store every element in a string
         index = 0
         output = "Shows every song until the character limit is reached\n\n"
         total_seconds = 0
         while tempq:
-            #get the url of the video
+            # get the url of the video
             track, _, _ = tempq.pop()
 
-            if len(output) < 4000: #limit for embed description is 4096 characters
-                
+            if len(output) < 4000:  # limit for embed description is 4096 characters
                 if not track.is_stream:
-                    output += (f'{index +1}. `{track.title}` - `{seconds_to_timestring(track.length)}`\n')
+                    output += f"{index +1}. `{track.title}` - `{seconds_to_timestring(track.length)}`\n"
 
                 else:
-                    output += (f'{index +1}. `{track.title}` - `Livestream`\n')
+                    output += f"{index +1}. `{track.title}` - `Livestream`\n"
                 index += 1
 
             if not track.is_stream:
                 total_seconds += track.length / 1000
-            
+
         output += "\n"
-        output += f'*{len(self.bot.cache[interaction.guild_id].song_queue) - index} remaining songs not listed...*'
-        
+        output += f"*{len(self.bot.cache[interaction.guild_id].song_queue) - index} remaining songs not listed...*"
+
         embed = discord.Embed(
-            title = "**Queue** 📚",
-            description = output,
-            color = discord.Color.red(),
+            title="**Queue** 📚",
+            description=output,
+            color=discord.Color.red(),
         )
 
-        #figure the length of the queue
-        embed.set_footer(text=f'Total length: {seconds_to_timestring(total_seconds)}')
+        # figure the length of the queue
+        embed.set_footer(text=f"Total length: {seconds_to_timestring(total_seconds)}")
 
         if self.bot.cache[interaction.guild_id].loop_enabled:
             embed.set_footer(text="Total length: Forever")
@@ -65,20 +66,26 @@ class Queue(commands.GroupCog, group_name='queue'):
         self.bot.cache[interaction.guild_id].song_queue.clear()
         await interaction.response.send_message("**Cleared queue** 📚")
 
-    @app_commands.command(name="remove", description="Removes a song from the queue based on its track number")
+    @app_commands.command(
+        name="remove",
+        description="Removes a song from the queue based on its track number",
+    )
     @app_commands.describe(queue_position="The position of the track to be removed")
     async def queue_remove(self, interaction: discord.Interaction, queue_position: int):
-        if queue_position > len(self.bot.cache[interaction.guild_id].song_queue) or queue_position < 0:
+        if (
+            queue_position > len(self.bot.cache[interaction.guild_id].song_queue)
+            or queue_position < 0
+        ):
             await interaction.response.send_message("Input invalid")
             return
 
-        #because of how the remove function works we have to make a copy
+        # because of how the remove function works we have to make a copy
         tempq = self.bot.cache[interaction.guild_id].song_queue.copy()
 
-        for _ in range(queue_position -1): #so we dont have to save what's popped
+        for _ in range(queue_position - 1):  # so we dont have to save what's popped
             tempq.pop()
 
-        #we should have the url of the track we want to remove
+        # we should have the url of the track we want to remove
         self.bot.cache[interaction.guild_id].song_queue.remove(tempq.pop())
         await interaction.response.send_message("**Removed from queue** 📚")
 
@@ -90,6 +97,7 @@ class Queue(commands.GroupCog, group_name='queue'):
 
         else:
             await interaction.response.send_message("Nothing to shuffle")
+
 
 async def setup(bot):
     await bot.add_cog(Queue(bot))
