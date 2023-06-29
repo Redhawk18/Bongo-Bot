@@ -14,13 +14,14 @@ class Force_Skip(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        player = await self.bot.get_player(interaction.guild_id, interaction)
         if player is None or not await self.bot.able_to_use_commands(
             interaction,
             self.bot.cache[interaction.guild_id].music_channel_id,
             self.bot.cache[interaction.guild_id].music_role_id,
         ):
             return
+
+        player = await self.bot.get_player(interaction)
 
         if player.is_playing():
             await player.stop()

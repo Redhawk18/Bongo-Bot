@@ -2,38 +2,36 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utilities import able_to_use_commands
 
 class Loop(commands.Cog):
-
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="loop", description="Loops the current song until disabled")
+    @app_commands.command(
+        name="loop", description="Loops the current song until disabled"
+    )
     @app_commands.guild_only()
     async def loop(self, interaction: discord.Interaction):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        if not await able_to_use_commands(interaction, self.bot.cache[interaction.guild_id].is_playing, self.bot.cache[interaction.guild_id].music_channel_id, self.bot.cache[interaction.guild_id].music_role_id):
+        if not await self.bot.able_to_use_commands(  # TODO do some testng to see if this can be put in the command method instead of the helper method
+            interaction,
+            self.bot.cache[interaction.guild_id].music_channel_id,
+            self.bot.cache[interaction.guild_id].music_role_id,
+        ):
             return
 
-        if not self.bot.cache[interaction.guild_id].is_playing:
-            await interaction.response.send_message("Nothing Playing")
-            return
+        player: wavelink.player = await self.bot.get_player(interaction)
 
-        if self.bot.cache[interaction.guild_id].loop_enabled: #disable loop
-            _, _, _ = self.bot.cache[interaction.guild_id].song_queue.pop()
-            self.bot.cache[interaction.guild_id].loop_enabled = False
+        if loop := player.queue.loop:
+            loop = False
             await interaction.response.send_message("**Loop Disabled** 🔁")
 
-        else: #enable loop
-            #add current song to the top of the queue once
-            track = self.bot.cache[interaction.guild_id].now_playing_track
-            self.bot.cache[interaction.guild_id].song_queue.append((track, interaction.channel, None))
-            self.bot.cache[interaction.guild_id].loop_enabled = True
+        else:
+            loop = True
             await interaction.response.send_message("**Loop Enabled** 🔁")
+
 
 async def setup(bot):
     await bot.add_cog(Loop(bot))
-    
