@@ -2,10 +2,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utilities import able_to_use_commands
 
 class Force_Skip(commands.Cog):
-
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -16,17 +14,21 @@ class Force_Skip(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        voice = await self.bot.get_player(interaction.guild_id, interaction)
-        if voice is None or not await able_to_use_commands(interaction, self.bot.cache[interaction.guild_id].is_playing, self.bot.cache[interaction.guild_id].music_channel_id, self.bot.cache[interaction.guild_id].music_role_id):
+        player = await self.bot.get_player(interaction.guild_id, interaction)
+        if player is None or not await self.bot.able_to_use_commands(
+            interaction,
+            self.bot.cache[interaction.guild_id].music_channel_id,
+            self.bot.cache[interaction.guild_id].music_role_id,
+        ):
             return
 
-        if voice.is_playing():
-            await voice.stop()
+        if player.is_playing():
+            await player.stop()
             await interaction.response.send_message("**Skipped** ⏭")
 
         else:
             await interaction.response.send_message("Nothing is playing")
 
+
 async def setup(bot):
     await bot.add_cog(Force_Skip(bot))
-    
