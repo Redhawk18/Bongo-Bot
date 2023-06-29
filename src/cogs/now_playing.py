@@ -19,7 +19,7 @@ class Now_Playing(commands.Cog):
             await interaction.response.send_message("Nothing is playing")
             return
 
-        voice_position = (await self.bot.get_voice(interaction.guild_id, interaction)).position / 1000
+        voice_position = (await self.bot.get_player(interaction.guild_id, interaction)).position / 1000
 
         embed = discord.Embed(
             title = "**Now Playing** 🎶",

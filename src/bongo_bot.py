@@ -158,13 +158,13 @@ class Bongo_Bot(commands.Bot):
     async def get_player(
         self, guild_id: int, interaction: discord.Interaction = None
     ) -> wavelink.Player:
-        voice: wavelink.Player = interaction.guild.voice_client
+        player: wavelink.Player = interaction.guild.voice_client
 
-        if voice is None:  # not connected to voice
+        if player is None:  # not connected to voice
             await interaction.response.send_message("Nothing is playing")
             return None
 
-        return voice
+        return player
 
     async def load_data(self) -> None:
         """Loads the entire table entry by entry into cache"""

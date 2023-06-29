@@ -15,7 +15,7 @@ class Pause(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        voice = await self.bot.get_voice(interaction.guild_id, interaction)
+        voice = await self.bot.get_player(interaction.guild_id, interaction)
         if voice is None or not await able_to_use_commands(
             interaction,
             self.bot.cache[interaction.guild_id].is_playing, #TODO this doesnt exist anymore

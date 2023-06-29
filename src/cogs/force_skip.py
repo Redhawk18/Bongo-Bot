@@ -16,7 +16,7 @@ class Force_Skip(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        voice = await self.bot.get_voice(interaction.guild_id, interaction)
+        voice = await self.bot.get_player(interaction.guild_id, interaction)
         if voice is None or not await able_to_use_commands(interaction, self.bot.cache[interaction.guild_id].is_playing, self.bot.cache[interaction.guild_id].music_channel_id, self.bot.cache[interaction.guild_id].music_role_id):
             return
 

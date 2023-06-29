@@ -150,7 +150,11 @@ class Play(commands.Cog):
                     player.queue.put_at_front(track)
 
             else:
-                for track in tracks.tracks:
+                for (
+                    track
+                ) in (
+                    tracks.tracks
+                ):  # TODO when i upgrade to 2.6 delete this loop, playlist can be added without a loop
                     player.queue.put(track)
 
         else:
