@@ -15,15 +15,15 @@ class Resume(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        voice = await self.bot.get_player(interaction.guild_id, interaction)
-        if voice is None or not await able_to_use_commands(interaction, self.bot.cache[interaction.guild_id].is_playing, self.bot.cache[interaction.guild_id].music_channel_id, self.bot.cache[interaction.guild_id].music_role_id):
+        player = await self.bot.get_player(interaction)
+        if not await able_to_use_commands(interaction, self.bot.cache[interaction.guild_id].is_playing, self.bot.cache[interaction.guild_id].music_channel_id, self.bot.cache[interaction.guild_id].music_role_id):
             return
 
-        if voice.is_paused():
-            await voice.resume()
+        if player.is_paused():
+            await player.resume()
             await interaction.response.send_message("**Resumed** ▶")
-            playing_view = self.bot.cache[interaction.guild_id].playing_view
-            await playing_view.edit_view(interaction, True)
+            # playing_view = self.bot.cache[interaction.guild_id].playing_view
+            # await playing_view.edit_view(interaction, True)
 
 
         else:
