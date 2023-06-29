@@ -14,7 +14,7 @@ class Cache():
         self.loop_enabled = False
         self.now_playing_track = None
         self.playing_view = None
-        self.playing_view_channel_id = None
+        self.playing_view_channel = None
         self.playing_view_message_id = None
         self.queue = Queue()
         self.user_who_want_to_skip = []
