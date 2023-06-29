@@ -30,8 +30,9 @@ class Play(commands.Cog):
         log.info(f'Finished playing "{payload.track.title}" name: {payload.player.guild.name}, id: {payload.player.guild.id}')
         await edit_view_message(self.bot, payload.player.guild.id, None)
 
-    async def connect(self, interaction):
+    async def connect(self, interaction) -> wavelink.Player:
         if interaction.guild.voice_client: #already connected
+            await interaction.followup.send(f'**Connected** 🥁 to `{interaction.user.voice.channel.name}`')
             player: wavelink.Player = interaction.guild.voice_client
 
         else: 
@@ -76,11 +77,12 @@ class Play(commands.Cog):
 
         self.bot.cache[interaction.guild_id].playing_view_channel = interaction.channel
 
-    async def add_to_queue(self, interaction: discord.Interaction, next: bool, tracks: wavelink.YouTubePlaylist | list[wavelink.YouTubeTrack]):
-        player = await self.connect(interaction)
+    async def add_to_queue(self, interaction: discord.Interaction, next: bool, tracks: wavelink.YouTubePlaylist | list[wavelink.YouTubeTrack]) -> wavelink.Player:
+        player: wavelink.Player
 
         if isinstance(tracks, wavelink.YouTubePlaylist):
             await interaction.response.send_message(f'Added 🎶 playlist `{tracks.tracks.uri}` to queue')
+            player = await self.connect(interaction)
             if next:
                 for track in reversed(tracks.tracks):
                     player.queue.put_at_front(track)
@@ -91,6 +93,7 @@ class Play(commands.Cog):
 
         else:
             await interaction.response.send_message(f'Added 🎵 `{tracks[0].uri}` to queue')
+            player = await self.connect(interaction)
             if next:
                 player.queue.put_at_front(tracks[0])
 
@@ -98,7 +101,7 @@ class Play(commands.Cog):
                 player.queue.put(tracks[0])
             
 
-        await interaction.followup.send(f'**Connected** 🥁 to `{interaction.user.voice.channel.name}`')
+        
         return player
 
 async def setup(bot):
