@@ -14,50 +14,20 @@ from cache import Cache
 
 log = logging.getLogger(__name__)
 
+
 class Bongo_Bot(commands.Bot):
     """Handles intents, prefixs, and database init automatically"""
+
     def __init__(self, *args, **kwargs):
-        super().__init__(command_prefix = "!", intents = self.get_intents(), *args, **kwargs)
+        super().__init__(
+            command_prefix="!", intents=self.get_intents(), *args, **kwargs
+        )
         self.tree.on_error = self.on_tree_error
 
         self.cache = defaultdict(Cache)
-        
-    async def on_ready(self):
-        log.info(f'Logged in as {self.user} (ID: {self.user.id})')
-
-    async def setup_hook(self):
-        #cogs setup
-        root_path = Path(__file__).parent.resolve().parent.resolve() 
-        for file in root_path.glob('./src/cogs/*.py'):
-            await self.load_extension(f'cogs.{file.name[:-3]}')
-
-        #database setup
-        await self.create_database_pool()
-        await self.load_data()
-
-        #wavelink setup
-        node: wavelink.Node = wavelink.Node(
-            uri='http://' + getenv('LAVALINK_HOST') + ':' + getenv('LAVALINK_PORT'), 
-            password=getenv('LAVALINK_PASSWORD')
-            )
-        
-        await wavelink.NodePool.connect(client=self, nodes=[node])
-
-        #sync new commands
-        await self.tree.sync()
-
-    async def on_tree_error(self, interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
-        if isinstance(error, discord.app_commands.CommandOnCooldown):
-            log.warn(error)
-            await interaction.response.send_message(str(error), ephemeral=True)
-
-        else:
-            log.critical('Ignoring exception in command {}:'.format(error))
-            traceback.print_exception(type(error), error, error.__traceback__)
-            await interaction.response.send_message(str(error), ephemeral=True)
 
     async def close(self):
-        log.info(f'{len(self.voice_clients)} Voice Clients to shutdown')
+        log.info(f"{len(self.voice_clients)} Voice Clients to shutdown")
         for voice in self.voice_clients:
             self.get_cog("Disconnect").stop_voice_functions(voice)
 
@@ -67,6 +37,116 @@ class Bongo_Bot(commands.Bot):
 
         await super().close()
 
+    async def on_ready(self):
+        log.info(f"Logged in as {self.user} (ID: {self.user.id})")
+
+    async def on_tree_error(
+        self,
+        interaction: discord.Interaction,
+        error: discord.app_commands.AppCommandError,
+    ):
+        if isinstance(error, discord.app_commands.CommandOnCooldown):
+            log.warn(error)
+            await interaction.response.send_message(str(error), ephemeral=True)
+
+        else:
+            log.critical("Ignoring exception in command {}:".format(error))
+            traceback.print_exception(type(error), error, error.__traceback__)
+            await interaction.response.send_message(str(error), ephemeral=True)
+
+    async def setup_hook(self):
+        # cogs setup
+        root_path = Path(__file__).parent.resolve().parent.resolve()
+        for file in root_path.glob("./src/cogs/*.py"):
+            await self.load_extension(f"cogs.{file.name[:-3]}")
+
+        # database setup
+        await self.create_database_pool()
+        await self.load_data()
+
+        # wavelink setup
+        node: wavelink.Node = wavelink.Node(
+            uri="http://" + getenv("LAVALINK_HOST") + ":" + getenv("LAVALINK_PORT"),
+            password=getenv("LAVALINK_PASSWORD"),
+        )
+
+        await wavelink.NodePool.connect(client=self, nodes=[node])
+
+        # sync new commands
+        await self.tree.sync()
+
+    async def able_to_use_commands(
+        interaction: discord.Interaction,
+        is_playing: bool,
+        music_channel_id,
+        music_role_id,
+    ) -> bool:
+        """returns True if the user mets all conditions to use playing commands"""
+        if music_role_id is not None:
+            if (
+                interaction.user.get_role(music_role_id) is None
+            ):  # true if user has correct role
+                await interaction.response.send_message(
+                    f"User does not have music role"
+                )
+                return False
+
+        if interaction.channel_id != music_channel_id and music_channel_id is not None:
+            await interaction.response.send_message(f"Wrong channel for music")
+            return False
+
+        if interaction.user.voice is None:  # not in any voice chat
+            await interaction.response.send_message("Not in any voice chat")
+            return False
+
+        if interaction.user.voice.deaf or interaction.user.voice.self_deaf:  # deafen
+            await interaction.response.send_message(
+                "Deafed users can not use playing commands"
+            )
+            return False
+
+        voice = interaction.guild.voice_client
+        if voice is not None:
+            if (
+                voice.channel.id != interaction.user.voice.channel.id
+            ):  # bot is in a different voice chat than user
+                if is_playing:  # bot is busy
+                    await interaction.response.send_message(
+                        "Not in the same voice channel"
+                    )
+                    return False
+
+                elif not is_playing:  # bot is idling
+                    await voice.disconnect()  # TODO use the `move_to` function
+                    return True
+
+        return True
+
+    async def create_database_pool(self) -> None:
+        try:
+            self.database: asyncpg.Pool = await asyncpg.create_pool(
+                database=getenv("DATABASE_DATABASE"),
+                user=getenv("DATABASE_USER"),
+                host=getenv("DATABASE_HOST"),
+                port=getenv("DATABASE_PORT"),
+                password=getenv("DATABASE_PASSWORD"),
+            )
+
+        except:  # TODO add a exeception here
+            log.critical("Database not connected")
+            self.database = None  # since it failed
+            exit()
+
+        log.info("Database connected")
+
+    async def edit_view_message(bot, guild_id: int, change_to):
+        playing_view_message = bot.get_channel(
+            bot.cache[guild_id].playing_view_channel_id
+        ).get_partial_message(
+            bot.cache[guild_id].playing_view_message_id
+        )  # TODO fix this since we just save the object, we dont need to fetch it anymore
+        await playing_view_message.edit(view=change_to)
+
     def get_intents(self) -> discord.Intents:
         intents = discord.Intents.default()
         intents.members = True
@@ -75,39 +155,34 @@ class Bongo_Bot(commands.Bot):
 
         return intents
 
-    async def create_database_pool(self) -> None:
-        try:
-            self.database: asyncpg.Pool = await asyncpg.create_pool(
-            database=getenv('DATABASE_DATABASE'),
-            user=getenv('DATABASE_USER'),
-            host=getenv('DATABASE_HOST'),
-            port=getenv('DATABASE_PORT'),
-            password=getenv('DATABASE_PASSWORD')
-            )
-
-        except: #TODO add a exeception here
-            log.critical("Database not connected")
-            self.database = None #since it failed
-            exit()
-
-        log.info("Database connected")
-
-    async def load_data(self) -> None:
-        """Loads the entire table entry by entry into cache"""
-        records = await self.database.fetch('SELECT * FROM guilds')
-
-        for record in records:
-            self.cache[record['guild_id']].music_channel_id = record['music_channel_id']
-            self.cache[record['guild_id']].music_role_id = record['music_role_id']
-            self.cache[record['guild_id']].volume = record['volume']
-
-        log.info("Database loaded into cache")
-
-    async def get_voice(self, guild_id: int, interaction: discord.Interaction = None) -> wavelink.Player:
+    async def get_voice(
+        self, guild_id: int, interaction: discord.Interaction = None
+    ) -> wavelink.Player:
         voice: wavelink.Player = self.get_guild(guild_id).voice_client
 
-        if voice is None: #not connected to voice
+        if voice is None:  # not connected to voice
             await interaction.response.send_message("Nothing is playing")
             return None
 
         return voice
+
+    async def load_data(self) -> None:
+        """Loads the entire table entry by entry into cache"""
+        records = await self.database.fetch("SELECT * FROM guilds")
+
+        for record in records:
+            self.cache[record["guild_id"]].music_channel_id = record["music_channel_id"]
+            self.cache[record["guild_id"]].music_role_id = record["music_role_id"]
+            self.cache[record["guild_id"]].volume = record["volume"]
+
+        log.info("Database loaded into cache")
+
+    def seconds_to_timestring(total_seconds: int) -> str:
+        """Takes the total amount of seconds and returns a time like `1:35:54` or `1:23`"""
+        minutes, seconds = divmod(total_seconds, 60)
+        hours, minutes = divmod(minutes, 60)
+
+        if hours > 0:
+            return f"{(floor(hours)):02}:{(floor(minutes)):02}:{(floor(seconds)):02}"
+
+        return f"{(floor(minutes)):02}:{(floor(seconds)):02}"
