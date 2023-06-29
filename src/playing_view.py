@@ -36,7 +36,7 @@ class Playing_View(discord.ui.View):
 
     @discord.ui.button(label="Skip", style=discord.ButtonStyle.gray, emoji="⏭")
     async def skip(self, interaction, button):
-        await self.bot.get_cog("Skip").helper(interaction)
+        await self.bot.get_cog("Force_Skip").helper(interaction)
 
     @discord.ui.button(label="Now Playing", style=discord.ButtonStyle.gray, emoji="🎶")
     async def now_playing(self, interaction, button):

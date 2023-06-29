@@ -25,6 +25,7 @@ class Force_Skip(commands.Cog):
 
         if player.is_playing():
             await player.stop()
+            self.bot.cache[interaction.guild_id].user_who_want_to_skip.clear()
             await interaction.response.send_message("**Skipped** ⏭")
 
         else:

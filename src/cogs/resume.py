@@ -2,8 +2,6 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utilities import able_to_use_commands
-
 
 class Resume(commands.Cog):
     def __init__(self, bot: commands.Bot):
