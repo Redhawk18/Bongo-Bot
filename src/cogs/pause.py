@@ -4,8 +4,8 @@ from discord.ext import commands
 
 from utilities import able_to_use_commands
 
-class Pause(commands.Cog):
 
+class Pause(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -16,7 +16,12 @@ class Pause(commands.Cog):
 
     async def helper(self, interaction: discord.Interaction):
         voice = await self.bot.get_voice(interaction.guild_id, interaction)
-        if voice is None or not await able_to_use_commands(interaction, self.bot.cache[interaction.guild_id].is_playing, self.bot.cache[interaction.guild_id].music_channel_id, self.bot.cache[interaction.guild_id].music_role_id):
+        if voice is None or not await able_to_use_commands(
+            interaction,
+            self.bot.cache[interaction.guild_id].is_playing, #TODO this doesnt exist anymore
+            self.bot.cache[interaction.guild_id].music_channel_id,
+            self.bot.cache[interaction.guild_id].music_role_id,
+        ):
             return
 
         if not voice.is_paused():
@@ -27,6 +32,7 @@ class Pause(commands.Cog):
 
         else:
             await interaction.response.send_message("Already paused")
+
 
 async def setup(bot):
     await bot.add_cog(Pause(bot))

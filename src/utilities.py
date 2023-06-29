@@ -36,7 +36,7 @@ async def able_to_use_commands(interaction: discord.Interaction, is_playing: boo
     return True
 
 async def edit_view_message(bot, guild_id: int, change_to):
-    playing_view_message = bot.get_channel(bot.cache[guild_id].playing_view_channel_id).get_partial_message(bot.cache[guild_id].playing_view_message_id)
+    playing_view_message = bot.get_channel(bot.cache[guild_id].playing_view_channel_id).get_partial_message(bot.cache[guild_id].playing_view_message_id) #TODO fix this since we just save the object, we dont need to fetch it anymore
     await playing_view_message.edit(view=change_to)
 
 async def get_milliseconds_from_string(time_string: str, interaction: discord.Interaction) -> int:

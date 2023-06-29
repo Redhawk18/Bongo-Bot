@@ -67,9 +67,8 @@ class Play(commands.Cog):
         
         player: wavelink.player = await self.add_to_queue(interaction, next, tracks)
         player.autoplay = True
-        print(player.queue)
 
-        if player.is_playing():
+        if player.is_playing(): # busy
             return
 
         track = player.queue.get()

@@ -9,13 +9,10 @@ class Cache():
 
     def __init__(self):
         #internal variables
-        self.autoplay = False
-        self.is_playing = False
-        self.loop_enabled = False
         self.now_playing_track = None
         self.playing_view = None
         self.playing_view_channel = None
-        self.playing_view_message_id = None
+        self.playing_view_message = None
         self.queue = Queue()
         self.user_who_want_to_skip = []
 
@@ -26,9 +23,6 @@ class Cache():
 
     def __str__(self):
         return f"""
-        autoplay, {self.autoplay}
-        is playing, {self.is_playing}
-        looping, {self.loop_enabled}
         now playing, {self.now_playing_track}
         playing view channel id, {self.playing_view_channel_id}
         playing view message id, {self.playing_view_message_id}
