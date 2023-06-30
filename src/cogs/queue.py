@@ -14,7 +14,7 @@ class Queue(commands.GroupCog, group_name="queue"):
 
     @app_commands.command(name="list", description="Lists the queue")
     @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
-    async def queue_list(self, interaction: discord.Interaction):
+    async def list(self, interaction: discord.Interaction):
         if (
             len(self.bot.cache[interaction.guild_id].song_queue) == 0
         ):  # incase the queue was empty from the start
@@ -62,41 +62,21 @@ class Queue(commands.GroupCog, group_name="queue"):
         await interaction.edit_original_response(content=None, embed=embed)
 
     @app_commands.command(name="clear", description="Clears everything in the queue")
-    async def queue_clear(self, interaction: discord.Interaction):
-        self.bot.cache[interaction.guild_id].song_queue.clear()
+    async def clear(self, interaction: discord.Interaction):
+        player: wavelink.player = await self.bot.get_player(interaction)
+        player.queue.clear()
         await interaction.response.send_message("**Cleared queue** 📚")
 
     @app_commands.command(
         name="remove",
         description="Removes a song from the queue based on its track number",
     )
-    @app_commands.describe(queue_position="The position of the track to be removed")
-    async def queue_remove(self, interaction: discord.Interaction, queue_position: int):
-        if (
-            queue_position > len(self.bot.cache[interaction.guild_id].song_queue)
-            or queue_position < 0
-        ):
-            await interaction.response.send_message("Input invalid")
-            return
-
-        # because of how the remove function works we have to make a copy
-        tempq = self.bot.cache[interaction.guild_id].song_queue.copy()
-
-        for _ in range(queue_position - 1):  # so we dont have to save what's popped
-            tempq.pop()
-
-        # we should have the url of the track we want to remove
-        self.bot.cache[interaction.guild_id].song_queue.remove(tempq.pop())
-        await interaction.response.send_message("**Removed from queue** 📚")
 
     @app_commands.command(name="shuffle", description="shuffles the queue")
     async def queue_shuffle(self, interaction: discord.Interaction):
-        if len(self.bot.cache[interaction.guild_id].song_queue) > 1:
-            random.shuffle(self.bot.cache[interaction.guild_id].song_queue)
-            await interaction.response.send_message("**Shuffled queue** 📚")
-
-        else:
-            await interaction.response.send_message("Nothing to shuffle")
+        player: wavelink.player = await self.bot.get_player(interaction)
+        player.queue.shuffle()
+        await interaction.response.send_message("**Shuffled queue** 📚")
 
 
 async def setup(bot):
