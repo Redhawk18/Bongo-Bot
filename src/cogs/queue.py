@@ -15,37 +15,36 @@ class Queue(commands.GroupCog, group_name="queue"):
     @app_commands.command(name="list", description="Lists the queue")
     @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
     async def list(self, interaction: discord.Interaction):
-        if (
-            len(self.bot.cache[interaction.guild_id].song_queue) == 0
-        ):  # incase the queue was empty from the start
+        player: wavelink.player = await self.bot.get_player(interaction)
+        if player.queue.empty():
             await interaction.response.send_message("The queue is empty")
             return
 
         await interaction.response.send_message("Queue is loading")
 
-        tempq = self.bot.cache[interaction.guild_id].song_queue.copy()
+        temp_queue = player.queue.copy()
 
         # store every element in a string
         index = 0
-        output = "Shows every song until the character limit is reached\n\n"
+        output = ""
         total_seconds = 0
-        while tempq:
+        while temp_queue:
             # get the url of the video
-            track, _, _ = tempq.pop()
+            track = temp_queue.pop()
 
             if len(output) < 4000:  # limit for embed description is 4096 characters
-                if not track.is_stream:
-                    output += f"{index +1}. `{track.title}` - `{seconds_to_timestring(track.length)}`\n"
-
+                if track.is_stream:
+                    output += f'{index +1}. `{track.title}` - `Livestream`\n'
+                    
                 else:
-                    output += f"{index +1}. `{track.title}` - `Livestream`\n"
+                    output += f"{index +1}. `{track.title}` - `{self.bot.seconds_to_timestring(track.length)}`\n"
                 index += 1
 
             if not track.is_stream:
                 total_seconds += track.length / 1000
 
         output += "\n"
-        output += f"*{len(self.bot.cache[interaction.guild_id].song_queue) - index} remaining songs not listed...*"
+        output += f'*{len(self.bot.cache[interaction.guild_id].song_queue) - index} remaining songs not listed...*'
 
         embed = discord.Embed(
             title="**Queue** 📚",
@@ -54,10 +53,7 @@ class Queue(commands.GroupCog, group_name="queue"):
         )
 
         # figure the length of the queue
-        embed.set_footer(text=f"Total length: {seconds_to_timestring(total_seconds)}")
-
-        if self.bot.cache[interaction.guild_id].loop_enabled:
-            embed.set_footer(text="Total length: Forever")
+        embed.set_footer(text=f"Total length: {self.bot.seconds_to_timestring(total_seconds)}")
 
         await interaction.edit_original_response(content=None, embed=embed)
 
