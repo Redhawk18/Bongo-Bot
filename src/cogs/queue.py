@@ -65,12 +65,27 @@ class Queue(commands.GroupCog, group_name="queue"):
     async def clear(self, interaction: discord.Interaction):
         player: wavelink.player = await self.bot.get_player(interaction)
         player.queue.clear()
-        await interaction.response.send_message("**Cleared queue** 📚")
+        await interaction.response.send_message("**Cleared** 📚 queue")
 
     @app_commands.command(
         name="remove",
         description="Removes a song from the queue based on its track number",
     )
+    @app_commands.describe(queue_position="The position of the track to be removed")
+    async def remove(self, interaction: discord.Interaction, queue_position: int):
+        player: wavelink.player = await self.bot.get_player(interaction)
+
+        if player.queue.is_empty():
+            interaction.response.send_message("Queue is empty")
+            return
+
+        if player.queue.count < queue_position:
+            interaction.response.send_message("Position too large") 
+            return
+
+        del player.queue[queue_position]
+        interaction.response.send_message("**Removed** 🚮 track")
+
 
     @app_commands.command(name="shuffle", description="shuffles the queue")
     async def queue_shuffle(self, interaction: discord.Interaction):
