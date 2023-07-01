@@ -2,6 +2,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+log = logging.getLogger(__name__)
+
 
 class Disconnect(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -30,6 +32,7 @@ class Disconnect(commands.Cog):
     async def stop_voice_functions(self, voice: discord.VoiceClient):
         await voice.stop()
         await voice.disconnect()
+        log.info(f"Disconnecting in name: {voice.guild.name}, id: {voice.guild.id}")
 
 
 async def setup(bot):
