@@ -1,6 +1,10 @@
+import logging
+
 import discord
 from discord import app_commands
 from discord.ext import commands
+
+log = logging.getLogger(__name__)
 
 
 class Force_Skip(commands.Cog):
@@ -14,6 +18,7 @@ class Force_Skip(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
+        player = await self.bot.get_player(interaction)
         if player is None or not await self.bot.able_to_use_commands(
             interaction,
             self.bot.cache[interaction.guild_id].music_channel_id,
@@ -25,7 +30,11 @@ class Force_Skip(commands.Cog):
 
         if player.is_playing():
             await player.stop()
+            player.queue.loop = False
             self.bot.cache[interaction.guild_id].user_who_want_to_skip.clear()
+            log.info(
+                f"Skipped track name: {player.guild.name}, id: {player.guild.id}"
+            )
             await interaction.response.send_message("**Skipped** ⏭")
 
         else:

@@ -13,7 +13,7 @@ class Resume(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        if not await able_to_use_commands(
+        if not await self.bot.able_to_use_commands(
             interaction,
             self.bot.cache[interaction.guild_id].music_channel_id,
             self.bot.cache[interaction.guild_id].music_role_id,

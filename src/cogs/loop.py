@@ -1,6 +1,10 @@
+import logging
+
 import discord
 from discord import app_commands
 from discord.ext import commands
+
+log = logging.getLogger(__name__)
 
 
 class Loop(commands.Cog):
@@ -26,10 +30,16 @@ class Loop(commands.Cog):
 
         if player.queue.loop:
             player.queue.loop = False
+            log.info(
+                f"Disabled loop name: {payload.player.guild.name}, id: {payload.player.guild.id}"
+            )
             await interaction.response.send_message("**Loop Disabled** 🔁")
 
         else:
             player.queue.loop = True
+            log.info(
+                f"Enabled loop name: {payload.player.guild.name}, id: {payload.player.guild.id}"
+            )
             await interaction.response.send_message("**Loop Enabled** 🔁")
 
 

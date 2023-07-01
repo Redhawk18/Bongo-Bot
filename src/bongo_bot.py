@@ -1,6 +1,7 @@
 from collections import defaultdict
 import logging
 from os import getenv
+from math import floor
 from pathlib import Path
 import sys
 import traceback
@@ -69,15 +70,14 @@ class Bongo_Bot(commands.Bot):
             uri="http://" + getenv("LAVALINK_HOST") + ":" + getenv("LAVALINK_PORT"),
             password=getenv("LAVALINK_PASSWORD"),
         )
-
         await wavelink.NodePool.connect(client=self, nodes=[node])
 
         # sync new commands
         await self.tree.sync()
 
     async def able_to_use_commands(
+        self,
         interaction: discord.Interaction,
-        is_playing: bool,
         music_channel_id,
         music_role_id,
     ) -> bool:
@@ -139,13 +139,8 @@ class Bongo_Bot(commands.Bot):
 
         log.info("Database connected")
 
-    async def edit_view_message(bot, guild_id: int, change_to):
-        playing_view_message = bot.get_channel(
-            bot.cache[guild_id].playing_view_channel_id
-        ).get_partial_message(
-            bot.cache[guild_id].playing_view_message_id
-        )  # TODO fix this since we just save the object, we dont need to fetch it anymore
-        await playing_view_message.edit(view=change_to)
+    async def edit_view_message(self, guild_id: int, change_to):
+        await self.cache[guild_id].playing_view_message.edit(view=change_to)
 
     def get_intents(self) -> discord.Intents:
         intents = discord.Intents.default()
@@ -175,7 +170,7 @@ class Bongo_Bot(commands.Bot):
 
         log.info("Database loaded into cache")
 
-    def seconds_to_timestring(total_seconds: int) -> str:
+    def seconds_to_timestring(self, total_seconds: int) -> str:
         """Takes the total amount of seconds and returns a time like `1:35:54` or `1:23`"""
         minutes, seconds = divmod(total_seconds, 60)
         hours, minutes = divmod(minutes, 60)

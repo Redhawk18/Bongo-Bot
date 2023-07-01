@@ -21,7 +21,9 @@ class Play(commands.Cog):
             f'Now playing "{payload.track.title}" name: {payload.player.guild.name}, id: {payload.player.guild.id}'
         )
         playing_view = Playing_View(self.bot)
-        playing_view_msg: discord.Message = await self.bot.cache[
+        self.bot.cache[
+            payload.player.guild.id
+        ].playing_view_message: discord.Message = await self.bot.cache[
             payload.player.guild.id
         ].playing_view_channel.send(
             f"**Playing** 🎶 `{payload.track.title}` by `{payload.track.author}` - Now!",
@@ -29,16 +31,13 @@ class Play(commands.Cog):
         )
 
         self.bot.cache[payload.player.guild.id].playing_view = playing_view
-        self.bot.cache[
-            payload.player.guild.id
-        ].playing_view_message_id = playing_view_msg.id
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, payload: wavelink.TrackEventPayload):
         log.info(
             f'Finished playing "{payload.track.title}" name: {payload.player.guild.name}, id: {payload.player.guild.id}'
         )
-        await edit_view_message(self.bot, payload.player.guild.id, None)
+        await self.bot.edit_view_message(payload.player.guild.id, None)
 
     async def connect(self, interaction) -> wavelink.Player:
         if interaction.guild.voice_client:  # already connected
@@ -142,7 +141,7 @@ class Play(commands.Cog):
 
         if isinstance(tracks, wavelink.YouTubePlaylist):
             await interaction.response.send_message(
-                f"Added 🎶 playlist `{tracks.tracks.uri}` to queue"
+                f"Added 🎶 playlist `{tracks.name}` to queue"
             )
             player = await self.connect(interaction)
             if next:

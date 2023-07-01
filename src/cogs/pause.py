@@ -14,7 +14,7 @@ class Pause(commands.Cog):
 
     async def helper(self, interaction: discord.Interaction):
         player = await self.bot.get_player(interaction)
-        if not await able_to_use_commands(
+        if not await self.bot.able_to_use_commands(
             interaction,
             self.bot.cache[interaction.guild_id].music_channel_id,
             self.bot.cache[interaction.guild_id].music_role_id,

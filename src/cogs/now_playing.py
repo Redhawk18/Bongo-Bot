@@ -30,9 +30,7 @@ class Now_Playing(commands.Cog):
         embed.add_field(name="Uploader", value=player.current.author)
 
         total_seconds = player.current.length / 1000
-        voice_position = (
-            await self.bot.get_player(interaction.guild_id, interaction)
-        ).position / 1000
+        voice_position = player.position / 1000
 
         if player.current.is_stream:
             embed.add_field(name="Duration", value="Livestream")
