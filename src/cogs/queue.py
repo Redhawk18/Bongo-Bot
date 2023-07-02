@@ -64,7 +64,8 @@ class Queue(commands.GroupCog, group_name="queue"):
         description="Removes a song from the queue based on its track number",
     )
     @app_commands.describe(queue_position="The position of the track to be removed")
-    async def remove(self, interaction: discord.Interaction, queue_position: int):
+    async def remove(self, interaction: discord.Interaction, queue_position: app_commands.Range[int, 1]):
+        queue_position -= 1
         player: wavelink.player = await self.bot.get_player(interaction)
 
         if player.queue.is_empty:
