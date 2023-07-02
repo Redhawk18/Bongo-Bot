@@ -26,7 +26,7 @@ class Play(commands.Cog):
         ].playing_view_message: discord.Message = await self.bot.cache[
             payload.player.guild.id
         ].playing_view_channel.send(
-            f"**Playing** 🎙️ `{payload.track.title}` by `{payload.track.author}` - Now!",
+            f"**Playing** 🎶 `{payload.track.title}` by `{payload.track.author}` - Now!",
             view=playing_view,
         )
 
