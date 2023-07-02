@@ -116,7 +116,7 @@ class Settings(commands.GroupCog, group_name="settings"):
         self, interaction: discord.Interaction, volume: app_commands.Range[int, 1, 100]
     ):
         player = await self.bot.get_player(interaction)
-        if player is not None: # Sets volume for the current playing song
+        if player is not None:  # Sets volume for the current playing song
             await player.set_volume(volume)
 
         self.bot.cache[interaction.guild_id].volume = volume
