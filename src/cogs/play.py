@@ -26,7 +26,7 @@ class Play(commands.Cog):
         ].playing_view_message: discord.Message = await self.bot.cache[
             payload.player.guild.id
         ].playing_view_channel.send(
-            f"**Playing** 🎶 `{payload.track.title}` by `{payload.track.author}` - Now!",
+            f"**Playing** 🎙️ `{payload.track.title}` by `{payload.track.author}` - Now!",
             view=playing_view,
         )
 
@@ -141,7 +141,7 @@ class Play(commands.Cog):
 
         if isinstance(tracks, wavelink.YouTubePlaylist):
             await interaction.response.send_message(
-                f"Added 🎶 playlist `{tracks.name}` to queue"
+                f"**Added** 🎶 playlist `{tracks.name}` to queue"
             )
             player = await self.connect(interaction)
             if next:
@@ -158,7 +158,7 @@ class Play(commands.Cog):
 
         else:
             await interaction.response.send_message(
-                f"Added 🎵 `{tracks[0].uri}` to queue"
+                f"**Added** 🎵 `{tracks[0].uri}` to queue"
             )
             player = await self.connect(interaction)
             if next:
