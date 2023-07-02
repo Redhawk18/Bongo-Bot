@@ -170,9 +170,10 @@ class Bongo_Bot(commands.Bot):
 
         log.info("Database loaded into cache")
 
-    def seconds_to_timestring(self, total_seconds: int) -> str:
-        """Takes the total amount of seconds and returns a time like `1:35:54` or `1:23`"""
-        minutes, seconds = divmod(total_seconds, 60)
+    def milliseconds_to_timestring(self, milliseconds: int) -> str:
+        """Takes the total amount of milliseconds and returns a time like `1:35:54` or `1:23`"""
+        seconds = milliseconds / 1000
+        minutes, seconds = divmod(seconds, 60)
         hours, minutes = divmod(minutes, 60)
 
         if hours > 0:

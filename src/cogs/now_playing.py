@@ -29,8 +29,8 @@ class Now_Playing(commands.Cog):
         embed.add_field(name="Title", value=player.current.title, inline=False)
         embed.add_field(name="Uploader", value=player.current.author)
 
-        total_seconds = player.current.length / 1000
-        voice_position = player.position / 1000
+        total_seconds = player.current.length
+        voice_position = player.position
 
         if player.current.is_stream:
             embed.add_field(name="Duration", value="Livestream")
@@ -38,7 +38,7 @@ class Now_Playing(commands.Cog):
         else:
             embed.add_field(
                 name="Duration",
-                value=f"{self.bot.seconds_to_timestring(voice_position)}/{self.bot.seconds_to_timestring(total_seconds)}",
+                value=f"{self.bot.milliseconds_to_timestring(voice_position)}/{self.bot.milliseconds_to_timestring(total_seconds)}",
             )
 
         await interaction.response.send_message(embed=embed)
