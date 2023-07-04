@@ -41,12 +41,12 @@ class Play(commands.Cog):
 
     async def connect(self, interaction) -> wavelink.Player:
         if interaction.guild.voice_client:  # already connected
-            await interaction.followup.send(
-                f"**Connected** 🥁 to `{interaction.user.voice.channel.name}`"
-            )
             player: wavelink.Player = interaction.guild.voice_client
 
         else:
+            await interaction.followup.send(
+                f"**Connected** 🥁 to `{interaction.user.voice.channel.name}`"
+            )
             player: wavelink.Player = await interaction.user.voice.channel.connect(
                 cls=wavelink.Player
             )
@@ -95,14 +95,31 @@ class Play(commands.Cog):
         next: bool = False,
         start_time: str = None,
     ):
-        # locked channel is full
-        # if len(interaction.user.voice.channel.members) == interaction.user.voice.channel.user_limit: #== because admin can drag bot into channel
-        #     await interaction.response.send_message("Locked voice channel is at max capacity")
-        #     return
+        if not await self.bot.able_to_use_commands(
+            interaction,
+            self.bot.cache[interaction.guild_id].music_channel_id,
+            self.bot.cache[interaction.guild_id].music_role_id,
+        ):
+            return
 
-        # if not interaction.user.voice.channel.permissions_for(interaction.guild.me).connect is True:
-        #     await interaction.response.send_message("Does not have permission to connect")
-        #     return
+        # locked channel is full
+        if (
+            len(interaction.user.voice.channel.members)
+            == interaction.user.voice.channel.user_limit
+        ):  # == because admin can drag bot into channel
+            await interaction.response.send_message(
+                "Locked voice channel is at max capacity"
+            )
+            return
+
+        # if the bot itself has permissions to join the channel
+        if not interaction.user.voice.channel.permissions_for(
+            interaction.guild.me
+        ).connect:
+            await interaction.response.send_message(
+                "Does not have permission to connect"
+            )
+            return
 
         if start_time is not None:  # parser
             start_time = await get_milliseconds_from_string(start_time, interaction)
@@ -113,12 +130,13 @@ class Play(commands.Cog):
             wavelink.YouTubeTrack
         ] = await wavelink.YouTubeTrack.search(query)
         if not tracks:
+            interaction.response.send_message("Track not found")
             return
 
         player: wavelink.player = await self.add_to_queue(interaction, next, tracks)
         player.autoplay = True
 
-        if player.is_playing():  # busy
+        if player.is_playing():  # if busy
             return
 
         track = player.queue.get()
@@ -130,6 +148,9 @@ class Play(commands.Cog):
         )
 
         self.bot.cache[interaction.guild_id].playing_view_channel = interaction.channel
+        if interaction is None:  # discord.py bug?
+            log.critical(interaction)
+            log.critical(interaction.channel)
 
     async def add_to_queue(
         self,

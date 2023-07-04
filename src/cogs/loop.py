@@ -30,16 +30,12 @@ class Loop(commands.Cog):
 
         if player.queue.loop:
             player.queue.loop = False
-            log.info(
-                f"Disabled loop name: {payload.player.guild.name}, id: {payload.player.guild.id}"
-            )
+            log.info(f"Disabled loop name: {player.guild.name}, id: {player.guild.id}")
             await interaction.response.send_message("**Loop Disabled** 🔁")
 
         else:
             player.queue.loop = True
-            log.info(
-                f"Enabled loop name: {payload.player.guild.name}, id: {payload.player.guild.id}"
-            )
+            log.info(f"Enabled loop name: {player.guild.name}, id: {player.guild.id}")
             await interaction.response.send_message("**Loop Enabled** 🔁")
 
 

@@ -13,7 +13,6 @@ class Pause(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        player = await self.bot.get_player(interaction)
         if not await self.bot.able_to_use_commands(
             interaction,
             self.bot.cache[interaction.guild_id].music_channel_id,
@@ -21,11 +20,13 @@ class Pause(commands.Cog):
         ):
             return
 
+        player = await self.bot.get_player(interaction)
+
         if not player.is_paused():
             await player.pause()
             await interaction.response.send_message("**Paused** ⏸")
-            # playing_view = self.bot.cache[interaction.guild_id].playing_view
-            # await playing_view.edit_view(interaction, False)
+            playing_view = self.bot.cache[interaction.guild_id].playing_view
+            await playing_view.edit_view(interaction, False)
 
         else:
             await interaction.response.send_message("Already paused")

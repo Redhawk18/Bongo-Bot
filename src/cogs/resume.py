@@ -25,8 +25,8 @@ class Resume(commands.Cog):
         if player.is_paused():
             await player.resume()
             await interaction.response.send_message("**Resumed** ▶")
-            # playing_view = self.bot.cache[interaction.guild_id].playing_view
-            # await playing_view.edit_view(interaction, True)
+            playing_view = self.bot.cache[interaction.guild_id].playing_view
+            await playing_view.edit_view(interaction, True)
 
         else:
             await interaction.response.send_message("Already resumed")

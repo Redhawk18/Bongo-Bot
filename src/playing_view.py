@@ -24,7 +24,7 @@ class Playing_View(discord.ui.View):
 
     async def edit_view(self, interaction: discord.Interaction, is_pause: bool):
         self.add_items(is_pause)
-        await self.bot.edit_view_message(self.bot, interaction.guild_id, self)
+        await self.bot.edit_view_message(interaction.guild_id, self)
 
     @discord.ui.button(label="Pause", style=discord.ButtonStyle.gray, emoji="⏸")
     async def pause(self, interaction: discord.Interaction, button):

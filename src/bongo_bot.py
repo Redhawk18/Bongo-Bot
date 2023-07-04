@@ -71,6 +71,7 @@ class Bongo_Bot(commands.Bot):
             password=getenv("LAVALINK_PASSWORD"),
         )
         await wavelink.NodePool.connect(client=self, nodes=[node])
+        log.info(f"Lavalink connected with node id {node.id}")
 
         # sync new commands
         await self.tree.sync()
@@ -110,14 +111,14 @@ class Bongo_Bot(commands.Bot):
             if (
                 voice.channel.id != interaction.user.voice.channel.id
             ):  # bot is in a different voice chat than user
-                if is_playing:  # bot is busy
+                if voice.is_playing():  # bot is busy
                     await interaction.response.send_message(
                         "Not in the same voice channel"
                     )
                     return False
 
-                elif not is_playing:  # bot is idling
-                    await voice.disconnect()  # TODO use the `move_to` function
+                else:  # bot is idling
+                    await voice.move_to(interaction.user.voice.channel)
                     return True
 
         return True
@@ -139,8 +140,8 @@ class Bongo_Bot(commands.Bot):
 
         log.info("Database connected")
 
-    async def edit_view_message(self, guild_id: int, change_to):
-        await self.cache[guild_id].playing_view_message.edit(view=change_to)
+    async def edit_view_message(self, guild_id: int, view: discord.ui.View | None):
+        await self.cache[guild_id].playing_view_message.edit(view=view)
 
     def get_intents(self) -> discord.Intents:
         intents = discord.Intents.default()
