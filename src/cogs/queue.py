@@ -20,7 +20,7 @@ class Queue(commands.GroupCog, group_name="queue"):
     @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
     async def list(self, interaction: discord.Interaction):
         player: wavelink.player = await self.bot.get_player(interaction)
-        if player.queue.is_empty:  # TODO player can be none
+        if player.queue.is_empty or player is None:
             await interaction.response.send_message("The queue is empty")
             return
 

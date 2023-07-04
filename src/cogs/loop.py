@@ -19,7 +19,7 @@ class Loop(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        if not await self.bot.able_to_use_commands(  # TODO do some testng to see if this can be put in the command method instead of the helper method
+        if not await self.bot.able_to_use_commands(
             interaction,
             self.bot.cache[interaction.guild_id].music_channel_id,
             self.bot.cache[interaction.guild_id].music_role_id,

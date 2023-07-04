@@ -71,7 +71,6 @@ class Bongo_Bot(commands.Bot):
             password=getenv("LAVALINK_PASSWORD"),
         )
         await wavelink.NodePool.connect(client=self, nodes=[node])
-        log.info(f"Lavalink connected with node id {node.id}")
 
         # sync new commands
         await self.tree.sync()

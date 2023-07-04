@@ -130,7 +130,7 @@ class Play(commands.Cog):
             wavelink.YouTubeTrack
         ] = await wavelink.YouTubeTrack.search(query)
         if not tracks:
-            interaction.response.send_message("Track not found")
+            await interaction.response.send_message("Track not found")
             return
 
         player: wavelink.player = await self.add_to_queue(interaction, next, tracks)
@@ -165,8 +165,8 @@ class Play(commands.Cog):
                 f"**Added** 🎶 playlist `{tracks.name}` to queue"
             )
             player = await self.connect(interaction)
-            if next:
-                for track in reversed(tracks.tracks):
+            if next: 
+                for track in reversed(tracks.tracks): # TODO playlist cannot be added via `put_at_front` YET, coming soon
                     player.queue.put_at_front(track)
 
             else:

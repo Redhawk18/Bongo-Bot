@@ -16,7 +16,7 @@ class Tasks(commands.Cog):
             if len(voice.channel.members) < 2:  # no one in voice besides the bot
                 await self.bot.get_cog("Disconnect").stop_voice_functions(voice)
 
-    @tasks.loop(hours=24)  # TODO look into this
+    @tasks.loop(hours=24)
     async def set_status(self):
         await self.bot.wait_until_ready()
         await self.bot.change_presence(
