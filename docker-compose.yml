@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
 
   lavalink:
-    image: ghcr.io/freyacodes/lavalink:3.7.5
+    image: ghcr.io/lavalink-devs/lavalink:3.7.6-alpine
     healthcheck:
       test: ["CMD", "curl", "http://localhost:2333/version"]
       interval: 5s
