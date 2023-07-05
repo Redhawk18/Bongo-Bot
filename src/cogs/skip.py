@@ -4,49 +4,46 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utilities import able_to_use_commands
 
 class Skip(commands.Cog):
-
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
 
     @app_commands.command(name="skip", description="Calls a vote to skip the track")
     @app_commands.guild_only()
     async def skip(self, interaction: discord.Interaction):
-        await self.helper(interaction)
-
-    async def helper(self, interaction: discord.Interaction):
-        voice = await self.bot.get_voice(interaction.guild_id, interaction)
-        if voice is None or not await able_to_use_commands(interaction, self.bot.cache[interaction.guild_id].is_playing, self.bot.cache[interaction.guild_id].music_channel_id, self.bot.cache[interaction.guild_id].music_role_id):
+        if not self.bot.does_voice_exist(interaction):
             return
 
-        if voice.is_playing():
-            #check list if the user is the same
-            for id in self.bot.cache[interaction.guild_id].user_who_want_to_skip:
-                if id == interaction.user.id: #already voted
-                    await interaction.response.send_message("You already voted")
-                    return
+        player = await self.bot.get_player(interaction)
 
-            #add user id to list
-            self.bot.cache[interaction.guild_id].user_who_want_to_skip.append(interaction.user.id)
-
-            #check if its passed threshold
-            voice_channel = interaction.user.voice.channel
-            threshold = ceil((len(voice_channel.members)-1)/2) #-1 for the bot
-
-            if len(self.bot.cache[interaction.guild_id].user_who_want_to_skip) >= threshold: #enough people
-                await self.bot.get_cog("Force_Skip").helper(interaction)
-
-            else: #not enough people
-                await interaction.response.send_message(f'**Skipping? ({len(self.bot.cache[interaction.guild_id].user_who_want_to_skip)}/{threshold} votes needed) or use `force-skip`**')
-
-        else:
+        if not player.is_playing():
             await interaction.response.send_message("Nothing is playing")
+            return
+
+        if not hasattr(player, "user_ids"):
+            player.user_ids = []
+
+        for id in player.user_ids:
+            if id == interaction.user.id:  # already voted
+                await interaction.response.send_message("You already voted")
+                return
+
+        # add user id to list
+        player.user_ids.append(interaction.user.id)
+
+        # check if its passed threshold
+        voice_channel = interaction.user.voice.channel
+        threshold = ceil((len(voice_channel.members) - 1) / 2)  # -1 for the bot itself
+
+        if len(player.user_ids) >= threshold:  # enough people
+            await self.bot.get_cog("Force_Skip").helper(interaction)
+
+        else:  # not enough people
+            await interaction.response.send_message(
+                f"**Skipping? ({len(player.user_ids)}/{threshold} votes needed) or use `force-skip`**"
+            )
+
 
 async def setup(bot):
     await bot.add_cog(Skip(bot))

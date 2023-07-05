@@ -1,9 +1,9 @@
 import discord
 
-from utilities import edit_view_message
 
 class Playing_View(discord.ui.View):
     """The view for the playing output"""
+
     def __init__(self, bot):
         super().__init__(timeout=None)
         self.bot = bot
@@ -24,7 +24,7 @@ class Playing_View(discord.ui.View):
 
     async def edit_view(self, interaction: discord.Interaction, is_pause: bool):
         self.add_items(is_pause)
-        await edit_view_message(self.bot, interaction.guild_id, self)
+        await self.bot.edit_view_message(interaction.guild_id, self)
 
     @discord.ui.button(label="Pause", style=discord.ButtonStyle.gray, emoji="⏸")
     async def pause(self, interaction: discord.Interaction, button):
@@ -36,7 +36,7 @@ class Playing_View(discord.ui.View):
 
     @discord.ui.button(label="Skip", style=discord.ButtonStyle.gray, emoji="⏭")
     async def skip(self, interaction, button):
-        await self.bot.get_cog("Skip").helper(interaction)
+        await self.bot.get_cog("Force_Skip").helper(interaction)
 
     @discord.ui.button(label="Now Playing", style=discord.ButtonStyle.gray, emoji="🎶")
     async def now_playing(self, interaction, button):

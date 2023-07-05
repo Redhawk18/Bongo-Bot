@@ -2,16 +2,10 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utilities import able_to_use_commands
 
 class Resume(commands.Cog):
-
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        pass
 
     @app_commands.command(name="resume", description="Resumes track")
     @app_commands.guild_only()
@@ -19,19 +13,21 @@ class Resume(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        voice = await self.bot.get_voice(interaction.guild_id, interaction)
-        if voice is None or not await able_to_use_commands(interaction, self.bot.cache[interaction.guild_id].is_playing, self.bot.cache[interaction.guild_id].music_channel_id, self.bot.cache[interaction.guild_id].music_role_id):
+        if not await self.bot.able_to_use_commands(
+            interaction
+        ) and not await self.bot.does_voice_exist(interaction):
             return
 
-        if voice.is_paused():
-            await voice.resume()
-            await interaction.response.send_message("**Resumed** ▶")
-            playing_view = self.bot.cache[interaction.guild_id].playing_view
-            await playing_view.edit_view(interaction, True)
+        player = await self.bot.get_player(interaction)
 
+        if player.is_paused():
+            await player.resume()
+            await interaction.response.send_message("**Resumed** ▶")
+            await player.view.edit_view(interaction, True)
 
         else:
             await interaction.response.send_message("Already resumed")
+
 
 async def setup(bot):
     await bot.add_cog(Resume(bot))
