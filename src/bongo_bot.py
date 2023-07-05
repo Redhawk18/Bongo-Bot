@@ -82,6 +82,10 @@ class Bongo_Bot(commands.Bot):
         music_role_id,
     ) -> bool:
         """returns True if the user mets all conditions to use playing commands"""
+        if not self.does_voice_exist(interaction):
+            await interaction.response.send_message("Nothing is playing")
+            return False
+
         if music_role_id is not None:
             if (
                 interaction.user.get_role(music_role_id) is None
@@ -138,6 +142,12 @@ class Bongo_Bot(commands.Bot):
             exit()
 
         log.info("Database connected")
+
+    def does_voice_exist(self, interaction: discord.Interaction) -> bool:
+        if interaction.guild.voice_client:
+            return True
+
+        return False
 
     async def edit_view_message(self, guild_id: int, view: discord.ui.View | None):
         await self.cache[guild_id].playing_view_message.edit(view=view)

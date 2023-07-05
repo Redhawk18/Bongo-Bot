@@ -13,6 +13,10 @@ class Now_Playing(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
+        if not self.bot.does_voice_exist(interaction):
+            await interaction.response.send_message("Nothing is playing")
+            return
+
         player: wavelink.player = await self.bot.get_player(interaction)
         
         if not player.current:
