@@ -13,7 +13,6 @@ class Skip(commands.Cog):
     @app_commands.guild_only()
     async def skip(self, interaction: discord.Interaction):
         if not self.bot.does_voice_exist(interaction):
-            await interaction.response.send_message("Nothing is playing")
             return
 
         player = await self.bot.get_player(interaction)

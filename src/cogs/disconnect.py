@@ -15,10 +15,8 @@ class Disconnect(commands.Cog):
     @app_commands.guild_only()
     async def disconnect(self, interaction: discord.Interaction):
         if not await self.bot.able_to_use_commands(
-            interaction,
-            self.bot.cache[interaction.guild_id].music_channel_id,
-            self.bot.cache[interaction.guild_id].music_role_id,
-        ):
+            interaction
+                    ):
             return
 
         player = await self.bot.get_player(interaction)

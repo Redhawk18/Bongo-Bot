@@ -75,32 +75,29 @@ class Bongo_Bot(commands.Bot):
         # sync new commands
         await self.tree.sync()
 
-    async def able_to_use_commands(
-        self,
-        interaction: discord.Interaction,
-        music_channel_id,
-        music_role_id,
-    ) -> bool:
+    async def able_to_use_commands(self, interaction: discord.Interaction) -> bool:
         """returns True if the user mets all conditions to use playing commands"""
-        if not self.does_voice_exist(interaction): # TODO FIX THIS
-            await interaction.response.send_message("Nothing is playing")
-            return False 
-
-        if music_role_id is not None:
+        if self.cache[interaction.guild_id].music_role_id is not None:
             if (
-                interaction.user.get_role(music_role_id) is None
+                interaction.user.get_role(
+                    self.cache[interaction.guild_id].music_role_id
+                )
+                is None
             ):  # true if user has correct role
                 await interaction.response.send_message(
                     f"User does not have music role"
                 )
                 return False
 
-        if interaction.channel_id != music_channel_id and music_channel_id is not None:
+        if (
+            interaction.channel_id != self.cache[interaction.guild_id].music_channel_id
+            and self.cache[interaction.guild_id].music_channel_id is not None
+        ):
             await interaction.response.send_message(f"Wrong channel for music")
             return False
 
         if interaction.user.voice is None:  # not in any voice chat
-            await interaction.response.send_message("Not in any voice chat")
+            await interaction.response.send_message("Not in any voice channel")
             return False
 
         if interaction.user.voice.deaf or interaction.user.voice.self_deaf:  # deafen
@@ -143,10 +140,11 @@ class Bongo_Bot(commands.Bot):
 
         log.info("Database connected")
 
-    def does_voice_exist(self, interaction: discord.Interaction) -> bool:
+    async def does_voice_exist(self, interaction: discord.Interaction) -> bool:
         if interaction.guild.voice_client:
             return True
 
+        await interaction.response.send_message("Nothing is playing")
         return False
 
     async def edit_view_message(self, guild_id: int, view: discord.ui.View | None):

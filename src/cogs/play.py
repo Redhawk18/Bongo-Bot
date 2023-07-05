@@ -34,6 +34,41 @@ class Play(commands.Cog):
         )
         await self.bot.edit_view_message(payload.player.guild.id, None)
 
+    async def add_to_queue(
+        self,
+        interaction: discord.Interaction,
+        next: bool,
+        tracks: wavelink.YouTubePlaylist | list[wavelink.YouTubeTrack],
+    ) -> wavelink.Player:
+        player: wavelink.Player
+
+        if isinstance(tracks, wavelink.YouTubePlaylist):
+            await interaction.response.send_message(
+                f"**Added** 🎶 playlist `{tracks.name}` to queue"
+            )
+            player = await self.connect(interaction)
+            if next:
+                for track in reversed(
+                    tracks.tracks
+                ):  # TODO playlist cannot be added via `put_at_front` YET, coming soon
+                    player.queue.put_at_front(track)
+
+            else:
+                player.queue.put(tracks)
+
+        else:
+            await interaction.response.send_message(
+                f"**Added** 🎵 `{tracks[0].uri}` to queue"
+            )
+            player = await self.connect(interaction)
+            if next:
+                player.queue.put_at_front(tracks[0])
+
+            else:
+                player.queue.put(tracks[0])
+
+        return player
+
     async def connect(self, interaction) -> wavelink.Player:
         if interaction.guild.voice_client:  # already connected
             player: wavelink.Player = interaction.guild.voice_client
@@ -92,6 +127,8 @@ class Play(commands.Cog):
         next: bool = False,
         start_time: str = None,
     ):
+        if not await self.bot.able_to_use_commands(interaction):
+            return
         # locked channel is full
         if (
             len(interaction.user.voice.channel.members)
@@ -138,41 +175,6 @@ class Play(commands.Cog):
             volume=self.bot.cache[interaction.guild_id].volume,
             populate=autoplay,
         )
-
-    async def add_to_queue(
-        self,
-        interaction: discord.Interaction,
-        next: bool,
-        tracks: wavelink.YouTubePlaylist | list[wavelink.YouTubeTrack],
-    ) -> wavelink.Player:
-        player: wavelink.Player
-
-        if isinstance(tracks, wavelink.YouTubePlaylist):
-            await interaction.response.send_message(
-                f"**Added** 🎶 playlist `{tracks.name}` to queue"
-            )
-            player = await self.connect(interaction)
-            if next:
-                for track in reversed(
-                    tracks.tracks
-                ):  # TODO playlist cannot be added via `put_at_front` YET, coming soon
-                    player.queue.put_at_front(track)
-
-            else:
-                player.queue.put(tracks)
-
-        else:
-            await interaction.response.send_message(
-                f"**Added** 🎵 `{tracks[0].uri}` to queue"
-            )
-            player = await self.connect(interaction)
-            if next:
-                player.queue.put_at_front(tracks[0])
-
-            else:
-                player.queue.put(tracks[0])
-
-        return player
 
 
 async def setup(bot):

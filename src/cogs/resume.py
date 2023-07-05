@@ -14,10 +14,8 @@ class Resume(commands.Cog):
 
     async def helper(self, interaction: discord.Interaction):
         if not await self.bot.able_to_use_commands(
-            interaction,
-            self.bot.cache[interaction.guild_id].music_channel_id,
-            self.bot.cache[interaction.guild_id].music_role_id,
-        ):
+            interaction
+        ) and not await self.bot.does_voice_exist(interaction):
             return
 
         player = await self.bot.get_player(interaction)
