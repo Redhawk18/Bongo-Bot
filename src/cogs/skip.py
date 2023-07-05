@@ -22,26 +22,27 @@ class Skip(commands.Cog):
             await interaction.response.send_message("Nothing is playing")
             return
 
-        # check list if the user is the same
-        user_who_want_to_skip = []
-        for id in user_who_want_to_skip:
+        if not hasattr(player, "user_ids"):
+            player.user_ids = []
+
+        for id in player.user_ids:
             if id == interaction.user.id:  # already voted
                 await interaction.response.send_message("You already voted")
                 return
 
         # add user id to list
-        user_who_want_to_skip.append(interaction.user.id)
+        player.user_ids.append(interaction.user.id)
 
         # check if its passed threshold
         voice_channel = interaction.user.voice.channel
         threshold = ceil((len(voice_channel.members) - 1) / 2)  # -1 for the bot itself
 
-        if len(user_who_want_to_skip) >= threshold:  # enough people
+        if len(player.user_ids) >= threshold:  # enough people
             await self.bot.get_cog("Force_Skip").helper(interaction)
 
         else:  # not enough people
             await interaction.response.send_message(
-                f"**Skipping? ({len(user_who_want_to_skip)}/{threshold} votes needed) or use `force-skip`**"
+                f"**Skipping? ({len(player.user_ids)}/{threshold} votes needed) or use `force-skip`**"
             )
 
 

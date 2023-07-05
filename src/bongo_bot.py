@@ -150,7 +150,9 @@ class Bongo_Bot(commands.Bot):
         return False
 
     async def edit_view_message(self, guild_id: int, view: discord.ui.View | None):
-        await self.cache[guild_id].playing_view_message.edit(view=view)
+        voice = self.get_guild(guild_id).voice_client
+        if voice is not None:
+            await voice.message.edit(view=view)
 
     def get_intents(self) -> discord.Intents:
         intents = discord.Intents.default()
@@ -164,7 +166,8 @@ class Bongo_Bot(commands.Bot):
         player: wavelink.Player = interaction.guild.voice_client
 
         if player is None:  # not connected to voice
-            await interaction.response.send_message("Nothing is playing")
+            if not interaction.response.is_done():
+                await interaction.response.send_message("Nothing is playing")
             return None
 
         return player

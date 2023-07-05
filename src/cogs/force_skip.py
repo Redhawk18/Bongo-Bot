@@ -30,7 +30,8 @@ class Force_Skip(commands.Cog):
         if player.is_playing():
             await player.stop()
             player.queue.loop = False
-            self.bot.cache[interaction.guild_id].user_who_want_to_skip.clear()
+            if hasattr(player, "user_ids"):
+                player.user_ids.clear()
             log.info(
                 f"Skipped track name: {player.guild.name}, id: {player.guild.id}"
             )
