@@ -23,7 +23,7 @@ class Play(commands.Cog):
         view = Playing_View(self.bot)
         payload.player.message = await payload.player.text_channel.send(
             f"**Playing** 🎶 `{payload.track.title}` by `{payload.track.author}` - Now!",
-            view=playing_view,
+            view=view,
         )
         payload.player.view = view
 
