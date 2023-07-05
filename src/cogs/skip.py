@@ -12,7 +12,7 @@ class Skip(commands.Cog):
     @app_commands.command(name="skip", description="Calls a vote to skip the track")
     @app_commands.guild_only()
     async def skip(self, interaction: discord.Interaction):
-        if not self.bot.does_voice_exist(interaction):
+        if not await self.bot.does_voice_exist(interaction):
             return
 
         player = await self.bot.get_player(interaction)
