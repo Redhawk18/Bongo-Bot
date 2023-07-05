@@ -1,5 +1,5 @@
 <div align="center">
-<img src="logo.png" style="max-width:34%;">
+<img src="logo.png" style="max-width:10%;">
 
 # Bongo Bot
 <br>
