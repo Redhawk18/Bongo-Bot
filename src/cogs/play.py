@@ -20,17 +20,12 @@ class Play(commands.Cog):
         log.info(
             f'Now playing "{payload.track.title}" name: {payload.player.guild.name}, id: {payload.player.guild.id}'
         )
-        playing_view = Playing_View(self.bot)
-        self.bot.cache[
-            payload.player.guild.id
-        ].playing_view_message: discord.Message = await self.bot.cache[
-            payload.player.guild.id
-        ].playing_view_channel.send(
+        view = Playing_View(self.bot)
+        payload.player.message = await payload.player.text_channel.send(
             f"**Playing** 🎶 `{payload.track.title}` by `{payload.track.author}` - Now!",
             view=playing_view,
         )
-
-        self.bot.cache[payload.player.guild.id].playing_view = playing_view
+        payload.player.view = view
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, payload: wavelink.TrackEventPayload):
@@ -82,6 +77,7 @@ class Play(commands.Cog):
     )
     @app_commands.describe(
         query="What to search youtube for",
+        autoplay="Uses the autoplay feature to continuously play songs without user querys, once enabled disconnect to disable",
         next="If this track should be put at the front of the queue",
         start_time="time stamp to start the video at, for example 1:34 or 1:21:19",
     )
@@ -92,16 +88,10 @@ class Play(commands.Cog):
         interaction: discord.Interaction,
         *,
         query: str,
+        autoplay: bool = False,
         next: bool = False,
         start_time: str = None,
     ):
-        if not await self.bot.able_to_use_commands(
-            interaction,
-            self.bot.cache[interaction.guild_id].music_channel_id,
-            self.bot.cache[interaction.guild_id].music_role_id,
-        ):
-            return
-
         # locked channel is full
         if (
             len(interaction.user.voice.channel.members)
@@ -144,10 +134,10 @@ class Play(commands.Cog):
             track,
             start=start_time,
             volume=self.bot.cache[interaction.guild_id].volume,
-            populate=True,
+            populate=autoplay,
         )
 
-        self.bot.cache[interaction.guild_id].playing_view_channel = interaction.channel
+        player.text_channel = interaction.channel
         if interaction is None:  # discord.py bug?
             log.critical(interaction)
             log.critical(interaction.channel)
@@ -165,8 +155,10 @@ class Play(commands.Cog):
                 f"**Added** 🎶 playlist `{tracks.name}` to queue"
             )
             player = await self.connect(interaction)
-            if next: 
-                for track in reversed(tracks.tracks): # TODO playlist cannot be added via `put_at_front` YET, coming soon
+            if next:
+                for track in reversed(
+                    tracks.tracks
+                ):  # TODO playlist cannot be added via `put_at_front` YET, coming soon
                     player.queue.put_at_front(track)
 
             else:

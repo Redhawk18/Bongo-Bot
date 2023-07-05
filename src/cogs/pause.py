@@ -25,8 +25,7 @@ class Pause(commands.Cog):
         if not player.is_paused():
             await player.pause()
             await interaction.response.send_message("**Paused** ⏸")
-            playing_view = self.bot.cache[interaction.guild_id].playing_view
-            await playing_view.edit_view(interaction, False)
+            await player.view.edit_view(interaction, False)
 
         else:
             await interaction.response.send_message("Already paused")

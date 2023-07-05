@@ -82,9 +82,9 @@ class Bongo_Bot(commands.Bot):
         music_role_id,
     ) -> bool:
         """returns True if the user mets all conditions to use playing commands"""
-        if not self.does_voice_exist(interaction):
+        if not self.does_voice_exist(interaction): # TODO FIX THIS
             await interaction.response.send_message("Nothing is playing")
-            return False
+            return False 
 
         if music_role_id is not None:
             if (

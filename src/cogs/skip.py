@@ -16,18 +16,14 @@ class Skip(commands.Cog):
             await interaction.response.send_message("Nothing is playing")
             return
 
-        
         player = await self.bot.get_player(interaction)
-
 
         if not player.is_playing():
             await interaction.response.send_message("Nothing is playing")
             return
 
         # check list if the user is the same
-        user_who_want_to_skip = self.bot.cache[
-            interaction.guild_id
-        ].user_who_want_to_skip
+        user_who_want_to_skip = []
         for id in user_who_want_to_skip:
             if id == interaction.user.id:  # already voted
                 await interaction.response.send_message("You already voted")
