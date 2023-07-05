@@ -19,9 +19,9 @@ All commands are slash commands and are self-documenting, regardless here are so
 * `/play query: chocolate insomnia autoplay: true`
 
 The `play` command has three options.
-* `autoplay` Continuously play songs without user querys, once enabled disconnect the bot to disable",
-* `next` If this track should be put at the front of the queue",
-* `start_time` Time stamp to start the video at, for example 1:34 or 1:21:19",
+* `autoplay` Continuously play songs without user querys, once enabled disconnect the bot to disable
+* `next` If this track should be put at the front of the queue
+* `start_time` Time stamp to start the video at, for example `1:34` or `1:21:19`
 
 ## Setup
 * First create a `.env` with all the the following variables
