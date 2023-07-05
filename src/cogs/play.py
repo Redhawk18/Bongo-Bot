@@ -129,6 +129,8 @@ class Play(commands.Cog):
         if player.is_playing():  # if busy
             return
 
+        player.text_channel = interaction.channel
+
         track = player.queue.get()
         await player.play(
             track,
@@ -136,11 +138,6 @@ class Play(commands.Cog):
             volume=self.bot.cache[interaction.guild_id].volume,
             populate=autoplay,
         )
-
-        player.text_channel = interaction.channel
-        if interaction is None:  # discord.py bug?
-            log.critical(interaction)
-            log.critical(interaction.channel)
 
     async def add_to_queue(
         self,
