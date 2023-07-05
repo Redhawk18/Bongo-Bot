@@ -32,9 +32,7 @@ class Force_Skip(commands.Cog):
             player.queue.loop = False
             if hasattr(player, "user_ids"):
                 player.user_ids.clear()
-            log.info(
-                f"Skipped track name: {player.guild.name}, id: {player.guild.id}"
-            )
+            log.info(f"Skipped track name: {player.guild.name}, id: {player.guild.id}")
             await interaction.response.send_message("**Skipped** ⏭")
 
         else:
