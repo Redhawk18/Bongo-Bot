@@ -22,14 +22,14 @@ class Disconnect(commands.Cog):
         player = await self.bot.get_player(interaction)
 
         if player.is_connected():
-            await self.stop_voice_functions(player)
+            await self.stop_voice(player)
             if not interaction.response.is_done():
                 await interaction.response.send_message("**Disconnected** 🎸")
 
         else:
             await interaction.response.send_message("Already disconnected")
 
-    async def stop_voice_functions(self, voice: discord.VoiceClient):
+    async def stop_voice(self, voice: discord.VoiceClient):
         log.info(f"Disconnecting in name: {voice.guild.name}, id: {voice.guild.id}")
         await self.bot.edit_view_message(voice.guild.id, None)
         await voice.disconnect()

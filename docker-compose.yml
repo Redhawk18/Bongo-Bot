@@ -3,24 +3,18 @@ version: '3.5'
 services:
   bongo-bot:
     image: ghcr.io/redhawk18/bongo-bot:latest
-    depends_on:
-      lavalink:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
     env_file:
       - .env
     environment:
       DISCORD_TOKEN: ${DISCORD_TOKEN}
       DATABASE_DATABASE: ${DATABASE_DATABASE}
       DATABASE_USER: ${DATABASE_USER}
-      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_HOST: postgres
       DATABASE_PORT: ${DATABASE_PORT}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
       LAVALINK_HOST: lavalink
       LAVALINK_PORT: ${LAVALINK_PORT}
       LAVALINK_PASSWORD: ${LAVALINK_PASSWORD}
-      TROLLED_USER_ID: ${TROLLED_USER_ID}
     networks:
       - lavalink
       - postgres
@@ -28,13 +22,7 @@ services:
     restart: unless-stopped
 
   lavalink:
-    image: ghcr.io/lavalink-devs/lavalink:3.7.8-alpine
-    healthcheck:
-      test: ["CMD", "curl", "http://localhost:2333/version"]
-      interval: 5s
-      timeout: 30s
-      retries: 3
-      start_period: 20s
+    image: ghcr.io/lavalink-devs/lavalink:3-alpine
     networks:
       - lavalink
     ports:
@@ -45,17 +33,11 @@ services:
 
   postgres:
     image: postgres
-    healthcheck:
-      test: ["CMD", "pg_isready"]
-      interval: 5s
-      timeout: 30s
-      retries: 3
-      start_period: 5s
     env_file:
       - .env
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       PGDATA: /data/postgres
     networks:
       - postgres

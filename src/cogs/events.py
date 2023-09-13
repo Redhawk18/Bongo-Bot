@@ -1,5 +1,7 @@
 from discord.ext import commands
 
+log = logging.getLogger(__name__)
+
 
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -7,12 +9,12 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        # add guild id to database
+        log.info(f"Inserting guild {guild_id}")
         await self.bot.database.execute(f"INSERT INTO guilds VALUES ({guild.id});")
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        # remove guild id from database
+        log.info(f"Deleting guild {guild_id}")
         await self.bot.database.execute(
             f"DELETE FROM guilds WHERE guild_id = {guild.id};"
         )

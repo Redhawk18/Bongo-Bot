@@ -30,11 +30,12 @@ class Bongo_Bot(commands.Bot):
     async def close(self):
         log.info(f"{len(self.voice_clients)} Voice Clients to shutdown")
         for voice in self.voice_clients:
-            self.get_cog("Disconnect").stop_voice_functions(voice)
+            self.get_cog("Disconnect").stop_voice(voice)
 
-        if self.database is not None:
-            await self.database.close()
-            log.info("Database shutdown")
+        if hasattr(self, "database"):
+            if self.database is not None:
+                await self.database.close()
+                log.info("Database shutdown")
 
         await super().close()
 
