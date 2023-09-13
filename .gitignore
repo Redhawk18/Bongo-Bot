@@ -1,10 +1,8 @@
-# vscode
+# editors
 .vscode/
 
-#wavelink dependencies
-lavalink/Lavalink.jar
-lavalink/logs/
-lavalink/plugins
+# volume
+/postgres
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
