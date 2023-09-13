@@ -127,11 +127,11 @@ class Bongo_Bot(commands.Bot):
     async def create_database_pool(self) -> None:
         try:
             self.database: asyncpg.Pool = await asyncpg.create_pool(
-                database=getenv("DATABASE_DATABASE"),
-                user=getenv("DATABASE_USER"),
-                host=getenv("DATABASE_HOST"),
-                port=getenv("DATABASE_PORT"),
-                password=getenv("DATABASE_PASSWORD"),
+                database=getenv("POSTGRES_DATABASE"),
+                user=getenv("POSTGRES_USER"),
+                host=getenv("POSTGRES_HOST"),
+                port=getenv("POSTGRES_PORT"),
+                password=getenv("POSTGRES_PASSWORD"),
             )
 
         except:  # TODO add a exeception here
