@@ -45,12 +45,9 @@ services:
       - "5432:5432"
     restart: unless-stopped
     volumes:
-       - postgres:/data/postgres
+       - ./postgres:/data/postgres
 
 networks:
   lavalink:
   postgres:
 
-volumes:
-  pgadmin:
-  postgres:
