@@ -165,9 +165,7 @@ class Bongo_Bot(commands.Bot):
     async def get_player(self, interaction: discord.Interaction) -> wavelink.Player:
         player: wavelink.Player = interaction.guild.voice_client
 
-        if player is None:  # not connected to voice
-            if not interaction.response.is_done():
-                await interaction.response.send_message("Nothing is playing")
+        if player is None:
             return None
 
         return player
