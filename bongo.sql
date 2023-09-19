@@ -5,6 +5,8 @@
 -- Dumped from database version 15.4 (Debian 15.4-1.pgdg120+1)
 -- Dumped by pg_dump version 15.4 (Debian 15.4-1.pgdg120+1)
 
+\connect bongo
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
