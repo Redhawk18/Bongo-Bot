@@ -1,6 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
+import wavelink
 
 
 class Now_Playing(commands.Cog):
@@ -16,26 +17,27 @@ class Now_Playing(commands.Cog):
         if not await self.bot.does_voice_exist(interaction):
             return
 
-        player: wavelink.player = await self.bot.get_player(interaction)
-        
-        if not player.current:
+        player: wavelink.Playable = await self.bot.get_player(interaction)
+        track = player.current
+
+        if not track:
             await interaction.response.send_message("Nothing is playing")
             return
 
         embed = discord.Embed(
             title="**Now Playing** 🎶",
-            url=player.current.uri,
+            url=track.uri,
             color=discord.Color.red(),
             description="",
         )
-        embed.set_thumbnail(url=player.current.thumbnail)
-        embed.add_field(name="Title", value=player.current.title, inline=False)
-        embed.add_field(name="Uploader", value=player.current.author)
+        embed.set_thumbnail(url=track.artwork)
+        embed.add_field(name="Title", value=track.title, inline=False)
+        embed.add_field(name="Uploader", value=track.author)
 
-        total_seconds = player.current.length
+        total_seconds = track.length
         voice_position = player.position
 
-        if player.current.is_stream:
+        if track.is_stream:
             embed.add_field(name="Duration", value="Livestream")
 
         else:

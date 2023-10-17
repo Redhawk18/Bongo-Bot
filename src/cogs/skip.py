@@ -3,6 +3,7 @@ from math import ceil
 import discord
 from discord import app_commands
 from discord.ext import commands
+import wavelink
 
 
 class Skip(commands.Cog):
@@ -15,9 +16,9 @@ class Skip(commands.Cog):
         if not await self.bot.does_voice_exist(interaction):
             return
 
-        player = await self.bot.get_player(interaction)
+        player: wavelink.Player = await self.bot.get_player(interaction)
 
-        if not player.is_playing():
+        if not player.current:
             await interaction.response.send_message("Nothing is playing")
             return
 

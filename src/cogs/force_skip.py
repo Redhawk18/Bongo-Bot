@@ -3,6 +3,7 @@ import logging
 import discord
 from discord import app_commands
 from discord.ext import commands
+import wavelink
 
 log = logging.getLogger(__name__)
 
@@ -23,10 +24,10 @@ class Force_Skip(commands.Cog):
         ) and not await self.bot.does_voice_exist(interaction):
             return
 
-        player = await self.bot.get_player(interaction)
+        player: wavelink.Player = await self.bot.get_player(interaction)
 
-        if player.is_playing():
-            await player.stop()
+        if player.current:
+            await player.skip()
             player.queue.loop = False
             if hasattr(player, "user_ids"):
                 player.user_ids.clear()

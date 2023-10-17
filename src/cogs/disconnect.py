@@ -3,6 +3,7 @@ import logging
 import discord
 from discord import app_commands
 from discord.ext import commands
+import wavelink
 
 log = logging.getLogger(__name__)
 
@@ -14,14 +15,12 @@ class Disconnect(commands.Cog):
     @app_commands.command(name="disconnect", description="disconnect from voice chat")
     @app_commands.guild_only()
     async def disconnect(self, interaction: discord.Interaction):
-        if not await self.bot.able_to_use_commands(
-            interaction
-                    ):
+        if not await self.bot.able_to_use_commands(interaction):
             return
 
-        player = await self.bot.get_player(interaction)
+        player: wavelink.Player = await self.bot.get_player(interaction)
 
-        if player.is_connected():
+        if player.connected():
             await self.stop_voice(player)
             await interaction.response.send_message("**Disconnected** 🎸")
 

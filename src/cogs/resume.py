@@ -1,6 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
+import wavelink
 
 
 class Resume(commands.Cog):
@@ -18,10 +19,10 @@ class Resume(commands.Cog):
         ) and not await self.bot.does_voice_exist(interaction):
             return
 
-        player = await self.bot.get_player(interaction)
+        player: wavelink.Player = await self.bot.get_player(interaction)
 
-        if player.is_paused():
-            await player.resume()
+        if player.paused:
+            await player.pause(False)
             await interaction.response.send_message("**Resumed** ▶")
             await player.view.edit_view(interaction, True)
 

@@ -16,9 +16,9 @@ class Play(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_wavelink_track_start(self, payload: wavelink.TrackEventPayload):
+    async def on_wavelink_track_start(self, payload: wavelink.TrackEndEventPayload):
         log.info(
-            f'Now playing "{payload.track.title}" name: {payload.player.guild.name}, id: {payload.player.guild.id}'
+            f'Now playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}'
         )
         view = Playing_View(self.bot)
         payload.player.message = await payload.player.text_channel.send(
@@ -28,9 +28,9 @@ class Play(commands.Cog):
         payload.player.view = view
 
     @commands.Cog.listener()
-    async def on_wavelink_track_end(self, payload: wavelink.TrackEventPayload):
+    async def on_wavelink_track_end(self, payload: wavelink.TrackEndEventPayload):
         log.info(
-            f'Finished playing "{payload.track.title}" name: {payload.player.guild.name}, id: {payload.player.guild.id}'
+            f'Finished playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}'
         )
         await self.bot.edit_view_message(payload.player.guild.id, None)
 
@@ -38,11 +38,11 @@ class Play(commands.Cog):
         self,
         interaction: discord.Interaction,
         next: bool,
-        tracks: wavelink.YouTubePlaylist | list[wavelink.YouTubeTrack],
+        tracks: wavelink.Playlist | list[wavelink.Playable],
     ) -> wavelink.Player:
         player: wavelink.Player
 
-        if isinstance(tracks, wavelink.YouTubePlaylist):
+        if isinstance(tracks, wavelink.Playlist):
             await interaction.response.send_message(
                 f"**Added** 🎶 playlist `{tracks.name}` to queue"
             )
@@ -83,8 +83,8 @@ class Play(commands.Cog):
 
         return player
 
-    async def get_milliseconds_from_string(
-        time_string: str, interaction: discord.Interaction
+    async def milliseconds_from_string(
+        self, time_string: str, interaction: discord.Interaction
     ) -> int:
         "takes a time string and returns the time in milliseconds `1:34` -> `94000`, errors return `-1`"
         TIME_RE = re.compile("^[0-5]?\d:[0-5]?\d:[0-5]\d|[0-5]?\d:[0-5]\d|\d+$")
@@ -148,22 +148,26 @@ class Play(commands.Cog):
             )
             return
 
+        start_time_milliseconds = 0
         if start_time is not None:  # parser
-            start_time = await get_milliseconds_from_string(start_time, interaction)
-            if start_time == -1:  # time code was invalid
+            start_time_milliseconds = await self.milliseconds_from_string(
+                start_time, interaction
+            )
+            if start_time_milliseconds == -1:  # time code was invalid
                 return
 
-        tracks: wavelink.YouTubePlaylist | list[
-            wavelink.YouTubeTrack
-        ] = await wavelink.YouTubeTrack.search(query)
+        tracks: wavelink.Playlist | list[
+            wavelink.Playable
+        ] = await wavelink.Playable.search(query)
         if not tracks:
             await interaction.response.send_message("Track not found")
             return
 
-        player: wavelink.player = await self.add_to_queue(interaction, next, tracks)
-        player.autoplay = True
+        player: wavelink.Player = await self.add_to_queue(interaction, next, tracks)
+        if autoplay:
+            player.autoplay = wavelink.AutoPlayMode.enabled
 
-        if player.is_playing():  # if busy
+        if player.current:  # if busy
             return
 
         player.text_channel = interaction.channel
@@ -171,9 +175,8 @@ class Play(commands.Cog):
         track = player.queue.get()
         await player.play(
             track,
-            start=start_time,
+            start=start_time_milliseconds,
             volume=self.bot.cache[interaction.guild_id].volume,
-            populate=autoplay,
         )
 
 

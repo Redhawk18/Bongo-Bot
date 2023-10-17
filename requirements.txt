@@ -1,4 +1,4 @@
 asyncpg
 discord.py[voice, speed]==2.3.2
 python-dotenv
-wavelink==2.6.4
+git+https://github.com/PythonistaGuild/Wavelink.git@feature/v3

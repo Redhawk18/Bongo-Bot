@@ -1,8 +1,7 @@
-import random
-
 import discord
 from discord import app_commands
 from discord.ext import commands
+import wavelink
 
 
 @app_commands.guild_only()
@@ -12,14 +11,14 @@ class Queue(commands.GroupCog, group_name="queue"):
 
     @app_commands.command(name="clear", description="Clears everything in the queue")
     async def clear(self, interaction: discord.Interaction):
-        player: wavelink.player = await self.bot.get_player(interaction)
+        player: wavelink.Player = await self.bot.get_player(interaction)
         player.queue.clear()
         await interaction.response.send_message("**Cleared queue** 📚")
 
     @app_commands.command(name="list", description="Lists the queue")
     @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
     async def list(self, interaction: discord.Interaction):
-        player: wavelink.player = await self.bot.get_player(interaction)
+        player: wavelink.Player = await self.bot.get_player(interaction)
         if player.queue.is_empty or player is None:
             await interaction.response.send_message("The queue is empty")
             return
@@ -68,7 +67,7 @@ class Queue(commands.GroupCog, group_name="queue"):
         queue_position: app_commands.Range[int, 1],
     ):
         queue_position -= 1
-        player: wavelink.player = await self.bot.get_player(interaction)
+        player: wavelink.Player = await self.bot.get_player(interaction)
 
         if player.queue.is_empty:
             interaction.response.send_message("Queue is empty")
@@ -83,7 +82,7 @@ class Queue(commands.GroupCog, group_name="queue"):
 
     @app_commands.command(name="shuffle", description="shuffles the queue")
     async def shuffle(self, interaction: discord.Interaction):
-        player: wavelink.player = await self.bot.get_player(interaction)
+        player: wavelink.Player = await self.bot.get_player(interaction)
         player.queue.shuffle()
         await interaction.response.send_message("**Shuffled queue** 📚")
 
