@@ -28,7 +28,10 @@ class Bongo_Bot(commands.Bot):
         self.cache = defaultdict(Cache)
 
     async def close(self):
-        log.info(f"{len(self.voice_clients)} Voice Clients to shutdown")
+        log.info("Disconnecting Lavalink nodes")
+        await wavelink.Pool.close()
+
+        log.info(f'{len(self.voice_clients)} Voice Clients to shutdown')
         for voice in self.voice_clients:
             self.get_cog("Disconnect").stop_voice(voice)
 
