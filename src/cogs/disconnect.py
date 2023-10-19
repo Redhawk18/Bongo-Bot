@@ -22,7 +22,7 @@ class Disconnect(commands.Cog):
 
         player: wavelink.Player = await self.bot.get_player(interaction)
 
-        if player.connected():
+        if player.connected:
             await self.stop_voice(player)
             await interaction.response.send_message("**Disconnected** 🎸")
 
