@@ -19,17 +19,16 @@ class Queue(commands.GroupCog, group_name="queue"):
     @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
     async def list(self, interaction: discord.Interaction):
         player: wavelink.Player = await self.bot.get_player(interaction)
-        if player.queue.is_empty or player is None:
+        print(player.queue)
+        if not player.queue or player is None:
             await interaction.response.send_message("The queue is empty")
             return
 
         await interaction.response.send_message("Queue is loading")
 
-        queue = player.queue.copy()
-
         output = ""
         total_milliseconds = 0
-        for i, track in enumerate(queue):
+        for i, track in enumerate(player.queue):
             if len(output) > 4000:  # limit for embed description is 4096 characters
                 output += "\n"
                 output += f"*{len(player.queue) - i} remaining songs not listed*"
@@ -69,7 +68,7 @@ class Queue(commands.GroupCog, group_name="queue"):
         queue_position -= 1
         player: wavelink.Player = await self.bot.get_player(interaction)
 
-        if player.queue.is_empty:
+        if player.queue:
             interaction.response.send_message("Queue is empty")
             return
 
