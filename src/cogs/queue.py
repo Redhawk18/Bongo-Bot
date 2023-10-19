@@ -3,10 +3,11 @@ from discord import app_commands
 from discord.ext import commands
 import wavelink
 
+import bongo_bot
 
 @app_commands.guild_only()
 class Queue(commands.GroupCog, group_name="queue"):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: bongo_bot.Bongo_Bot):
         self.bot = bot
 
     @app_commands.command(name="clear", description="Clears everything in the queue")

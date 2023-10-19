@@ -5,11 +5,13 @@ from discord import app_commands
 from discord.ext import commands
 import wavelink
 
+import bongo_bot
+
 log = logging.getLogger(__name__)
 
 
 class Disconnect(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: bongo_bot.Bongo_Bot):
         self.bot = bot
 
     @app_commands.command(name="disconnect", description="disconnect from voice chat")

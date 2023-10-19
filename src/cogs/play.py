@@ -6,13 +6,14 @@ from discord import app_commands
 from discord.ext import commands
 import wavelink
 
+import bongo_bot
 from playing_view import Playing_View
 
 log = logging.getLogger(__name__)
 
 
 class Play(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: bongo_bot.Bongo_Bot):
         self.bot = bot
 
     @commands.Cog.listener()

@@ -1,9 +1,10 @@
 import discord
 from discord.ext import commands, tasks
 
+import bongo_bot
 
 class Tasks(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: bongo_bot.Bongo_Bot):
         self.bot = bot
 
         # start tasks

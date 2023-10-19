@@ -4,13 +4,15 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+import bongo_bot
+
 log = logging.getLogger(__name__)
 
 
 @app_commands.default_permissions(administrator=True)
 @app_commands.guild_only()
 class Settings(commands.GroupCog, group_name="settings"):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: bongo_bot.Bongo_Bot):
         self.bot = bot
 
     @app_commands.command(name="list", description="Lists all settings")
