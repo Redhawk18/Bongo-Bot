@@ -76,7 +76,7 @@ class Queue(commands.GroupCog, group_name="queue"):
             interaction.response.send_message("Position too large")
             return
 
-        del player.queue[queue_position]
+        await player.queue.delete(queue_position)
         await interaction.response.send_message("**Removed track** 🚮")
 
     @app_commands.command(name="shuffle", description="shuffles the queue")
