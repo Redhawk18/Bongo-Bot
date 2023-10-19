@@ -5,6 +5,7 @@ import wavelink
 
 import bongo_bot
 
+
 @app_commands.guild_only()
 class Queue(commands.GroupCog, group_name="queue"):
     def __init__(self, bot: bongo_bot.Bongo_Bot):
@@ -20,7 +21,7 @@ class Queue(commands.GroupCog, group_name="queue"):
     @app_commands.checks.cooldown(1, 1, key=lambda i: (i.guild_id, i.user.id))
     async def list(self, interaction: discord.Interaction):
         player: wavelink.Player = await self.bot.get_player(interaction)
-        print(player.queue)
+
         if not player.queue or player is None:
             await interaction.response.send_message("The queue is empty")
             return

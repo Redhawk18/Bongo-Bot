@@ -6,6 +6,7 @@ from discord.ext import commands
 
 import bongo_bot
 
+
 class Frank(commands.Cog):
     def __init__(self, bot: bongo_bot.Bongo_Bot):
         self.bot = bot

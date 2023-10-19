@@ -157,18 +157,20 @@ class Play(commands.Cog):
             if start_time_milliseconds == -1:  # time code was invalid
                 return
 
-        tracks: wavelink.Playlist | wavelink.Playlist = await wavelink.Playable.search(query)
+        tracks: wavelink.Playlist | wavelink.Playlist = await wavelink.Playable.search(
+            query
+        )
         if not tracks:
             await interaction.response.send_message("Track not found")
             return
 
         player: wavelink.Player = await self.add_to_queue(interaction, next, tracks)
-        print(player.queue)
+
         if autoplay:
             player.autoplay = wavelink.AutoPlayMode.enabled
 
-        else: 
-            player.auto_queue = wavelink.AutoPlayMode.partial
+        else:
+            player.autoplay = wavelink.AutoPlayMode.partial
 
         if player.current:  # if busy
             return

@@ -7,6 +7,7 @@ import wavelink
 
 import bongo_bot
 
+
 class Skip(commands.Cog):
     def __init__(self, bot: bongo_bot.Bongo_Bot):
         self.bot = bot
