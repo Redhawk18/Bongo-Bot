@@ -28,7 +28,7 @@ class Force_Skip(commands.Cog):
 
         player: wavelink.Player = await self.bot.get_player(interaction)
 
-        if player.current:
+        if player.playing:
             await player.skip()
             player.queue.loop = False
             if hasattr(player, "user_ids"):

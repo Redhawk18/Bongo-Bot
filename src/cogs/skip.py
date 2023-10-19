@@ -20,7 +20,7 @@ class Skip(commands.Cog):
 
         player: wavelink.Player = await self.bot.get_player(interaction)
 
-        if not player.current:
+        if not player.playing:
             await interaction.response.send_message("Nothing is playing")
             return
 

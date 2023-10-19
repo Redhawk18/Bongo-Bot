@@ -115,7 +115,7 @@ class Bongo_Bot(commands.Bot):
             if (
                 voice.channel.id != interaction.user.voice.channel.id
             ):  # bot is in a different voice chat than user
-                if voice.is_playing():  # bot is busy
+                if voice.playing():  # bot is busy
                     await interaction.response.send_message(
                         "Not in the same voice channel"
                     )

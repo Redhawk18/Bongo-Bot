@@ -10,10 +10,10 @@ class Playing_View(discord.ui.View):
 
         self.add_items(True)
 
-    def add_items(self, is_pause):
+    def add_items(self, paused):
         self.clear_items()
 
-        if is_pause:
+        if paused:
             self.add_item(self.pause)
         else:
             self.add_item(self.resume)
@@ -22,8 +22,8 @@ class Playing_View(discord.ui.View):
         self.add_item(self.now_playing)
         self.add_item(self.loop)
 
-    async def edit_view(self, interaction: discord.Interaction, is_pause: bool):
-        self.add_items(is_pause)
+    async def edit_view(self, interaction: discord.Interaction, paused: bool):
+        self.add_items(paused)
         await self.bot.edit_view_message(interaction.guild_id, self)
 
     @discord.ui.button(label="Pause", style=discord.ButtonStyle.gray, emoji="⏸")

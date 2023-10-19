@@ -22,6 +22,9 @@ class Loop(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
+        await interaction.response.send_message("not implemented on the library side, aka this isn't my fault")
+
+
         if not await self.bot.able_to_use_commands(
             interaction
         ) and not await self.bot.does_voice_exist(interaction):

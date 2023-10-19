@@ -172,7 +172,7 @@ class Play(commands.Cog):
         else:
             player.autoplay = wavelink.AutoPlayMode.partial
 
-        if player.current:  # if busy
+        if player.playing:  # if busy
             return
 
         player.text_channel = interaction.channel
