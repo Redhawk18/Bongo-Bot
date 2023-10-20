@@ -17,6 +17,10 @@ class Play(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
+    async def on_wavelink_node_ready(self, payload: wavelink.NodeReadyEventPayload):
+        self.node = payload.node
+
+    @commands.Cog.listener()
     async def on_wavelink_track_start(self, payload: wavelink.TrackEndEventPayload):
         log.info(
             f'Now playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}'
@@ -161,6 +165,10 @@ class Play(commands.Cog):
         if not tracks:
             await interaction.response.send_message("Track not found")
             return
+        
+        data = ["interaction", "music_offtopic", "selfpromo", "sponsor"]
+        await self.node.send('PUT', path=f'v4/sessions/{self.node.session_id}/players/{interaction.guild_id}/sponsorblock/categories', data=data)
+
 
         player: wavelink.Player = await self.add_to_queue(interaction, next, tracks)
 

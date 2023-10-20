@@ -74,6 +74,7 @@ class Bongo_Bot(commands.Bot):
             uri="http://" + getenv("LAVALINK_HOST") + ":" + getenv("LAVALINK_PORT"),
             password=getenv("LAVALINK_PASSWORD"),
         )
+        
         await wavelink.Pool.connect(client=self, nodes=[node])
 
         # sync new commands
