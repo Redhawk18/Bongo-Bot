@@ -25,6 +25,7 @@ class Play(commands.Cog):
         log.info(
             f'Now playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}'
         )
+        payload.player.pause(False)
         view = Playing_View(self.bot)
         payload.player.message = await payload.player.text_channel.send(
             f"**Playing** 🎶 `{payload.track.title}` by `{payload.track.author}` - Now!",
