@@ -18,7 +18,7 @@ class Play(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_node_ready(self, payload: wavelink.NodeReadyEventPayload):
-        self.node = payload.node
+        self.node: wavelink.Node = payload.node
 
     @commands.Cog.listener()
     async def on_wavelink_track_start(self, payload: wavelink.TrackEndEventPayload):
@@ -42,7 +42,6 @@ class Play(commands.Cog):
     async def add_to_queue(
         self,
         interaction: discord.Interaction,
-        next: bool,
         tracks: wavelink.Playlist | list[wavelink.Playable],
     ) -> wavelink.Player:
         player: wavelink.Player
@@ -52,25 +51,14 @@ class Play(commands.Cog):
                 f"**Added** 🎶 playlist `{tracks.name}` to queue"
             )
             player = await self.connect(interaction)
-            if next:
-                for track in reversed(
-                    tracks.tracks
-                ):  # TODO playlist cannot be added via `put_at_front` YET, coming soon
-                    player.queue.put_at_front(track)  # TODO method doesn't exist
-
-            else:
-                player.queue.put(tracks)
+            player.queue.put(tracks)
 
         else:  # wavelink.Playable
             await interaction.response.send_message(
                 f"**Added** 🎵 `{tracks[0].uri}` to queue"
             )
             player = await self.connect(interaction)
-            if next:
-                player.queue.put_at_front(tracks[0])  # TODO method doesn't exist
-
-            else:
-                player.queue.put(tracks[0])
+            player.queue.put(tracks[0])
 
         return player
 
@@ -98,7 +86,7 @@ class Play(commands.Cog):
         TIME_RE = re.compile("^[0-5]?\d:[0-5]?\d:[0-5]\d|[0-5]?\d:[0-5]\d|\d+$")
         if not TIME_RE.match(time_string):
             await interaction.response.send_message("Invalid time stamp")
-            return -1  # TODO maybe turn this into a exception
+            raise ParseTimeString
 
         list_of_units = [int(x) for x in time_string.split(":")]
 
@@ -121,7 +109,6 @@ class Play(commands.Cog):
     @app_commands.describe(
         query="What to search for",
         autoplay="Continuously play songs without user querys, once enabled disconnect the bot to disable",
-        next="If this track should be put at the front of the queue",
         start_time="Time stamp to start the video at, for example 1:34 or 1:21:19",
     )
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
@@ -132,7 +119,6 @@ class Play(commands.Cog):
         *,
         query: str,
         autoplay: bool = False,
-        next: bool = False,
         start_time: str = None,
     ):
         if not await self.bot.able_to_use_commands(interaction):
@@ -158,10 +144,11 @@ class Play(commands.Cog):
 
         start_time_milliseconds = 0
         if start_time is not None:  # parser
-            start_time_milliseconds = await self.milliseconds_from_string(
-                start_time, interaction
-            )
-            if start_time_milliseconds == -1:  # time code was invalid
+            try:
+                start_time_milliseconds = await self.milliseconds_from_string(
+                    start_time, interaction
+                )
+            except ParseTimeString:
                 return
 
         tracks: wavelink.Search = await wavelink.Playable.search(query)
@@ -169,7 +156,7 @@ class Play(commands.Cog):
             await interaction.response.send_message("Track not found")
             return
 
-        player: wavelink.Player = await self.add_to_queue(interaction, next, tracks)
+        player: wavelink.Player = await self.add_to_queue(interaction, tracks)
 
         if autoplay:
             player.autoplay = wavelink.AutoPlayMode.enabled
@@ -192,3 +179,6 @@ class Play(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Play(bot))
+
+class ParseTimeString(Exception):
+    pass

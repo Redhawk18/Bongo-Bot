@@ -36,12 +36,12 @@ class Loop(commands.Cog):
 
         if player.queue.loop:  # TODO, this hasn't been implemented on the library side
             player.queue.loop = False
-            log.info(f"Disabled loop name: {player.guild.name}, id: {player.guild.id}")
+            log.info(f"Disabled loop name: {player.guild.name}:{player.guild.id}")
             await interaction.response.send_message("**Loop Disabled** 🔁")
 
         else:
             player.queue.loop = True
-            log.info(f"Enabled loop name: {player.guild.name}, id: {player.guild.id}")
+            log.info(f"Enabled loop name: {player.guild.name}:{player.guild.id}")
             await interaction.response.send_message("**Loop Enabled** 🔁")
 
 

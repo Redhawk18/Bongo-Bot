@@ -13,12 +13,12 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        log.info(f"Inserting guild {guild.name} {guild.id}")
+        log.info(f"Inserting guild {guild.name}:{guild.id}")
         await self.bot.database.execute(f"INSERT INTO guilds VALUES ({guild.id});")
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        log.info(f"Deleting guild {guild.name} {guild.id}")
+        log.info(f"Deleting guild {guild.name}:{guild.id}")
         await self.bot.database.execute(
             f"DELETE FROM guilds WHERE guild_id = {guild.id};"
         )

@@ -70,12 +70,12 @@ class Queue(commands.GroupCog, group_name="queue"):
         queue_position -= 1
         player: wavelink.Player = await self.bot.get_player(interaction)
 
-        if player.queue:
-            interaction.response.send_message("Queue is empty")
+        if not player.queue:
+            await interaction.response.send_message("Queue is empty")
             return
 
-        if player.queue.count < queue_position:
-            interaction.response.send_message("Position too large")
+        if len(player.queue) < queue_position:
+            await interaction.response.send_message("Position too large")
             return
 
         await player.queue.delete(queue_position)

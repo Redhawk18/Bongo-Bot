@@ -30,7 +30,7 @@ class Disconnect(commands.Cog):
             await interaction.response.send_message("Already disconnected")
 
     async def stop_voice(self, voice: discord.VoiceClient):
-        log.info(f"Disconnecting in name: {voice.guild.name}, id: {voice.guild.id}")
+        log.info(f"Disconnecting in name: {voice.guild.name}:{voice.guild.id}")
         await self.bot.edit_view_message(voice.guild.id, None)
         await voice.disconnect()
 
