@@ -52,18 +52,18 @@ class Play(commands.Cog):
                 for track in reversed(
                     tracks.tracks
                 ):  # TODO playlist cannot be added via `put_at_front` YET, coming soon
-                    player.queue.put_at_front(track)
+                    player.queue.put_at_front(track)  # TODO method doesn't exist
 
             else:
                 player.queue.put(tracks)
 
-        else:
+        else:  # wavelink.Playable
             await interaction.response.send_message(
                 f"**Added** 🎵 `{tracks[0].uri}` to queue"
             )
             player = await self.connect(interaction)
             if next:
-                player.queue.put_at_front(tracks[0])
+                player.queue.put_at_front(tracks[0])  # TODO method doesn't exist
 
             else:
                 player.queue.put(tracks[0])
@@ -157,9 +157,7 @@ class Play(commands.Cog):
             if start_time_milliseconds == -1:  # time code was invalid
                 return
 
-        tracks: wavelink.Playlist | wavelink.Playlist = await wavelink.Playable.search(
-            query
-        )
+        tracks: wavelink.Search = await wavelink.Playable.search(query)
         if not tracks:
             await interaction.response.send_message("Track not found")
             return

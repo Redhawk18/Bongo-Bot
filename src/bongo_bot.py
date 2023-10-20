@@ -137,7 +137,7 @@ class Bongo_Bot(commands.Bot):
                 password=getenv("POSTGRES_PASSWORD"),
             )
 
-        except Exception as e:  # TODO add a exeception here
+        except Exception as e:
             log.critical("Database not connected")
             log.critical(e)
             self.database = None  # since it failed

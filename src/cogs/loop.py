@@ -22,8 +22,10 @@ class Loop(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        await interaction.response.send_message("not implemented on the library side, aka this isn't my fault")
-
+        await interaction.response.send_message(
+            "not implemented on the library side, aka this isn't my fault"
+        )
+        return
 
         if not await self.bot.able_to_use_commands(
             interaction
