@@ -34,9 +34,14 @@ class Play(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, payload: wavelink.TrackEndEventPayload):
-        log.info(
-            f'Finished playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}'
-        )
+        if payload.player:
+            log.info(
+                f'Finished playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}'
+            )
+
+        else:
+            log.info(f'Finished playing "{payload.track.title}"')
+
         await self.bot.edit_view_message(payload.player.guild.id, None)
 
     async def add_to_queue(
@@ -75,7 +80,11 @@ class Play(commands.Cog):
             )
 
             data = ["interaction", "music_offtopic", "selfpromo", "sponsor"]
-            await self.node.send('PUT', path=f'v4/sessions/{self.node.session_id}/players/{interaction.guild_id}/sponsorblock/categories', data=data)
+            await self.node.send(
+                "PUT",
+                path=f"v4/sessions/{self.node.session_id}/players/{interaction.guild_id}/sponsorblock/categories",
+                data=data,
+            )
 
         return player
 
@@ -179,6 +188,7 @@ class Play(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Play(bot))
+
 
 class ParseTimeString(Exception):
     pass

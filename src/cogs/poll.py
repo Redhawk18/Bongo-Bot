@@ -11,7 +11,7 @@ class Poll(commands.Cog):
 
     @app_commands.command(
         name="poll", description="creates a poll with emotes to vote by"
-    ) 
+    )
     @app_commands.describe(title="the title of the poll")
     @app_commands.guild_only()
     async def poll(
