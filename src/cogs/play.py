@@ -35,14 +35,11 @@ class Play(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, payload: wavelink.TrackEndEventPayload):
-        if payload.player:
-            log.info(
-                f'Finished playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}'
-            )
-
-        else:
+        if not payload.player:
             log.info(f'Finished playing "{payload.track.title}"')
+            return
 
+        log.info(f'Finished playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}')
         await self.bot.edit_view_message(payload.player.guild.id, None)
 
     async def add_to_queue(
