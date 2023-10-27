@@ -120,7 +120,7 @@ class Play(commands.Cog):
         autoplay="Continuously play songs without user querys, once enabled disconnect the bot to disable",
         start_time="Time stamp to start the video at, for example 1:34 or 1:21:19",
     )
-    @app_commands.checks.bot_has_permissions(connect=True, send_messages=True)
+    @app_commands.checks.bot_has_permissions(send_messages=True)
     @app_commands.checks.cooldown(1, 2, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.guild_only()
     async def play(
