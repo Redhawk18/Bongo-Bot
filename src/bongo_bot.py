@@ -54,6 +54,10 @@ class Bongo_Bot(commands.Bot):
             log.warn(error)
             await interaction.response.send_message(str(error), ephemeral=True)
 
+        if isinstance(error, discord.app_commands.errors.BotMissingPermissions):
+            log.warn(error)
+            await interaction.response.send_message(str(error), ephemeral=True)
+
         else:
             log.critical("Ignoring exception in command {}:".format(error))
             traceback.print_exception(type(error), error, error.__traceback__)

@@ -1,5 +1,4 @@
 import asyncio
-import os
 from os import getenv
 import logging
 from pathlib import Path
