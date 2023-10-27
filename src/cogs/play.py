@@ -39,7 +39,9 @@ class Play(commands.Cog):
             log.info(f'Finished playing "{payload.track.title}"')
             return
 
-        log.info(f'Finished playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}')
+        log.info(
+            f'Finished playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}'
+        )
         await self.bot.edit_view_message(payload.player.guild.id, None)
 
     async def add_to_queue(
@@ -147,7 +149,8 @@ class Play(commands.Cog):
             interaction.guild.me
         ).connect:
             await interaction.response.send_message(
-                "Bot requires Connect permission(s) to run this command.", ephemeral=True
+                "Bot requires Connect permission(s) to run this command.",
+                ephemeral=True,
             )
             return
 

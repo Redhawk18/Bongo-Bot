@@ -76,7 +76,9 @@ class Settings(commands.GroupCog, group_name="settings"):
         self.bot.cache[interaction.guild_id].music_channel_id = None
 
         await interaction.response.send_message(f"Music channel reset")
-        await self.update_database_value("music_channel_id", None, interaction.guild_id)
+        await self.update_database_value(
+            "music_channel_id", "Null", interaction.guild_id
+        )
 
     @app_commands.command(
         name="set-music-role",
@@ -109,7 +111,7 @@ class Settings(commands.GroupCog, group_name="settings"):
         self.bot.cache[interaction.guild_id].music_role_id = None
 
         await interaction.response.send_message(f"Music role reset")
-        await self.update_database_value("music_role_id", None, interaction.guild_id)
+        await self.update_database_value("music_role_id", "Null", interaction.guild_id)
 
     @app_commands.command(name="volume", description="Sets the volume of the player")
     @app_commands.describe(volume="Volume of the player")
@@ -125,7 +127,9 @@ class Settings(commands.GroupCog, group_name="settings"):
         await interaction.response.send_message(f"**Volume** 🔊 changed to {volume}%")
         await self.update_database_value("volume", volume, interaction.guild_id)
 
-    async def update_database_value(self, column_name: str, value, guild_id: int):
+    async def update_database_value(
+        self, column_name: str, value: str | int, guild_id: int
+    ):
         log.info(f"Updating {column_name} to {value} in {guild_id}")
         await self.bot.database.execute(
             f"UPDATE guilds SET {column_name} = {value} WHERE guild_id = {guild_id};"
