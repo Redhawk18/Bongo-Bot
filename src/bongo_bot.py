@@ -3,7 +3,6 @@ import logging
 from os import getenv
 from math import floor
 from pathlib import Path
-import sys
 import traceback
 
 import asyncpg
@@ -21,7 +20,7 @@ class Bongo_Bot(commands.Bot):
 
     def __init__(self, *args, **kwargs):
         super().__init__(
-            command_prefix="!", intents=self.get_intents(), *args, **kwargs
+            command_prefix="bongo", intents=self.get_intents(), *args, **kwargs
         )
         self.tree.on_error = self.on_tree_error
 
@@ -75,8 +74,11 @@ class Bongo_Bot(commands.Bot):
 
         # wavelink setup
         node: wavelink.Node = wavelink.Node(
-            uri="http://" + getenv("LAVALINK_HOST") + ":" + getenv("LAVALINK_PORT"),
-            password=getenv("LAVALINK_PASSWORD"),
+            uri="http://"
+            + str(getenv("LAVALINK_HOST"))
+            + ":"
+            + str(getenv("LAVALINK_PORT")),
+            password=str(getenv("LAVALINK_PASSWORD")),
         )
         await wavelink.Pool.connect(client=self, nodes=[node])
 
@@ -119,7 +121,7 @@ class Bongo_Bot(commands.Bot):
             if (
                 voice.channel.id != interaction.user.voice.channel.id
             ):  # bot is in a different voice chat than user
-                if voice.playing():  # bot is busy
+                if voice.playing:  # bot is busy
                     await interaction.response.send_message(
                         "Not in the same voice channel"
                     )
@@ -133,7 +135,7 @@ class Bongo_Bot(commands.Bot):
 
     async def create_database_pool(self) -> None:
         try:
-            self.database: asyncpg.Pool = await asyncpg.create_pool(
+            self.database: asyncpg.Pool | None = await asyncpg.create_pool(
                 database=getenv("POSTGRES_DATABASE"),
                 user=getenv("POSTGRES_USER"),
                 host=getenv("POSTGRES_HOST"),
@@ -169,7 +171,9 @@ class Bongo_Bot(commands.Bot):
 
         return intents
 
-    async def get_player(self, interaction: discord.Interaction) -> wavelink.Player:
+    async def get_player(
+        self, interaction: discord.Interaction
+    ) -> wavelink.Player | None:
         player: wavelink.Player = interaction.guild.voice_client
 
         if player is None:

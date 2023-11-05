@@ -129,7 +129,7 @@ class Play(commands.Cog):
         *,
         query: str,
         autoplay: bool = False,
-        start_time: str = None,
+        start_time: str | None = None,
     ):
         log.debug(interaction.permissions.connect)
         if not await self.bot.able_to_use_commands(interaction):

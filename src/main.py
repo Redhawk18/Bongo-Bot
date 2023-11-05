@@ -22,7 +22,7 @@ if len(sys.argv) < 2:
 
     load_dotenv(root_path.joinpath(".env"))
 
-TOKEN = getenv("DISCORD_TOKEN")
+TOKEN: str = str(getenv("DISCORD_TOKEN"))
 
 bot = Bongo_Bot()
 
