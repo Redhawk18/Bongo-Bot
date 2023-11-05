@@ -22,25 +22,21 @@ class Loop(commands.Cog):
         await self.helper(interaction)
 
     async def helper(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
-            "not implemented on the library side, aka this isn't my fault"
-        )
-        return
-
         if not await self.bot.able_to_use_commands(
             interaction
         ) and not await self.bot.does_voice_exist(interaction):
             return
 
         player: wavelink.Player = await self.bot.get_player(interaction)
+        queue: wavelink.Queue = player.queue
 
-        if player.queue.loop:  # TODO, this hasn't been implemented on the library side
-            player.queue.loop = False
+        if wavelink.QueueMode.loop == queue.mode:
+            queue.mode = wavelink.QueueMode.normal
             log.info(f"Disabled loop name: {player.guild.name}:{player.guild.id}")
             await interaction.response.send_message("**Loop Disabled** 🔁")
 
         else:
-            player.queue.loop = True
+            queue.mode = wavelink.QueueMode.loop
             log.info(f"Enabled loop name: {player.guild.name}:{player.guild.id}")
             await interaction.response.send_message("**Loop Enabled** 🔁")
 
