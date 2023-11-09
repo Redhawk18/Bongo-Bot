@@ -25,13 +25,15 @@ class Play(commands.Cog):
         log.info(
             f'Now playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}'
         )
-        view = Playing_View(self.bot)
         await payload.player.pause(False)
-        payload.player.message = await payload.player.text_channel.send(
-            f"**Playing** 🎶 `{payload.track.title}` by `{payload.track.author}` - Now!",
-            view=view,
-        )
-        payload.player.view = view
+
+        if commands.bot_has_permissions(send_message=True):
+            view = Playing_View(self.bot)
+            payload.player.message = await payload.player.text_channel.send(
+                f"**Playing** 🎶 `{payload.track.title}` by `{payload.track.author}` - Now!",
+                view=view,
+            )
+            payload.player.view = view
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, payload: wavelink.TrackEndEventPayload):
@@ -42,7 +44,9 @@ class Play(commands.Cog):
         log.info(
             f'Finished playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}'
         )
-        await self.bot.edit_view_message(payload.player.guild.id, None)
+
+        if commands.bot_has_permissions(send_message=True):
+            await self.bot.edit_view_message(payload.player.guild.id, None)
 
     async def add_to_queue(
         self,
