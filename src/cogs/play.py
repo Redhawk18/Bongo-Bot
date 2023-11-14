@@ -27,7 +27,7 @@ class Play(commands.Cog):
         )
         await payload.player.pause(False)
 
-        if commands.bot_has_permissions(send_message=True):
+        if commands.bot_has_permissions(send_messages=True):
             view = Playing_View(self.bot)
             payload.player.message = await payload.player.text_channel.send(
                 f"**Playing** 🎶 `{payload.track.title}` by `{payload.track.author}` - Now!",
@@ -45,7 +45,7 @@ class Play(commands.Cog):
             f'Finished playing "{payload.track.title}" in {payload.player.guild.name}:{payload.player.guild.id}'
         )
 
-        if commands.bot_has_permissions(send_message=True):
+        if commands.bot_has_permissions(send_messages=True):
             await self.bot.edit_view_message(payload.player.guild.id, None)
 
     async def add_to_queue(
