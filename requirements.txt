@@ -1,4 +1,4 @@
 asyncpg
 discord.py[voice, speed]==2.3
 python-dotenv
-wavelink==3.0
+wavelink==3.1
