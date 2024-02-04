@@ -13,7 +13,13 @@ class Queue(commands.GroupCog, group_name="queue"):
 
     @app_commands.command(name="clear", description="Clears everything in the queue")
     async def clear(self, interaction: discord.Interaction):
+        if not await self.bot.able_to_use_commands(
+            interaction
+        ) and not await self.bot.does_voice_exist(interaction):
+            return
+
         player: wavelink.Player = await self.bot.get_player(interaction)
+
         player.queue.clear()
         await interaction.response.send_message("**Cleared queue** 📚")
 
@@ -57,30 +63,39 @@ class Queue(commands.GroupCog, group_name="queue"):
 
     @app_commands.command(
         name="remove",
-        description="Removes a song from the queue based on its track number",
+        description="Removes a song from the queue",
     )
-    @app_commands.describe(queue_position="The position of the track to be removed")
+    @app_commands.describe(track_number="The position of the track to be removed")
     async def remove(
         self,
         interaction: discord.Interaction,
-        queue_position: app_commands.Range[int, 1],
+        track_number: app_commands.Range[int, 1],
     ):
-        queue_position -= 1
+        if not await self.bot.able_to_use_commands(
+            interaction
+        ) and not await self.bot.does_voice_exist(interaction):
+            return
+
         player: wavelink.Player = await self.bot.get_player(interaction)
 
         if not player.queue:
             await interaction.response.send_message("Queue is empty")
             return
 
-        if len(player.queue) < queue_position:
+        if len(player.queue) < track_number:
             await interaction.response.send_message("Position too large")
             return
 
-        await player.queue.delete(queue_position)
+        await player.queue.delete(track_number - 1)
         await interaction.response.send_message("**Removed track** 🚮")
 
     @app_commands.command(name="shuffle", description="shuffles the queue")
     async def shuffle(self, interaction: discord.Interaction):
+        if not await self.bot.able_to_use_commands(
+            interaction
+        ) and not await self.bot.does_voice_exist(interaction):
+            return
+
         player: wavelink.Player = await self.bot.get_player(interaction)
         player.queue.shuffle()
         await interaction.response.send_message("**Shuffled queue** 📚")
