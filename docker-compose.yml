@@ -2,7 +2,8 @@ version: '3.5'
 
 services:
   bongo-bot:
-    image: ghcr.io/redhawk18/bongo-bot:latest
+    # image: ghcr.io/redhawk18/bongo-bot:latest
+    build: .
     env_file:
       - .env
     environment:
