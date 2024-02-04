@@ -157,7 +157,8 @@ class Bongo_Bot(commands.Bot):
     async def edit_view_message(self, guild_id: int, view: discord.ui.View | None):
         voice = self.get_guild(guild_id).voice_client
         if voice is not None:
-            await voice.message.edit(view=view)
+            if voice.message is not None:
+                await voice.message.edit(view=view)
 
     def get_intents(self) -> discord.Intents:
         intents = discord.Intents.default()

@@ -83,10 +83,12 @@ class Queue(commands.GroupCog, group_name="queue"):
             return
 
         if len(player.queue) < track_number:
-            await interaction.response.send_message("Position too large")
+            await interaction.response.send_message(
+                "Track number is larger than queue size"
+            )
             return
 
-        await player.queue.delete(track_number - 1)
+        player.queue.delete(track_number - 1)
         await interaction.response.send_message("**Removed track** 🚮")
 
     @app_commands.command(name="shuffle", description="shuffles the queue")
