@@ -21,6 +21,10 @@ services:
       - postgres
     pull_policy: always
     restart: unless-stopped
+    volumes:
+      - type: bind
+        source: ./src
+        target: /src
 
   lavalink:
     image: ghcr.io/lavalink-devs/lavalink:4-alpine

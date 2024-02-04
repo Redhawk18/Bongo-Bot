@@ -30,29 +30,22 @@ The `play` command has three options.
 DISCORD_TOKEN=
 
 POSTGRES_DATABASE=bongo
-POSTGRES_HOST=localhost
+POSTGRES_HOST=postgres
 POSTGRES_PASSWORD=
 POSTGRES_PORT=5432
 POSTGRES_USER=postgres
 
-LAVALINK_HOST=localhost
-LAVALINK_PASSWORD=password
+LAVALINK_HOST=lavalink
+LAVALINK_PASSWORD=
 LAVALINK_PORT=2333
 ```
 
----
-### Docker option
+* Then run 
+```
+docker compose up -d
+```
 
-* Comment out the local lines in `.env` 
-* Run `docker compose up -d`
-
----
-### Local option
-
-* Comment out docker lines in `.env`
-* Comment out the `discord-bot` container in `docker-compose.yml`
-* Run `docker compose up -d`
-* Run `pip3 install -r requirements.txt`
-* Start the discord bot with `python3 src/main.py`
-
-
+* Finally create the database with 
+```
+cat bongo.sql | docker exec -i bongo-bot-postgres-1 psql -U postgres
+``` 
