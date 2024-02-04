@@ -106,7 +106,7 @@ class Bongo_Bot(commands.Bot):
             await interaction.response.send_message("Not in any voice channel")
             return False
 
-        if interaction.user.voice.deaf or interaction.user.voice.self_deaf:  # deafen
+        if interaction.user.voice.deaf or interaction.user.voice.self_deaf:
             await interaction.response.send_message(
                 "Deafed users can not use playing commands"
             )
@@ -119,7 +119,7 @@ class Bongo_Bot(commands.Bot):
             ):  # bot is in a different voice chat than user
                 if voice.playing:  # bot is busy
                     await interaction.response.send_message(
-                        "Not in the same voice channel"
+                        "Playing a track in a different voice channel"
                     )
                     return False
 

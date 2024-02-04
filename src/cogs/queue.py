@@ -22,11 +22,9 @@ class Queue(commands.GroupCog, group_name="queue"):
     async def list(self, interaction: discord.Interaction):
         player: wavelink.Player = await self.bot.get_player(interaction)
 
-        if not player.queue or player is None:
+        if player.queue.is_empty or player is None:
             await interaction.response.send_message("The queue is empty")
             return
-
-        await interaction.response.send_message("Queue is loading")
 
         output = ""
         total_milliseconds = 0
@@ -55,7 +53,7 @@ class Queue(commands.GroupCog, group_name="queue"):
             text=f"Total length: {self.bot.milliseconds_to_timestring(total_milliseconds)}"
         )
 
-        await interaction.edit_original_response(content=None, embed=embed)
+        await interaction.response.send_message(embed=embed)
 
     @app_commands.command(
         name="remove",
