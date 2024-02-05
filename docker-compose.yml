@@ -2,7 +2,6 @@ version: '3.5'
 
 services:
   bongo-bot:
-    # image: ghcr.io/redhawk18/bongo-bot:latest
     build: .
     env_file:
       - .env
@@ -19,13 +18,10 @@ services:
     networks:
       - lavalink
       - postgres
-    pull_policy: always
     restart: unless-stopped
     volumes:
-      - type: bind
-        source: ./src
-        target: /src
-
+      - ./src/:/src
+  
   lavalink:
     image: ghcr.io/lavalink-devs/lavalink:4-alpine
     networks:

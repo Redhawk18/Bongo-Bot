@@ -49,7 +49,7 @@ class Bongo_Bot(commands.Bot):
             log.warn(error)
             await interaction.response.send_message(str(error), ephemeral=True)
 
-        if isinstance(error, discord.app_commands.errors.BotMissingPermissions):
+        elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
             log.warn(error)
             await interaction.response.send_message(str(error), ephemeral=True)
 

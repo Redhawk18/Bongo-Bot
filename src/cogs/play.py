@@ -135,9 +135,10 @@ class Play(commands.Cog):
         autoplay: bool = False,
         start_time: str | None = None,
     ):
-        log.debug(interaction.permissions.connect)
+
         if not await self.bot.able_to_use_commands(interaction):
             return
+
         # locked channel is full
         if (
             len(interaction.user.voice.channel.members)
@@ -183,7 +184,7 @@ class Play(commands.Cog):
         if player.playing:  # if busy
             return
 
-        player.text_channel = interaction.channel
+        player.text_channel: discord.TextChannel = interaction.channel
 
         track = player.queue.get()
         await player.play(
