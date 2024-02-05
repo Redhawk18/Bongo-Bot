@@ -2,7 +2,6 @@ FROM python:3.11-slim
 
 WORKDIR /app
 COPY requirements.txt requirements.txt
-COPY src/ src/
 
 # If git releases of libraries are used
 # RUN apt update
