@@ -168,9 +168,16 @@ class Play(commands.Cog):
             except ParseTimeString:
                 return
 
-        tracks: wavelink.Search = await wavelink.Playable.search(query)
+        try:
+            tracks: wavelink.Search = await wavelink.Playable.search(query)
+        except wavelink.LavalinkException:
+            await interaction.response.send_message(
+                "Track does not exist or is private."
+            )
+            return
+
         if not tracks:
-            await interaction.response.send_message("Track not found")
+            await interaction.response.send_message("Track not found.")
             return
 
         player: wavelink.Player = await self.add_to_queue(interaction, tracks)

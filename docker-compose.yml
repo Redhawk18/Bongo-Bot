@@ -20,7 +20,7 @@ services:
       - postgres
     restart: unless-stopped
     volumes:
-      - ./src/:/src
+      - ./src/:/app/src
   
   lavalink:
     image: ghcr.io/lavalink-devs/lavalink:4-alpine
