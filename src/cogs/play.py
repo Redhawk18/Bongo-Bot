@@ -170,7 +170,8 @@ class Play(commands.Cog):
 
         try:
             tracks: wavelink.Search = await wavelink.Playable.search(query)
-        except wavelink.LavalinkException:
+        except:
+            log.warn("Cannot find song with query", query)
             await interaction.response.send_message(
                 "Track does not exist or is private."
             )
