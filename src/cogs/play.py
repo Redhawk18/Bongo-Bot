@@ -29,10 +29,14 @@ class Play(commands.Cog):
 
         if commands.bot_has_permissions(send_messages=True):
             view = Playing_View(self.bot)
-            payload.player.message = await payload.player.text_channel.send(
-                f"**Playing** 🎶 `{payload.track.title}` by `{payload.track.author}` - Now!",
-                view=view,
-            )
+            try:
+                payload.player.message = await payload.player.text_channel.send(
+                    f"**Playing** 🎶 `{payload.track.title}` by `{payload.track.author}` - Now!",
+                    view=view,
+                )
+            except discord.errors.Forbidden:
+                payload.player.message = None
+
             payload.player.view = view
 
     @commands.Cog.listener()
