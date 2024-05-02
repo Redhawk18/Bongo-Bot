@@ -3,6 +3,10 @@ version: '3.5'
 services:
   bongo-bot:
     build: .
+    develop:
+      watch:
+        - action: rebuild
+          path: requirements.txt
     env_file:
       - .env
     environment:
