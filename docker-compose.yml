@@ -28,7 +28,7 @@ services:
   
   lavalink:
     # image: ghcr.io/lavalink-devs/lavalink:4-alpine
-    image: ghcr.io/lavalink-devs/lavalink:v4-update-lp-alpine
+    image: ghcr.io/lavalink-devs/Lavalink:v4-update-lp-alpine
     networks:
       - lavalink
     ports:
