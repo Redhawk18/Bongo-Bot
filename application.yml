@@ -30,7 +30,7 @@ lavalink:
       repository: "https://jitpack.io"
 
      # Replace VERSION with the current version as shown by the Releases tab or a long commit hash for snapshots.
-    - dependency: "dev.lavalink.youtube:youtube-plugin:1.1.0"
+    - dependency: "dev.lavalink.youtube:youtube-plugin:1.4.0"
       snapshot: false # Set to true if you want to use a snapshot version.     
   pluginsDir: "./plugins"
 

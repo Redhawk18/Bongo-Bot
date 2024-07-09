@@ -1,6 +1,10 @@
 # editors
 .vscode/
 
+# nixos
+.devenv/
+.direnv/
+
 # volume
 /postgres
 

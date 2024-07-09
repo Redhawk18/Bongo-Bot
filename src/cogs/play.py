@@ -183,7 +183,14 @@ class Play(commands.Cog):
             await interaction.response.send_message("Track not found.")
             return
 
-        player: wavelink.Player = await self.add_to_queue(interaction, tracks)
+        try:
+            player: wavelink.Player = await self.add_to_queue(interaction, tracks)
+        except wavelink.LavalinkException:
+            log.warn("Cannot create player")
+            await interaction.response.send_message(
+                "Player cannot be created, try a different search term."
+            )
+            return
 
         if autoplay:
             player.autoplay = wavelink.AutoPlayMode.enabled

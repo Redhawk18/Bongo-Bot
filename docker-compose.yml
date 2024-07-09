@@ -34,6 +34,7 @@ services:
       - lavalink
     ports:
       - "2333:2333"
+    
     restart: unless-stopped
     volumes:
       - ./application.yml:/opt/Lavalink/application.yml
