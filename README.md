@@ -7,6 +7,8 @@
 [![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/Redhawk18/Bongo-Bot/.github%2Fworkflows%2Fdocker.yml)](https://github.com/Redhawk18/Bongo-Bot/pkgs/container/bongo-bot)
 [![License](https://img.shields.io/github/license/Redhawk18/Bongo-Bot)](https://github.com/Redhawk18/Bongo-Bot/blob/main/LICENSE)
 
+Due to an increasing harder and harder to deal with youtube source I have decided archive the project. It's fine to have a few hours of maintenance a month but if it breaks every week without a way to test it, it's too much for a free side project to handle. 
+
 Designed to be a simple discord bot that play audios, inspiration is taken from the original [Rythm](https://rythm.fm/) bot.
 
 [Click here to add the bot.](https://discord.com/api/oauth2/authorize?client_id=970048770836402176&permissions=6479220032&scope=applications.commands%20bot)
